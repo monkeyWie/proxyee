@@ -15,13 +15,13 @@ import java.lang.reflect.Method;
 
 public class NettyHttpProxyServer {
 
-    public static HttpResponseStatus SUCCUSS;
+    public static HttpResponseStatus SUCCESS;
 
     static {
         try {
             Method method = HttpResponseStatus.class.getDeclaredMethod("newStatus",int.class,String .class);
             method.setAccessible(true);
-            SUCCUSS = (HttpResponseStatus) method.invoke(null,200,"Connection established");
+            SUCCESS = (HttpResponseStatus) method.invoke(null,200,"Connection established");
         } catch (Exception e) {
             e.printStackTrace();
         }
