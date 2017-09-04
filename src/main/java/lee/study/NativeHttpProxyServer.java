@@ -54,18 +54,6 @@ public class NativeHttpProxyServer {
                     }
                 }
                 String type = headStr.substring(0, headStr.indexOf(" "));
-                /*byte[] head = new byte[]{(byte) clientInput.read(), (byte) clientInput.read(), (byte) clientInput.read(),(byte) clientInput.read(),(byte) clientInput.read()};
-                int helloSize = ByteUtil.btsToIntForBig(new byte[]{0,0,head[3],head[4]});
-                System.out.println("helloSize:"+helloSize);
-                Socket proxySocket = new Socket(host.split(":")[0],443);
-                InputStream proxyInput = proxySocket.getInputStream();
-                OutputStream proxyOutput = proxySocket.getOutputStream();
-                proxyOutput.write(head);;
-                for (int i=0;i<helloSize;i++){
-                    proxyOutput.write(clientInput.read());
-                }
-                //proxyOutput.flush();
-                bw.write(proxyInput.read());*/
                 String[] hostTemp = host.split(":");
                 host = hostTemp[0];
                 int port = 80;

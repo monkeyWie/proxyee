@@ -5,12 +5,28 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lee.study.handler.HttpProxyServerHandle;
 
+import java.lang.reflect.Method;
+
 public class NettyHttpProxyServer {
+
+    public static HttpResponseStatus SUCCUSS;
+
+    static {
+        try {
+            Method method = HttpResponseStatus.class.getDeclaredMethod("newStatus",int.class,String .class);
+            method.setAccessible(true);
+            SUCCUSS = (HttpResponseStatus) method.invoke(null,200,"Connection established");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void start(int port) {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup(2);

@@ -3,6 +3,7 @@ package lee.study.handler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
+import lee.study.NettyHttpProxyServer;
 
 public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
 
@@ -27,7 +28,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
             this.host = temp[0];
             this.port = port;
             if ("CONNECT".equalsIgnoreCase(request.method().name())) {//HTTPS建立代理握手
-                HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+                HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, NettyHttpProxyServer.SUCCUSS);
                 ctx.writeAndFlush(response);
                 ctx.pipeline().remove("httpCodec");
                 ctx.pipeline().remove("httpObject");
