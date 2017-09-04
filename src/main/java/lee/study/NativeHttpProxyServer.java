@@ -10,8 +10,9 @@ import java.net.Socket;
 import java.util.concurrent.CountDownLatch;
 
 public class NativeHttpProxyServer {
-    public static void main(String[] args) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(8999);
+
+    public void start(int port) throws IOException {
+        ServerSocket serverSocket = new ServerSocket(port);
         for (; ; ) {
             new SocketHandle(serverSocket.accept()).start();
         }
