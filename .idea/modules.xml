@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/httpproxy.iml" filepath="$PROJECT_DIR$/httpproxy.iml" />
+      <module fileurl="file://$PROJECT_DIR$/proxyee.iml" filepath="$PROJECT_DIR$/proxyee.iml" />
     </modules>
   </component>
 </project>

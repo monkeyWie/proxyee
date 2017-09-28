@@ -7,10 +7,12 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="httpproxy" />
+        <module name="proxyee" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="httpproxy" target="1.5" />
+      <module name="httpproxy" target="1.8" />
+      <module name="proxyee" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

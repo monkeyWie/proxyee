@@ -1,6 +1,6 @@
-package lee.study;
+package lee.study.proxyee;
 
-import lee.study.util.LineBuffer;
+import lee.study.proxyee.util.LineBuffer;
 
 import java.io.IOException;
 import java.io.InputStream;

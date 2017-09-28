@@ -1,4 +1,4 @@
-package lee.study.util;
+package lee.study.proxyee.util;
 
 import java.io.IOException;
 import java.io.InputStream;
