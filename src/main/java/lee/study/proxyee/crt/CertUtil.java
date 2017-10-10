@@ -6,7 +6,9 @@ import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.URI;
 import java.nio.file.Files;
@@ -44,6 +46,17 @@ public class CertUtil {
         return caKeyPairGen.genKeyPair();
     }
 
+    /**
+     * 从文件加载RSA私钥
+     * openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.pem
+     * @param bts
+     * @return
+     * @throws Exception
+     */
+    public static PrivateKey loadPriKey(byte[] bts) throws Exception {
+        EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(bts);
+        return getKeyFactory().generatePrivate(privateKeySpec);
+    }
 
     /**
      * 从文件加载RSA私钥
@@ -53,8 +66,7 @@ public class CertUtil {
      * @throws Exception
      */
     public static PrivateKey loadPriKey(String path) throws Exception {
-        EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(Files.readAllBytes(Paths.get(path)));
-        return getKeyFactory().generatePrivate(privateKeySpec);
+        return loadPriKey(Files.readAllBytes(Paths.get(path)));
     }
 
     /**
@@ -66,6 +78,38 @@ public class CertUtil {
      */
     public static PrivateKey loadPriKey(URI uri) throws Exception {
         return loadPriKey(Paths.get(uri).toString());
+    }
+
+    /**
+     * 从文件加载RSA私钥
+     * openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.pem
+     * @param inputStream
+     * @return
+     * @throws Exception
+     */
+    public static PrivateKey loadPriKey(InputStream inputStream) throws Exception {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        byte[] bts = new byte[1024];
+        int len;
+        while((len=inputStream.read(bts))!=-1){
+            outputStream.write(bts,0,len);
+        }
+        inputStream.close();
+        outputStream.close();
+        return loadPriKey(outputStream.toByteArray());
+    }
+
+    /**
+     * 从文件加载RSA公钥
+     * openssl rsa -in ca_private.pem -pubout -outform DER -out ca_pub.der
+     *
+     * @param bts
+     * @return
+     * @throws Exception
+     */
+    public static PublicKey loadPubKey(byte[] bts) throws Exception {
+        EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(bts);
+        return getKeyFactory().generatePublic(publicKeySpec);
     }
 
     /**
@@ -93,14 +137,43 @@ public class CertUtil {
     }
 
     /**
+     * 从文件加载RSA公钥
+     * openssl rsa -in ca_private.pem -pubout -outform DER -out ca_pub.der
+     * @param inputStream
+     * @return
+     * @throws Exception
+     */
+    public static PublicKey loadPubKey(InputStream inputStream) throws Exception {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        byte[] bts = new byte[1024];
+        int len;
+        while((len=inputStream.read(bts))!=-1){
+            outputStream.write(bts,0,len);
+        }
+        inputStream.close();
+        outputStream.close();
+        return loadPubKey(outputStream.toByteArray());
+    }
+
+    /**
+     * 从文件加载证书
+     * @param path
+     * @return
+     * @throws Exception
+     */
+    public static X509Certificate loadCert(InputStream inputStream) throws Exception {
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        return (X509Certificate)cf.generateCertificate(inputStream);
+    }
+
+    /**
      * 从文件加载证书
      * @param path
      * @return
      * @throws Exception
      */
     public static X509Certificate loadCert(String path) throws Exception {
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        return (X509Certificate)cf.generateCertificate(new FileInputStream(path));
+        return loadCert(new FileInputStream(path));
     }
 
     /**

@@ -3,6 +3,7 @@ package lee.study.proxyee.handler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
+import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.ssl.SslContext;
@@ -10,7 +11,7 @@ import io.netty.handler.ssl.SslContextBuilder;
 import lee.study.proxyee.NettyHttpProxyServer;
 import lee.study.proxyee.crt.CertPool;
 import lee.study.proxyee.intercept.HttpProxyIntercept;
-import lee.study.proxyee.util.HttpUtil;
+import lee.study.proxyee.util.ProtoUtil;
 
 public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
 
@@ -20,6 +21,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
     private boolean isSSL = false;
     private int status = 0;
     private HttpProxyIntercept httpProxyHook;
+    public static int i = 1;
 
     public HttpProxyServerHandle(HttpProxyIntercept httpProxyHook) {
         this.httpProxyHook = httpProxyHook;
@@ -36,7 +38,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
             //第一次建立连接取host和端口号和处理代理握手
             if (status == 0) {
                 status = 1;
-                HttpUtil.RequestProto requestProto = HttpUtil.getRequestProto(request);
+                ProtoUtil.RequestProto requestProto = ProtoUtil.getRequestProto(request);
                 this.host = requestProto.getHost();
                 this.port = requestProto.getPort();
                 if ("CONNECT".equalsIgnoreCase(request.method().name())) {//建立代理握手
@@ -75,6 +77,23 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
         }
     }
 
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        if(cf!=null){
+            cf.channel().close();
+        }
+        ctx.close();
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        if(cf!=null){
+            cf.channel().close();
+        }
+        ctx.close();
+        super.exceptionCaught(ctx, cause);
+    }
+
     private void handleProxyData(final ChannelHandlerContext ctx, final Object msg) throws InterruptedException {
         if (cf == null) {
             Bootstrap bootstrap = new Bootstrap();
@@ -94,14 +113,6 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
             });*/
         }
         cf.channel().writeAndFlush(msg);
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        if(cf!=null){
-            cf.channel().closeFuture().sync();
-        }
-        super.exceptionCaught(ctx, cause);
     }
 
     private void transData(final ChannelHandlerContext ctx, final Object msg) throws InterruptedException {
