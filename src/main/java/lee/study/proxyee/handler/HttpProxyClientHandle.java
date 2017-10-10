@@ -13,7 +13,7 @@ public class HttpProxyClientHandle extends ChannelInboundHandlerAdapter {
 
     public HttpProxyClientHandle(Channel clientChannel) {
         this.clientChannel = clientChannel;
-        this.httpProxyHook = ((HttpProxyServerHandle) clientChannel.pipeline().get("serverHandle")).getHttpProxyHook();
+        this.httpProxyHook = ((HttpProxyServerHandle) clientChannel.pipeline().get("serverHandle")).getHttpProxyIntercept();
     }
 
     @Override

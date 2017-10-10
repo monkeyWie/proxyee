@@ -3,7 +3,6 @@ package lee.study.proxyee.handler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.ssl.SslContext;
@@ -20,15 +19,14 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
     private int port;
     private boolean isSSL = false;
     private int status = 0;
-    private HttpProxyIntercept httpProxyHook;
-    public static int i = 1;
+    private HttpProxyIntercept httpProxyIntercept;
 
-    public HttpProxyServerHandle(HttpProxyIntercept httpProxyHook) {
-        this.httpProxyHook = httpProxyHook;
+    public HttpProxyServerHandle(HttpProxyIntercept httpProxyIntercept) {
+        this.httpProxyIntercept = httpProxyIntercept;
     }
 
-    public HttpProxyIntercept getHttpProxyHook() {
-        return httpProxyHook;
+    public HttpProxyIntercept getHttpProxyIntercept() {
+        return httpProxyIntercept;
     }
 
     @Override
@@ -49,13 +47,13 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
                     return;
                 }
             }
-            if(httpProxyHook.beforeRequest(ctx.channel(),request)){
+            if(httpProxyIntercept.beforeRequest(ctx.channel(),request)){
                 return;
             }
             handleProxyData(ctx, msg);
         } else if (msg instanceof HttpContent) {
             if (status != 2) {
-                if(httpProxyHook.beforeRequest(ctx.channel(),(HttpContent) msg)){
+                if(httpProxyIntercept.beforeRequest(ctx.channel(),(HttpContent) msg)){
                     return;
                 }
                 handleProxyData(ctx, msg);
