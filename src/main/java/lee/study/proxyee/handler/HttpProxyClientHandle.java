@@ -24,13 +24,6 @@ public class HttpProxyClientHandle extends ChannelInboundHandlerAdapter {
             if(httpProxyHook.afterResponse(clientChannel,response)){
                 return;
             }
-//            response.headers().set(HttpHeaderNames.CONTENT_TYPE,"application/x-jpg");
-            //response.headers().set("Content-Type","application/x-jpg");
-            /*downFlag = DownUtil.download(httpProxyServerHandle.getHttpRequest(),response);
-            if(downFlag){
-                clientChannel.writeAndFlush(response);
-                clientChannel.writeAndFlush(new DefaultLastHttpContent());
-            }*/
         }else if(msg instanceof HttpContent){
             if(httpProxyHook.afterResponse(clientChannel,(HttpContent) msg)){
                 return;

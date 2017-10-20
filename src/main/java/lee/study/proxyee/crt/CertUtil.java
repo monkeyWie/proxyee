@@ -101,7 +101,7 @@ public class CertUtil {
 
     /**
      * 从文件加载RSA公钥
-     * openssl rsa -in ca_private.pem -pubout -outform DER -out ca_pub.der
+     * openssl rsa -in ca.key -pubout -outform DER -out ca_pub.der
      *
      * @param bts
      * @return
@@ -114,7 +114,7 @@ public class CertUtil {
 
     /**
      * 从文件加载RSA公钥
-     * openssl rsa -in ca_private.pem -pubout -outform DER -out ca_pub.der
+     * openssl rsa -in ca.key -pubout -outform DER -out ca_pub.der
      *
      * @param path
      * @return
@@ -127,7 +127,7 @@ public class CertUtil {
 
     /**
      * 从文件加载RSA公钥
-     * openssl rsa -in ca_private.pem -pubout -outform DER -out ca_pub.der
+     * openssl rsa -in ca.key -pubout -outform DER -out ca_pub.der
      * @param uri
      * @return
      * @throws Exception
@@ -138,7 +138,7 @@ public class CertUtil {
 
     /**
      * 从文件加载RSA公钥
-     * openssl rsa -in ca_private.pem -pubout -outform DER -out ca_pub.der
+     * openssl rsa -in ca.key -pubout -outform DER -out ca_pub.der
      * @param inputStream
      * @return
      * @throws Exception
@@ -157,7 +157,7 @@ public class CertUtil {
 
     /**
      * 从文件加载证书
-     * @param path
+     * @param inputStream
      * @return
      * @throws Exception
      */

@@ -1,11 +1,9 @@
 package lee.study.proxyee;
 
-import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -41,8 +39,10 @@ public class NettyHttpProxyServer {
         method.setAccessible(true);
         SUCCESS = (HttpResponseStatus) method.invoke(null, 200, "Connection established");
         clientSslCtx = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+        //CA私钥和公钥用于给动态生成的网站SSL证书签证
         caPriKey = CertUtil.loadPriKey(Thread.currentThread().getContextClassLoader().getResourceAsStream("ca_private.pem"));
         caPubKey = CertUtil.loadPubKey(Thread.currentThread().getContextClassLoader().getResourceAsStream("ca_public.der"));
+        //生产一对随机公私钥用于网站SSL证书动态创建
         KeyPair keyPair = CertUtil.genKeyPair();
         serverPriKey = keyPair.getPrivate();
         serverPubKey = keyPair.getPublic();
