@@ -16,9 +16,9 @@ public class CertPool {
             String key = host.trim().toLowerCase();
             if (certCache.containsKey(key)) {
                 return certCache.get(key);
-            }else{
-                cert = CertUtil.genCert(NettyHttpProxyServer.serverPubKey, NettyHttpProxyServer.caPriKey, NettyHttpProxyServer.caPubKey, key);
-                certCache.put(key,cert);
+            } else {
+                cert = CertUtil.genCert(NettyHttpProxyServer.issuer, NettyHttpProxyServer.serverPubKey, NettyHttpProxyServer.caPriKey, NettyHttpProxyServer.caPubKey, key);
+                certCache.put(key, cert);
             }
         }
         return cert;

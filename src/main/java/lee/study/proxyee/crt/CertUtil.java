@@ -19,8 +19,11 @@ import java.security.cert.X509Certificate;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Date;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class CertUtil {
 
@@ -49,6 +52,7 @@ public class CertUtil {
     /**
      * 从文件加载RSA私钥
      * openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.pem
+     *
      * @param bts
      * @return
      * @throws Exception
@@ -61,6 +65,7 @@ public class CertUtil {
     /**
      * 从文件加载RSA私钥
      * openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.pem
+     *
      * @param path
      * @return
      * @throws Exception
@@ -72,6 +77,7 @@ public class CertUtil {
     /**
      * 从文件加载RSA私钥
      * openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.pem
+     *
      * @param uri
      * @return
      * @throws Exception
@@ -83,6 +89,7 @@ public class CertUtil {
     /**
      * 从文件加载RSA私钥
      * openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.pem
+     *
      * @param inputStream
      * @return
      * @throws Exception
@@ -91,8 +98,8 @@ public class CertUtil {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         byte[] bts = new byte[1024];
         int len;
-        while((len=inputStream.read(bts))!=-1){
-            outputStream.write(bts,0,len);
+        while ((len = inputStream.read(bts)) != -1) {
+            outputStream.write(bts, 0, len);
         }
         inputStream.close();
         outputStream.close();
@@ -128,6 +135,7 @@ public class CertUtil {
     /**
      * 从文件加载RSA公钥
      * openssl rsa -in ca.key -pubout -outform DER -out ca_pub.der
+     *
      * @param uri
      * @return
      * @throws Exception
@@ -139,6 +147,7 @@ public class CertUtil {
     /**
      * 从文件加载RSA公钥
      * openssl rsa -in ca.key -pubout -outform DER -out ca_pub.der
+     *
      * @param inputStream
      * @return
      * @throws Exception
@@ -147,8 +156,8 @@ public class CertUtil {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         byte[] bts = new byte[1024];
         int len;
-        while((len=inputStream.read(bts))!=-1){
-            outputStream.write(bts,0,len);
+        while ((len = inputStream.read(bts)) != -1) {
+            outputStream.write(bts, 0, len);
         }
         inputStream.close();
         outputStream.close();
@@ -157,17 +166,19 @@ public class CertUtil {
 
     /**
      * 从文件加载证书
+     *
      * @param inputStream
      * @return
      * @throws Exception
      */
     public static X509Certificate loadCert(InputStream inputStream) throws Exception {
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        return (X509Certificate)cf.generateCertificate(inputStream);
+        return (X509Certificate) cf.generateCertificate(inputStream);
     }
 
     /**
      * 从文件加载证书
+     *
      * @param path
      * @return
      * @throws Exception
@@ -178,6 +189,7 @@ public class CertUtil {
 
     /**
      * 从文件加载证书
+     *
      * @param uri
      * @return
      * @throws Exception
@@ -187,8 +199,23 @@ public class CertUtil {
     }
 
     /**
+     * 读取ssl证书使用者信息
+     *
+     * @param inputStream
+     * @return
+     * @throws Exception
+     */
+    public static String getSubject(InputStream inputStream) throws Exception {
+        X509Certificate certificate = loadCert(inputStream);
+        //读出来顺序是反的需要反转下
+        List<String> tempList = Arrays.asList(certificate.getIssuerDN().toString().split(", "));
+        return IntStream.rangeClosed(0, tempList.size() - 1).mapToObj(i -> tempList.get(tempList.size() - i - 1)).collect(Collectors.joining(", "));
+    }
+
+    /**
      * 动态生成服务器证书,并进行CA签授
      *
+     * @param issuer       颁发机构
      * @param serverPubKey
      * @param caPriKey
      * @param caPubKey
@@ -196,10 +223,18 @@ public class CertUtil {
      * @return
      * @throws Exception
      */
-    public static X509Certificate genCert(PublicKey serverPubKey, PrivateKey caPriKey, PublicKey caPubKey, String host) throws Exception {
+    public static X509Certificate genCert(String issuer, PublicKey serverPubKey, PrivateKey caPriKey, PublicKey caPubKey, String host) throws Exception {
         X509V3CertificateGenerator v3CertGen = new X509V3CertificateGenerator();
-        String issuer = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=ProxyeeRoot";
-        String subject = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=" + host;
+        /* String issuer = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=ProxyeeRoot";
+        String subject = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=" + host;*/
+        //根据CA证书subject来动态生成目标服务器证书的issuer和subject
+        String subject = Arrays.stream(issuer.split(", ")).map((dn) -> {
+            String[] temp = dn.split("=");
+            if (temp[0].equalsIgnoreCase("CN")) {
+                return temp[0] + "=" + host;
+            }
+            return dn;
+        }).collect(Collectors.joining(", "));
         v3CertGen.reset();
         v3CertGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
         v3CertGen.setIssuerDN(new X509Principal(issuer));

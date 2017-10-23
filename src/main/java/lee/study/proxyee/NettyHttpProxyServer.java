@@ -25,6 +25,7 @@ public class NettyHttpProxyServer {
 
     public static HttpResponseStatus SUCCESS;
     public static SslContext clientSslCtx;
+    public static String issuer;
     public static PrivateKey caPriKey;
     public static PublicKey caPubKey;
     public static PrivateKey serverPriKey;
@@ -39,9 +40,11 @@ public class NettyHttpProxyServer {
         method.setAccessible(true);
         SUCCESS = (HttpResponseStatus) method.invoke(null, 200, "Connection established");
         clientSslCtx = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        issuer = CertUtil.getSubject(classLoader.getResourceAsStream("ca.crt"));
         //CA私钥和公钥用于给动态生成的网站SSL证书签证
-        caPriKey = CertUtil.loadPriKey(Thread.currentThread().getContextClassLoader().getResourceAsStream("ca_private.pem"));
-        caPubKey = CertUtil.loadPubKey(Thread.currentThread().getContextClassLoader().getResourceAsStream("ca_public.der"));
+        caPriKey = CertUtil.loadPriKey(classLoader.getResourceAsStream("ca_private.pem"));
+        caPubKey = CertUtil.loadPubKey(classLoader.getResourceAsStream("ca_public.der"));
         //生产一对随机公私钥用于网站SSL证书动态创建
         KeyPair keyPair = CertUtil.genKeyPair();
         serverPriKey = keyPair.getPrivate();
