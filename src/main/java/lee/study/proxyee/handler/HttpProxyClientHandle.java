@@ -19,19 +19,19 @@ public class HttpProxyClientHandle extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         HttpResponse response = null;
-        if(msg instanceof HttpResponse){
+        if (msg instanceof HttpResponse) {
             response = (HttpResponse) msg;
-            if(httpProxyHook.afterResponse(clientChannel,response)){
+            if (!httpProxyHook.afterResponse(clientChannel, ctx.channel(), response)) {
                 return;
             }
-        }else if(msg instanceof HttpContent){
-            if(httpProxyHook.afterResponse(clientChannel,(HttpContent) msg)){
+        } else if (msg instanceof HttpContent) {
+            if (!httpProxyHook.afterResponse(clientChannel, ctx.channel(), (HttpContent) msg)) {
                 return;
             }
         }
         clientChannel.writeAndFlush(msg);
-        if(response!=null){
-            if(HttpHeaderValues.WEBSOCKET.toString().equals(response.headers().get(HttpHeaderNames.UPGRADE))){
+        if (response != null) {
+            if (HttpHeaderValues.WEBSOCKET.toString().equals(response.headers().get(HttpHeaderNames.UPGRADE))) {
                 //websocket转发原始报文
                 ctx.pipeline().remove("httpCodec");
                 clientChannel.pipeline().remove("httpCodec");

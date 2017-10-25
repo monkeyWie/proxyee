@@ -47,13 +47,13 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
                     return;
                 }
             }
-            if(httpProxyIntercept.beforeRequest(ctx.channel(),request)){
+            if(!httpProxyIntercept.beforeRequest(ctx.channel(),request)){
                 return;
             }
             handleProxyData(ctx, msg);
         } else if (msg instanceof HttpContent) {
             if (status != 2) {
-                if(httpProxyIntercept.beforeRequest(ctx.channel(),(HttpContent) msg)){
+                if(!httpProxyIntercept.beforeRequest(ctx.channel(),(HttpContent) msg)){
                     return;
                 }
                 handleProxyData(ctx, msg);
@@ -80,7 +80,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
         if(cf!=null){
             cf.channel().close();
         }
-        ctx.close();
+        ctx.channel().close();
     }
 
     @Override
@@ -88,7 +88,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
         if(cf!=null){
             cf.channel().close();
         }
-        ctx.close();
+        ctx.channel().close();
         super.exceptionCaught(ctx, cause);
     }
 

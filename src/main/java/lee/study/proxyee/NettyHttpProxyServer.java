@@ -16,6 +16,7 @@ import lee.study.proxyee.intercept.ProxyInterceptFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.lang.reflect.Method;
+import java.net.ServerSocket;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -50,13 +51,13 @@ public class NettyHttpProxyServer {
         serverPriKey = keyPair.getPrivate();
         serverPubKey = keyPair.getPublic();
         proxyGroup = new NioEventLoopGroup();
-        if(proxyInterceptFactory==null){
+        if (proxyInterceptFactory == null) {
             proxyInterceptFactory = new DefaultInterceptFactory();
         }
     }
 
-    public NettyHttpProxyServer initProxyInterceptFactory(ProxyInterceptFactory proxyInterceptFactory){
-        this.proxyInterceptFactory=proxyInterceptFactory;
+    public NettyHttpProxyServer initProxyInterceptFactory(ProxyInterceptFactory proxyInterceptFactory) {
+        this.proxyInterceptFactory = proxyInterceptFactory;
         return this;
     }
 
@@ -93,28 +94,16 @@ public class NettyHttpProxyServer {
     }
 
     public static void main(String[] args) throws Exception {
-        new  NettyHttpProxyServer().initProxyInterceptFactory(() -> new HttpProxyIntercept() {
-            @Override
-            public boolean beforeRequest(Channel channel, HttpRequest httpRequest) {
-                return false;
-            }
+        new NettyHttpProxyServer().initProxyInterceptFactory(() -> new HttpProxyIntercept() {
 
             @Override
-            public boolean beforeRequest(Channel channel, HttpContent httpContent) {
-                return false;
+            public boolean afterResponse(Channel clientChannel, Channel proxyChannel, HttpResponse httpResponse) {
+                //拦截响应，添加一个响应头
+                httpResponse.headers().add("intercept","test");
+                return true;
             }
 
-            @Override
-            public boolean afterResponse(Channel channel, HttpResponse httpResponse) {
-                httpResponse.headers().set("Intercept","111");
-                return false;
-            }
-
-            @Override
-            public boolean afterResponse(Channel channel, HttpContent httpContent) {
-                return false;
-            }
-        }).start(8999);
+        }).start(9999);
     }
 
 }
