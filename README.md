@@ -11,33 +11,15 @@
 ```
     new NettyHttpProxyServer().start(9001);
     //拦截处理
-    new  NettyHttpProxyServer().initProxyInterceptFactory(new ProxyInterceptFactory() {
+    new NettyHttpProxyServer().initProxyInterceptFactory(() -> new HttpProxyIntercept() {
+    
                 @Override
-                public HttpProxyIntercept build() {
-                    return new HttpProxyIntercept() {
-                        @Override
-                        public boolean beforeRequest(Channel channel, HttpRequest httpRequest) {
-                            return false;
-                        }
-    
-                        @Override
-                        public boolean beforeRequest(Channel channel, HttpContent httpContent) {
-                            return false;
-                        }
-    
-                        @Override
-                        public boolean afterResponse(Channel channel, HttpResponse httpResponse) {
-                            //修改响应头
-                            httpResponse.headers().set("Intercept","111");
-                            return false;
-                        }
-    
-                        @Override
-                        public boolean afterResponse(Channel channel, HttpContent httpContent) {
-                            return false;
-                        }
-                    };
+                public boolean afterResponse(Channel clientChannel, Channel proxyChannel, HttpResponse httpResponse) {
+                    //拦截响应，添加一个响应头
+                    httpResponse.headers().add("intercept","test");
+                    return true;
                 }
+    
             }).start(8999);
 ```
 
