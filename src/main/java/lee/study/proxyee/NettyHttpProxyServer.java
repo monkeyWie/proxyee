@@ -42,6 +42,7 @@ public class NettyHttpProxyServer {
         SUCCESS = (HttpResponseStatus) method.invoke(null, 200, "Connection established");
         clientSslCtx = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        //读取CA证书使用者信息
         issuer = CertUtil.getSubject(classLoader.getResourceAsStream("ca.crt"));
         //CA私钥和公钥用于给动态生成的网站SSL证书签证
         caPriKey = CertUtil.loadPriKey(classLoader.getResourceAsStream("ca_private.pem"));
