@@ -218,12 +218,11 @@ public class CertUtil {
      * @param issuer       颁发机构
      * @param serverPubKey
      * @param caPriKey
-     * @param caPubKey
      * @param host
      * @return
      * @throws Exception
      */
-    public static X509Certificate genCert(String issuer, PublicKey serverPubKey, PrivateKey caPriKey, PublicKey caPubKey, String host) throws Exception {
+    public static X509Certificate genCert(String issuer, PublicKey serverPubKey, PrivateKey caPriKey, String host) throws Exception {
         X509V3CertificateGenerator v3CertGen = new X509V3CertificateGenerator();
         /* String issuer = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=ProxyeeRoot";
         String subject = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=" + host;*/
@@ -248,8 +247,8 @@ public class CertUtil {
         GeneralNames subjectAltName = new GeneralNames(new GeneralName(GeneralName.dNSName, host));
         v3CertGen.addExtension(X509Extensions.SubjectAlternativeName, false, subjectAltName);
         X509Certificate cert = v3CertGen.generateX509Certificate(caPriKey);
-        cert.checkValidity(new Date());
-        cert.verify(caPubKey);
+//        cert.checkValidity(new Date());
+//        cert.verify(caPubKey);
         return cert;
     }
 }

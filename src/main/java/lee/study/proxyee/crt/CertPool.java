@@ -17,14 +17,10 @@ public class CertPool {
             if (certCache.containsKey(key)) {
                 return certCache.get(key);
             } else {
-                cert = CertUtil.genCert(NettyHttpProxyServer.issuer, NettyHttpProxyServer.serverPubKey, NettyHttpProxyServer.caPriKey, NettyHttpProxyServer.caPubKey, key);
+                cert = CertUtil.genCert(NettyHttpProxyServer.issuer, NettyHttpProxyServer.serverPubKey, NettyHttpProxyServer.caPriKey, key);
                 certCache.put(key, cert);
             }
         }
         return cert;
-    }
-
-    public static void main(String[] args) throws MalformedURLException {
-
     }
 }
