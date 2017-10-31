@@ -13,14 +13,14 @@
     //拦截处理
     new NettyHttpProxyServer().initProxyInterceptFactory(() -> new HttpProxyIntercept() {
     
-                @Override
-                public boolean afterResponse(Channel clientChannel, Channel proxyChannel, HttpResponse httpResponse) {
-                    //拦截响应，添加一个响应头
-                    httpResponse.headers().add("intercept","test");
-                    return true;
-                }
-    
-            }).start(9999);
+        @Override
+        public boolean afterResponse(Channel clientChannel, Channel proxyChannel, HttpResponse httpResponse) {
+            //拦截响应，添加一个响应头
+            httpResponse.headers().add("intercept","test");
+            return true;
+        }
+
+    }).start(9999);
 ```
 
 #### 流程
