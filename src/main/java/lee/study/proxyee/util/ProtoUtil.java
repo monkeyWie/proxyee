@@ -13,7 +13,7 @@ public class ProtoUtil {
         int port = -1;
         String hostStr = httpRequest.headers().get(HttpHeaderNames.HOST);
         String uriStr = httpRequest.uri();
-        Pattern pattern = Pattern.compile("^(?:https?://)?(?<host>[^:]*)(?::(?<port>\\d+))?(.*)$");
+        Pattern pattern = Pattern.compile("^(?:https?://)?(?<host>[^:]*)(?::(?<port>\\d+))?$");
         Matcher matcher = pattern.matcher(hostStr);
         //先从host上取端口号没取到再从uri上取端口号 issues#4
         String portTemp = null;

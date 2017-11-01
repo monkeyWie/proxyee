@@ -34,13 +34,11 @@
             <artifactId>netty-all</artifactId>
             <version>4.1.15.Final</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
+
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.49</version>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>1.58</version>
         </dependency>
-
-
     </dependencies>
 </project>

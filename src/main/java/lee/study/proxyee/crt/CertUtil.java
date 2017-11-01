@@ -1,10 +1,13 @@
 package lee.study.proxyee.crt;
 
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -19,9 +22,10 @@ import java.security.cert.X509Certificate;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -223,32 +227,26 @@ public class CertUtil {
      * @throws Exception
      */
     public static X509Certificate genCert(String issuer, PublicKey serverPubKey, PrivateKey caPriKey, String host) throws Exception {
-        X509V3CertificateGenerator v3CertGen = new X509V3CertificateGenerator();
         /* String issuer = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=ProxyeeRoot";
         String subject = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=" + host;*/
         //根据CA证书subject来动态生成目标服务器证书的issuer和subject
-        String subject = Arrays.stream(issuer.split(", ")).map((dn) -> {
-            String[] temp = dn.split("=");
-            if (temp[0].equalsIgnoreCase("CN")) {
-                return temp[0] + "=" + host;
-            }
-            return dn;
-        }).collect(Collectors.joining(", "));
-        v3CertGen.reset();
-        v3CertGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
-        v3CertGen.setIssuerDN(new X509Principal(issuer));
-        v3CertGen.setNotBefore(new Date(System.currentTimeMillis() - 10 * ONE_DAY));
-        v3CertGen.setNotAfter(new Date(System.currentTimeMillis() + 3650 * ONE_DAY));
-        v3CertGen.setSubjectDN(new X509Principal(subject));
-        v3CertGen.setPublicKey(serverPubKey);
-        //SHA256 Chrome需要此哈希算法否则会出现不安全提示
-        v3CertGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
-        //SAN扩展 Chrome需要此扩展否则会出现不安全提示
+        String subject = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN="+host;
+        //doc from https://www.cryptoworkshop.com/guide/
+        JcaX509v3CertificateBuilder jv3Builder = new JcaX509v3CertificateBuilder(new X500Name(issuer),
+                BigInteger.ONE,
+                new Date(),
+                new Date(System.currentTimeMillis()+365*24*60*60*1000),
+                new X500Name(subject),
+                serverPubKey);
+        //SAN扩展证书支持的域名，否则浏览器提示证书不安全
         GeneralNames subjectAltName = new GeneralNames(new GeneralName(GeneralName.dNSName, host));
-        v3CertGen.addExtension(X509Extensions.SubjectAlternativeName, false, subjectAltName);
-        X509Certificate cert = v3CertGen.generateX509Certificate(caPriKey);
-//        cert.checkValidity(new Date());
-//        cert.verify(caPubKey);
-        return cert;
+        jv3Builder.addExtension(Extension.subjectAlternativeName,false,subjectAltName);
+        //SHA256 用SHA1浏览器可能会提示证书不安全
+        ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSAEncryption").build(caPriKey);
+        return new JcaX509CertificateConverter().getCertificate(jv3Builder.build(signer));
+    }
+
+    public static void main(String[] args) {
+
     }
 }
