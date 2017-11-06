@@ -32,7 +32,7 @@ import java.util.stream.IntStream;
 public class CertUtil {
 
     private static KeyFactory keyFactory = null;
-    private static final long ONE_DAY = TimeUnit.DAYS.toMillis(1);
+    private static final long TEN_YEAR = TimeUnit.DAYS.toMillis(3650);
 
     private static KeyFactory getKeyFactory() throws NoSuchAlgorithmException {
         if (keyFactory == null) {
@@ -235,7 +235,7 @@ public class CertUtil {
         JcaX509v3CertificateBuilder jv3Builder = new JcaX509v3CertificateBuilder(new X500Name(issuer),
                 BigInteger.ONE,
                 new Date(),
-                new Date(System.currentTimeMillis()+365*24*60*60*1000),
+                new Date(System.currentTimeMillis()+ TEN_YEAR),
                 new X500Name(subject),
                 serverPubKey);
         //SAN扩展证书支持的域名，否则浏览器提示证书不安全
