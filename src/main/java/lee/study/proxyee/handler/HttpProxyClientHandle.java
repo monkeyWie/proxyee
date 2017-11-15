@@ -39,4 +39,16 @@ public class HttpProxyClientHandle extends ChannelInboundHandlerAdapter {
 
         }
     }
+
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        ctx.channel().close();
+        clientChannel.close();
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        ctx.channel().close();
+        clientChannel.close();
+    }
 }

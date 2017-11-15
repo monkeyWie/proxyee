@@ -89,7 +89,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
             cf.channel().close();
         }
         ctx.channel().close();
-        super.exceptionCaught(ctx, cause);
+//        super.exceptionCaught(ctx, cause);
     }
 
     private void handleProxyData(final ChannelHandlerContext ctx, final Object msg) throws InterruptedException {
@@ -126,6 +126,18 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
                                 @Override
                                 public void channelRead(ChannelHandlerContext ctx0, Object msg0) throws Exception {
                                     ctx.channel().writeAndFlush(msg0);
+                                }
+
+                                @Override
+                                public void channelUnregistered(ChannelHandlerContext ctx0) throws Exception {
+                                    ctx0.channel().close();
+                                    ctx.channel().close();
+                                }
+
+                                @Override
+                                public void exceptionCaught(ChannelHandlerContext ctx0, Throwable cause) throws Exception {
+                                    ctx0.channel().close();
+                                    ctx.channel().close();
                                 }
                             });
                         }
