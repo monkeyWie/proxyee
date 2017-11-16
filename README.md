@@ -7,10 +7,10 @@
     可设置二级代理服务器,支持http,socks4,socks5。
 #### 启动
 ```
-//new HttpProxyServer().start(9999);
+//new HttpProxyServer().start(9999);  //不做任何拦截处理
 
-  new HttpProxyServer()
-      .proxyConfig(new ProxyConfig(ProxyType.SOCKS5, "127.0.0.1", 1085))  //使用socks5二级代理
+  new HttpProxyServer() //拦截修改请求头和响应头和使用二级代理
+      .proxyConfig(new ProxyConfig(ProxyType.SOCKS5, "127.0.0.1", 1085))  //使用socks5二级代理(例如：使用shadowsocks翻墙)
       .proxyInterceptFactory(() -> new HttpProxyIntercept() { //拦截http请求和响应
         @Override
         public boolean beforeRequest(Channel clientChannel, HttpRequest httpRequest) {
