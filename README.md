@@ -1,26 +1,33 @@
-### java实现HTTP代理服务器
+### HTTP代理服务器
     支持HTTP、HTTPS、WebSocket,HTTPS采用动态签发证书,可以拦截http、https的报文并进行处理。
     例如：http(s)协议抓包,http(s)动态替换请求内容或响应内容等等。
-### HTTPS支持
-    需要导入项目中的CA证书(src/resources/ca.crt)至受信任的根证书颁发机构.
-#### 原生java实现(仅做为demo，不支持拦截)
+#### HTTPS支持
+    需要导入项目中的CA证书(src/resources/ca.crt)至受信任的根证书颁发机构。
+#### 二级代理
+    可设置二级代理服务器,支持http,socks4,socks5。
+#### 启动
 ```
-    new NativeHttpProxyServer().start(9002);
-```
-#### 基于netty实现
-```
-    new NettyHttpProxyServer().start(9001);
-    //拦截处理
-    new NettyHttpProxyServer().initProxyInterceptFactory(() -> new HttpProxyIntercept() {
-    
+//new HttpProxyServer().start(9999);
+
+  new HttpProxyServer()
+      .proxyConfig(new ProxyConfig(ProxyType.SOCKS5, "127.0.0.1", 1085))  //使用socks5二级代理
+      .proxyInterceptFactory(() -> new HttpProxyIntercept() { //拦截http请求和响应
         @Override
-        public boolean afterResponse(Channel clientChannel, Channel proxyChannel, HttpResponse httpResponse) {
-            //拦截响应，添加一个响应头
-            httpResponse.headers().add("intercept","test");
-            return true;
+        public boolean beforeRequest(Channel clientChannel, HttpRequest httpRequest) {
+          //替换UA，伪装成手机浏览器
+          httpRequest.headers().set(HttpHeaderNames.USER_AGENT,"Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1");
+          return true;
         }
 
-    }).start(9999);
+        @Override
+        public boolean afterResponse(Channel clientChannel, Channel proxyChannel,
+            HttpResponse httpResponse) {
+          //拦截响应，添加一个响应头
+          httpResponse.headers().add("intercept", "test");
+          return true;
+        }
+
+      }).start(9999);
 ```
 
 #### 流程

@@ -6,8 +6,9 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 
 public class DefaultInterceptFactory implements ProxyInterceptFactory {
-    @Override
-    public HttpProxyIntercept build() {
-        return new HttpProxyIntercept();
-    }
+
+  @Override
+  public HttpProxyIntercept build() {
+    return new HttpProxyIntercept();
+  }
 }

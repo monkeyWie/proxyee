@@ -8,47 +8,49 @@ import lee.study.proxyee.intercept.HttpProxyIntercept;
 
 public class HttpProxyClientHandle extends ChannelInboundHandlerAdapter {
 
-    private Channel clientChannel;
-    private HttpProxyIntercept httpProxyHook;
+  private Channel clientChannel;
+  private HttpProxyIntercept httpProxyIntercept;
 
-    public HttpProxyClientHandle(Channel clientChannel) {
-        this.clientChannel = clientChannel;
-        this.httpProxyHook = ((HttpProxyServerHandle) clientChannel.pipeline().get("serverHandle")).getHttpProxyIntercept();
+  public HttpProxyClientHandle(Channel clientChannel) {
+    this.clientChannel = clientChannel;
+    this.httpProxyIntercept = ((HttpProxyServerHandle) clientChannel.pipeline().get("serverHandle"))
+        .getHttpProxyIntercept();
+  }
+
+  @Override
+  public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    HttpResponse response = null;
+    if (msg instanceof HttpResponse) {
+      response = (HttpResponse) msg;
+      if (!httpProxyIntercept.afterResponse(clientChannel, ctx.channel(), response)) {
+        return;
+      }
+    } else if (msg instanceof HttpContent) {
+      if (!httpProxyIntercept.afterResponse(clientChannel, ctx.channel(), (HttpContent) msg)) {
+        return;
+      }
     }
+    clientChannel.writeAndFlush(msg);
+    if (response != null) {
+      if (HttpHeaderValues.WEBSOCKET.toString()
+          .equals(response.headers().get(HttpHeaderNames.UPGRADE))) {
+        //websocket转发原始报文
+        ctx.pipeline().remove("httpCodec");
+        clientChannel.pipeline().remove("httpCodec");
+      }
 
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        HttpResponse response = null;
-        if (msg instanceof HttpResponse) {
-            response = (HttpResponse) msg;
-            if (!httpProxyHook.afterResponse(clientChannel, ctx.channel(), response)) {
-                return;
-            }
-        } else if (msg instanceof HttpContent) {
-            if (!httpProxyHook.afterResponse(clientChannel, ctx.channel(), (HttpContent) msg)) {
-                return;
-            }
-        }
-        clientChannel.writeAndFlush(msg);
-        if (response != null) {
-            if (HttpHeaderValues.WEBSOCKET.toString().equals(response.headers().get(HttpHeaderNames.UPGRADE))) {
-                //websocket转发原始报文
-                ctx.pipeline().remove("httpCodec");
-                clientChannel.pipeline().remove("httpCodec");
-            }
-
-        }
     }
+  }
 
-    @Override
-    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        ctx.channel().close();
-        clientChannel.close();
-    }
+  @Override
+  public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+    ctx.channel().close();
+    clientChannel.close();
+  }
 
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        ctx.channel().close();
-        clientChannel.close();
-    }
+  @Override
+  public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    ctx.channel().close();
+    clientChannel.close();
+  }
 }
