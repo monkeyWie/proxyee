@@ -103,10 +103,10 @@ public class HttpProxyServer {
   }
 
   public static void main(String[] args) throws Exception {
-//  new HttpProxyServer().start(9999);
+  new HttpProxyServer().start(9999);
 
-    new HttpProxyServer()
-        .proxyConfig(new ProxyConfig(ProxyType.SOCKS5, "127.0.0.1", 1085))  //使用socks5二级代理
+    /*new HttpProxyServer()
+//        .proxyConfig(new ProxyConfig(ProxyType.SOCKS5, "127.0.0.1", 1085))  //使用socks5二级代理
         .proxyInterceptFactory(() -> new HttpProxyIntercept() { //拦截http请求和响应
           @Override
           public boolean beforeRequest(Channel clientChannel, HttpRequest httpRequest) {
@@ -123,7 +123,7 @@ public class HttpProxyServer {
             return true;
           }
 
-        }).start(9999);
+        }).start(9999);*/
   }
 
 }

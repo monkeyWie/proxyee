@@ -15,6 +15,7 @@ import lee.study.proxyee.intercept.HttpProxyIntercept;
 import lee.study.proxyee.proxy.ProxyConfig;
 import lee.study.proxyee.proxy.ProxyHandleFactory;
 import lee.study.proxyee.util.ProtoUtil;
+import lee.study.proxyee.util.ProtoUtil.RequestProto;
 
 public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
 
@@ -97,15 +98,22 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
       cf.channel().close();
     }
     ctx.channel().close();
-//        super.exceptionCaught(ctx, cause);
+    super.exceptionCaught(ctx, cause);
   }
 
   private void handleProxyData(final Channel channel, final Object msg, boolean isHttp)
       throws InterruptedException {
     if (cf == null) {
       ProxyHandler proxyHandler = ProxyHandleFactory.build(proxyConfig);
+      /*
+        添加SSL client hello的Server Name Indication extension(SNI扩展)
+        有些服务器对于client hello不带SNI扩展时会直接返回Received fatal alert: handshake_failure(握手错误)
+        例如：https://cdn.mdn.mozilla.net/static/img/favicon32.7f3da72dcea1.png
+       */
+      RequestProto proto = ProtoUtil.getRequestProto((HttpRequest) msg);
+      proto.setSsl(isSSL);
       ChannelInitializer channelInitializer =
-          isHttp ? new HttpProxyInitializer(channel, isSSL, proxyHandler)
+          isHttp ? new HttpProxyInitializer(channel, proto, proxyHandler)
               : new TunnelProxyInitializer(channel, proxyHandler);
       Bootstrap bootstrap = new Bootstrap();
       bootstrap.group(HttpProxyServer.proxyGroup) // 注册线程池

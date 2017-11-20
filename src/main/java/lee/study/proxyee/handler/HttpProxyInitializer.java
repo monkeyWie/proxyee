@@ -5,6 +5,8 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.proxy.ProxyHandler;
 import lee.study.proxyee.server.HttpProxyServer;
+import lee.study.proxyee.util.ProtoUtil;
+import lee.study.proxyee.util.ProtoUtil.RequestProto;
 
 /**
  * HTTP代理，转发解码后的HTTP报文
@@ -12,13 +14,13 @@ import lee.study.proxyee.server.HttpProxyServer;
 public class HttpProxyInitializer extends ChannelInitializer {
 
   private Channel clientChannel;
-  private boolean isSSL;
+  private RequestProto requestProto;
   private ProxyHandler proxyHandler;
 
-  public HttpProxyInitializer(Channel clientChannel, boolean isSSL,
+  public HttpProxyInitializer(Channel clientChannel, RequestProto requestProto,
       ProxyHandler proxyHandler) {
     this.clientChannel = clientChannel;
-    this.isSSL = isSSL;
+    this.requestProto = requestProto;
     this.proxyHandler = proxyHandler;
   }
 
@@ -27,8 +29,8 @@ public class HttpProxyInitializer extends ChannelInitializer {
     if (proxyHandler != null) {
       ch.pipeline().addLast(proxyHandler);
     }
-    if (isSSL) {
-      ch.pipeline().addLast(HttpProxyServer.clientSslCtx.newHandler(ch.alloc()));
+    if (requestProto.getSsl()) {
+      ch.pipeline().addLast(HttpProxyServer.clientSslCtx.newHandler(ch.alloc(),requestProto.getHost(),requestProto.getPort()));
     }
     ch.pipeline().addLast("httpCodec", new HttpClientCodec());
     ch.pipeline().addLast(new HttpProxyClientHandle(clientChannel));

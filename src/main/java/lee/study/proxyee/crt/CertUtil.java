@@ -168,11 +168,11 @@ public class CertUtil {
    * @param issuer 颁发机构
    */
   public static X509Certificate genCert(String issuer, PublicKey serverPubKey, PrivateKey caPriKey,
-      String host) throws Exception {
+      String... hosts) throws Exception {
         /* String issuer = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=ProxyeeRoot";
         String subject = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=" + host;*/
     //根据CA证书subject来动态生成目标服务器证书的issuer和subject
-    String subject = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=" + host;
+    String subject = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=" + hosts[0];
     //doc from https://www.cryptoworkshop.com/guide/
     JcaX509v3CertificateBuilder jv3Builder = new JcaX509v3CertificateBuilder(new X500Name(issuer),
         BigInteger.ONE,
@@ -181,7 +181,11 @@ public class CertUtil {
         new X500Name(subject),
         serverPubKey);
     //SAN扩展证书支持的域名，否则浏览器提示证书不安全
-    GeneralNames subjectAltName = new GeneralNames(new GeneralName(GeneralName.dNSName, host));
+    GeneralName[] generalNames = new GeneralName[hosts.length];
+    for (int i = 0; i < hosts.length; i++) {
+      generalNames[i] = new GeneralName(GeneralName.dNSName, hosts[i]);
+    }
+    GeneralNames subjectAltName = new GeneralNames(generalNames);
     jv3Builder.addExtension(Extension.subjectAlternativeName, false, subjectAltName);
     //SHA256 用SHA1浏览器可能会提示证书不安全
     ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSAEncryption").build(caPriKey);

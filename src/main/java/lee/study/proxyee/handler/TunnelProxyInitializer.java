@@ -41,6 +41,7 @@ public class TunnelProxyInitializer extends ChannelInitializer {
       public void exceptionCaught(ChannelHandlerContext ctx0, Throwable cause) throws Exception {
         ctx0.channel().close();
         clientChannel.close();
+        super.exceptionCaught(ctx0, cause);
       }
     });
   }
