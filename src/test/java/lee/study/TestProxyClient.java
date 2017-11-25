@@ -27,7 +27,6 @@ public class TestProxyClient {
 
           @Override
           protected void initChannel(Channel ch) throws Exception {
-            System.out.println(1111);
 //            ch.pipeline().addLast(new MyHttpProxyHandler("127.0.0.1",8888));
 //            ch.pipeline().addLast(new HttpProxyHandler(new InetSocketAddress("127.0.0.1", 8888)));
             //ch.pipeline().addLast(new Socks5ProxyHandler(new InetSocketAddress("127.0.0.1", 1085)));

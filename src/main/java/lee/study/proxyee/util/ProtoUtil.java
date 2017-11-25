@@ -1,9 +1,7 @@
 package lee.study.proxyee.util;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

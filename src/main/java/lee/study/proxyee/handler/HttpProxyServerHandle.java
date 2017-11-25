@@ -103,6 +103,9 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
 
   private void handleProxyData(final Channel channel, final Object msg, boolean isHttp)
       throws InterruptedException {
+    if(!channel.isOpen()){  //connection异常 还有HttpContent进来，不转发
+      return;
+    }
     if (cf == null) {
       ProxyHandler proxyHandler = ProxyHandleFactory.build(proxyConfig);
       /*
