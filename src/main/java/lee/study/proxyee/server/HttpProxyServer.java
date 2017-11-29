@@ -132,6 +132,7 @@ public class HttpProxyServer {
                   HttpProxyInterceptPipeline pipeline) throws Exception {
                 //拦截响应，添加一个响应头
                 httpResponse.headers().add("intercept", "test");
+                //转到下一个拦截器处理
                 pipeline.afterResponse(clientChannel, proxyChannel, httpResponse);
               }
             });

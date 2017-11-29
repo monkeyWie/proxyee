@@ -7,11 +7,15 @@ import io.netty.handler.codec.http.HttpResponse;
 
 public class HttpProxyIntercept {
 
+  protected HttpRequest httpRequest;
+  protected HttpResponse httpResponse;
+
   /**
    * 拦截代理服务器到目标服务器的请求头
    */
   public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
       HttpProxyInterceptPipeline pipeline) throws Exception {
+    this.httpRequest = httpRequest;
     pipeline.beforeRequest(clientChannel,httpRequest);
   }
 
@@ -28,6 +32,7 @@ public class HttpProxyIntercept {
    */
   public void afterResponse(Channel clientChannel, Channel proxyChannel,
       HttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) throws Exception {
+    this.httpResponse = httpResponse;
     pipeline.afterResponse(clientChannel,proxyChannel,httpResponse);
   }
 
