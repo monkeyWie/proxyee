@@ -1,27 +1,32 @@
 package lee.study.proxyee.server;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.HttpContent;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import io.netty.util.AttributeKey;
-import lee.study.proxyee.crt.CertUtil;
-import lee.study.proxyee.handler.HttpProxyServerHandle;
-import lee.study.proxyee.intercept.DefaultInterceptFactory;
-import lee.study.proxyee.intercept.HttpProxyIntercept;
-import lee.study.proxyee.intercept.ProxyInterceptFactory;
-import lee.study.proxyee.proxy.ProxyConfig;
-import lee.study.proxyee.proxy.ProxyType;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
+import lee.study.proxyee.crt.CertUtil;
+import lee.study.proxyee.handler.HttpProxyServerHandle;
+import lee.study.proxyee.intercept.HttpProxyIntercept;
+import lee.study.proxyee.intercept.HttpProxyInterceptInitializer;
+import lee.study.proxyee.intercept.HttpProxyInterceptPipeline;
+import lee.study.proxyee.proxy.ProxyConfig;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class HttpProxyServer {
 
@@ -36,7 +41,7 @@ public class HttpProxyServer {
   public static PublicKey serverPubKey;
   public static EventLoopGroup proxyGroup;
 
-  private ProxyInterceptFactory proxyInterceptFactory;
+  private HttpProxyInterceptInitializer proxyInterceptInitializer;
   private ProxyConfig proxyConfig;
 
   private void init() throws Exception {
@@ -54,14 +59,14 @@ public class HttpProxyServer {
     serverPriKey = keyPair.getPrivate();
     serverPubKey = keyPair.getPublic();
     proxyGroup = new NioEventLoopGroup();
-    if (proxyInterceptFactory == null) {
-      proxyInterceptFactory = new DefaultInterceptFactory();
+    if (proxyInterceptInitializer == null) {
+      proxyInterceptInitializer = new HttpProxyInterceptInitializer();
     }
   }
 
-  public HttpProxyServer proxyInterceptFactory(
-      ProxyInterceptFactory proxyInterceptFactory) {
-    this.proxyInterceptFactory = proxyInterceptFactory;
+  public HttpProxyServer proxyInterceptInitializer(
+      HttpProxyInterceptInitializer proxyInterceptInitializer) {
+    this.proxyInterceptInitializer = proxyInterceptInitializer;
     return this;
   }
 
@@ -87,7 +92,7 @@ public class HttpProxyServer {
             protected void initChannel(Channel ch) throws Exception {
               ch.pipeline().addLast("httpCodec", new HttpServerCodec());
               ch.pipeline().addLast("serverHandle",
-                  new HttpProxyServerHandle(proxyInterceptFactory.build(), proxyConfig));
+                  new HttpProxyServerHandle(proxyInterceptInitializer, proxyConfig));
             }
           });
       ChannelFuture f = b
@@ -103,26 +108,35 @@ public class HttpProxyServer {
   }
 
   public static void main(String[] args) throws Exception {
-//  new HttpProxyServer().start(9999);
+//    new HttpProxyServer().start(9999);
 
     new HttpProxyServer()
 //        .proxyConfig(new ProxyConfig(ProxyType.SOCKS5, "127.0.0.1", 1085))  //使用socks5二级代理
-        .proxyInterceptFactory(() -> new HttpProxyIntercept() { //拦截http请求和响应
+        .proxyInterceptInitializer(new HttpProxyInterceptInitializer() {
           @Override
-          public boolean beforeRequest(Channel clientChannel, HttpRequest httpRequest) {
-            //替换UA，伪装成手机浏览器
-            httpRequest.headers().set(HttpHeaderNames.USER_AGENT,"Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1");
-            return true;
-          }
+          public void init(HttpProxyInterceptPipeline pipeline) {
+            pipeline.addLast(new HttpProxyIntercept() {
+              @Override
+              public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
+                  HttpProxyInterceptPipeline pipeline) throws Exception {
+                //替换UA，伪装成手机浏览器
+                httpRequest.headers().set(HttpHeaderNames.USER_AGENT,
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1");
+                //转到下一个拦截器处理
+                pipeline.beforeRequest(clientChannel, httpRequest);
+              }
 
-          @Override
-          public boolean afterResponse(Channel clientChannel, Channel proxyChannel,
-              HttpResponse httpResponse) {
-            //拦截响应，添加一个响应头
-            httpResponse.headers().add("intercept", "test");
-            return true;
+              @Override
+              public void afterResponse(Channel clientChannel, Channel proxyChannel,
+                  HttpResponse httpResponse,
+                  HttpProxyInterceptPipeline pipeline) throws Exception {
+                //拦截响应，添加一个响应头
+                httpResponse.headers().add("intercept", "test");
+                //转到下一个拦截器处理
+                pipeline.afterResponse(clientChannel, proxyChannel, httpResponse);
+              }
+            });
           }
-
         }).start(9999);
   }
 

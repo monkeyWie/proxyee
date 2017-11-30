@@ -7,27 +7,35 @@
     可设置二级代理服务器,支持http,socks4,socks5。
 #### 启动
 ```
-//new HttpProxyServer().start(9999);  //不做任何拦截处理
+//new HttpProxyServer().start(9999);
 
-  new HttpProxyServer() //拦截修改请求头和响应头和使用二级代理
-      .proxyConfig(new ProxyConfig(ProxyType.SOCKS5, "127.0.0.1", 1085))  //使用socks5二级代理(例如：使用shadowsocks翻墙)
-      .proxyInterceptFactory(() -> new HttpProxyIntercept() { //拦截http请求和响应
-        @Override
-        public boolean beforeRequest(Channel clientChannel, HttpRequest httpRequest) {
-          //替换UA，伪装成手机浏览器
-          httpRequest.headers().set(HttpHeaderNames.USER_AGENT,"Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1");
-          return true;
-        }
+new HttpProxyServer()
+//  .proxyConfig(new ProxyConfig(ProxyType.SOCKS5, "127.0.0.1", 1085))  //使用socks5二级代理
+    .proxyInterceptInitializer(new HttpProxyInterceptInitializer() {
+      @Override
+      public void init(HttpProxyInterceptPipeline pipeline) {
+        pipeline.addLast(new HttpProxyIntercept() {
+          @Override
+          public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
+              HttpProxyInterceptPipeline pipeline) throws Exception {
+            //替换UA，伪装成手机浏览器
+            httpRequest.headers().set(HttpHeaderNames.USER_AGENT,
+                "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1");
+            //转到下一个拦截器处理
+            pipeline.beforeRequest(clientChannel, httpRequest);
+          }
 
-        @Override
-        public boolean afterResponse(Channel clientChannel, Channel proxyChannel,
-            HttpResponse httpResponse) {
-          //拦截响应，添加一个响应头
-          httpResponse.headers().add("intercept", "test");
-          return true;
-        }
-
-      }).start(9999); //启动http代理服务器，监听9999端口
+          @Override
+          public void afterResponse(Channel clientChannel, Channel proxyChannel,
+              HttpResponse httpResponse,
+              HttpProxyInterceptPipeline pipeline) throws Exception {
+            //拦截响应，添加一个响应头
+            httpResponse.headers().add("intercept", "test");
+            pipeline.afterResponse(clientChannel, proxyChannel, httpResponse);
+          }
+        });
+      }
+    }).start(9999);
 ```
 
 #### 流程
