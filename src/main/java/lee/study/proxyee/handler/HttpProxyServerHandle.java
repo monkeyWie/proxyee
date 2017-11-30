@@ -42,8 +42,12 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
       HttpRequest request = (HttpRequest) msg;
       //第一次建立连接取host和端口号和处理代理握手
       if (status == 0) {
-        status = 1;
         ProtoUtil.RequestProto requestProto = ProtoUtil.getRequestProto(request);
+        if(requestProto==null){ //bad request
+          ctx.channel().close();
+          return;
+        }
+        status = 1;
         this.host = requestProto.getHost();
         this.port = requestProto.getPort();
         if ("CONNECT".equalsIgnoreCase(request.method().name())) {//建立代理握手
