@@ -1,5 +1,6 @@
 package lee.study.proxyee.crt;
 
+import lee.study.proxyee.server.HttpProxyServer;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -51,8 +52,7 @@ public class CertUtil {
   }
 
   /**
-   * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out
-   * ca_private.pem
+   * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.der
    */
   public static PrivateKey loadPriKey(byte[] bts) throws Exception {
     EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(bts);
@@ -60,24 +60,21 @@ public class CertUtil {
   }
 
   /**
-   * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out
-   * ca_private.pem
+   * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.der
    */
   public static PrivateKey loadPriKey(String path) throws Exception {
     return loadPriKey(Files.readAllBytes(Paths.get(path)));
   }
 
   /**
-   * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out
-   * ca_private.pem
+   * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.der
    */
   public static PrivateKey loadPriKey(URI uri) throws Exception {
     return loadPriKey(Paths.get(uri).toString());
   }
 
   /**
-   * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out
-   * ca_private.pem
+   * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.der
    */
   public static PrivateKey loadPriKey(InputStream inputStream) throws Exception {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -163,6 +160,16 @@ public class CertUtil {
   }
 
   /**
+   * 读取ssl证书使用者信息
+   */
+  public static String getSubject(X509Certificate certificate) throws Exception {
+    //读出来顺序是反的需要反转下
+    List<String> tempList = Arrays.asList(certificate.getIssuerDN().toString().split(", "));
+    return IntStream.rangeClosed(0, tempList.size() - 1)
+        .mapToObj(i -> tempList.get(tempList.size() - i - 1)).collect(Collectors.joining(", "));
+  }
+
+  /**
    * 动态生成服务器证书,并进行CA签授
    *
    * @param issuer 颁发机构
@@ -176,8 +183,8 @@ public class CertUtil {
     //doc from https://www.cryptoworkshop.com/guide/
     JcaX509v3CertificateBuilder jv3Builder = new JcaX509v3CertificateBuilder(new X500Name(issuer),
         BigInteger.ONE,
-        new Date(),
-        new Date(System.currentTimeMillis() + TEN_YEAR),
+        HttpProxyServer.caNotBefore,
+        HttpProxyServer.caNotAfter,
         new X500Name(subject),
         serverPubKey);
     //SAN扩展证书支持的域名，否则浏览器提示证书不安全

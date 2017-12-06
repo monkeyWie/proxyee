@@ -4,6 +4,7 @@
 #### HTTPS支持
     需要导入项目中的CA证书(src/resources/ca.crt)至受信任的根证书颁发机构。
     可以使用CertDownIntercept拦截器，开启网页下载证书功能，访问http://serverIP:serverPort即可进入。
+    注：安卓手机上安装证书若弹出键入凭据存储的密码，输入锁屏密码即可。
 #### 二级代理
     可设置二级代理服务器,支持http,socks4,socks5。
 #### 启动

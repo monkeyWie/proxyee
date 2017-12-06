@@ -7,7 +7,6 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -19,6 +18,8 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
+import java.security.cert.X509Certificate;
+import java.util.Date;
 import lee.study.proxyee.crt.CertUtil;
 import lee.study.proxyee.handler.HttpProxyServerHandle;
 import lee.study.proxyee.intercept.CertDownIntercept;
@@ -36,6 +37,8 @@ public class HttpProxyServer {
 
   public static SslContext clientSslCtx;
   public static String issuer;
+  public static Date caNotBefore;
+  public static Date caNotAfter;
   public static PrivateKey caPriKey;
   public static PrivateKey serverPriKey;
   public static PublicKey serverPubKey;
@@ -50,10 +53,14 @@ public class HttpProxyServer {
     clientSslCtx = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE)
         .build();
     ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+    X509Certificate certificate = CertUtil.loadCert(classLoader.getResourceAsStream("ca.crt"));
     //读取CA证书使用者信息
-    issuer = CertUtil.getSubject(classLoader.getResourceAsStream("ca.crt"));
+    issuer = CertUtil.getSubject(certificate);
+    //读取CA证书有效时段(server证书有效期超出CA证书的，在手机上会提示证书不安全)
+    caNotBefore = certificate.getNotBefore();
+    caNotAfter = certificate.getNotAfter();
     //CA私钥用于给动态生成的网站SSL证书签证
-    caPriKey = CertUtil.loadPriKey(classLoader.getResourceAsStream("ca_private.pem"));
+    caPriKey = CertUtil.loadPriKey(classLoader.getResourceAsStream("ca_private.der"));
     //生产一对随机公私钥用于网站SSL证书动态创建
     KeyPair keyPair = CertUtil.genKeyPair();
     serverPriKey = keyPair.getPrivate();
@@ -108,7 +115,7 @@ public class HttpProxyServer {
   }
 
   public static void main(String[] args) throws Exception {
-//    new HttpProxyServer().start(9999);
+    //new HttpProxyServer().start(9999);
 
     new HttpProxyServer()
 //        .proxyConfig(new ProxyConfig(ProxyType.SOCKS5, "127.0.0.1", 1085))  //使用socks5二级代理
@@ -121,8 +128,8 @@ public class HttpProxyServer {
               public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
                   HttpProxyInterceptPipeline pipeline) throws Exception {
                 //替换UA，伪装成手机浏览器
-                httpRequest.headers().set(HttpHeaderNames.USER_AGENT,
-                    "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1");
+//                httpRequest.headers().set(HttpHeaderNames.USER_AGENT,
+//                    "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1");
                 //转到下一个拦截器处理
                 pipeline.beforeRequest(clientChannel, httpRequest);
               }
