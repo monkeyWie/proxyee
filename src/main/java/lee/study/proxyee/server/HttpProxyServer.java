@@ -7,7 +7,6 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
@@ -22,6 +21,7 @@ import java.security.PublicKey;
 import java.security.Security;
 import lee.study.proxyee.crt.CertUtil;
 import lee.study.proxyee.handler.HttpProxyServerHandle;
+import lee.study.proxyee.intercept.CertDownIntercept;
 import lee.study.proxyee.intercept.HttpProxyIntercept;
 import lee.study.proxyee.intercept.HttpProxyInterceptInitializer;
 import lee.study.proxyee.intercept.HttpProxyInterceptPipeline;
@@ -115,6 +115,7 @@ public class HttpProxyServer {
         .proxyInterceptInitializer(new HttpProxyInterceptInitializer() {
           @Override
           public void init(HttpProxyInterceptPipeline pipeline) {
+            pipeline.addLast(new CertDownIntercept());  //处理证书下载
             pipeline.addLast(new HttpProxyIntercept() {
               @Override
               public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,

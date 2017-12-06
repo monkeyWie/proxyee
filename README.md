@@ -3,6 +3,7 @@
     例如：http(s)协议抓包,http(s)动态替换请求内容或响应内容等等。
 #### HTTPS支持
     需要导入项目中的CA证书(src/resources/ca.crt)至受信任的根证书颁发机构。
+    可以使用CertDownIntercept拦截器，开启网页下载证书功能，访问http://serverIP:serverPort即可进入。
 #### 二级代理
     可设置二级代理服务器,支持http,socks4,socks5。
 #### 启动
@@ -14,6 +15,7 @@ new HttpProxyServer()
     .proxyInterceptInitializer(new HttpProxyInterceptInitializer() {
       @Override
       public void init(HttpProxyInterceptPipeline pipeline) {
+        pipeline.addLast(new CertDownIntercept());  //开启网页下载证书功能
         pipeline.addLast(new HttpProxyIntercept() {
           @Override
           public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
