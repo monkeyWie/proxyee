@@ -48,6 +48,15 @@ public class ProtoUtil {
     private int port;
     private boolean ssl;
 
+    public RequestProto() {
+    }
+
+    public RequestProto(String host, int port, boolean ssl) {
+      this.host = host;
+      this.port = port;
+      this.ssl = ssl;
+    }
+
     public String getHost() {
       return host;
     }

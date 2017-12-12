@@ -156,10 +156,10 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
     exceptionHandle.beforeCatch(ctx.channel(), cause);
   }
 
-  private void handleProxyData(final Channel channel, final Object msg, boolean isHttp)
+  private void handleProxyData(Channel channel, Object msg, boolean isHttp)
       throws Exception {
     if (cf == null) {
-      if (!(msg instanceof HttpRequest)) {  //connection异常 还有HttpContent进来，不转发
+      if (isHttp && !(msg instanceof HttpRequest)) {  //connection异常 还有HttpContent进来，不转发
         return;
       }
       ProxyHandler proxyHandler = ProxyHandleFactory.build(proxyConfig);
@@ -168,8 +168,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
         有些服务器对于client hello不带SNI扩展时会直接返回Received fatal alert: handshake_failure(握手错误)
         例如：https://cdn.mdn.mozilla.net/static/img/favicon32.7f3da72dcea1.png
        */
-      RequestProto proto = ProtoUtil.getRequestProto((HttpRequest) msg);
-      proto.setSsl(isSSL);
+      RequestProto proto = new RequestProto(host,port,isSSL);
       ChannelInitializer channelInitializer =
           isHttp ? new HttpProxyInitializer(channel, proto, proxyHandler)
               : new TunnelProxyInitializer(channel, proxyHandler);
