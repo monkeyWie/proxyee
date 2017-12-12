@@ -11,6 +11,9 @@ public class ProtoUtil {
     RequestProto requestProto = new RequestProto();
     int port = -1;
     String hostStr = httpRequest.headers().get(HttpHeaderNames.HOST);
+    if(hostStr==null){
+      return null;
+    }
     String uriStr = httpRequest.uri();
     Pattern pattern = Pattern.compile("^(?:https?://)?(?<host>[^:]*)(?::(?<port>\\d+))?$");
     Matcher matcher = pattern.matcher(hostStr);

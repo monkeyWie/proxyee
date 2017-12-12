@@ -25,6 +25,10 @@ public class CertDownIntercept extends HttpProxyIntercept {
   public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
       HttpProxyInterceptPipeline pipeline) throws Exception {
     ProtoUtil.RequestProto requestProto = ProtoUtil.getRequestProto(httpRequest);
+    if (requestProto == null) { //bad request
+      clientChannel.close();
+      return;
+    }
     InetSocketAddress inetSocketAddress = (InetSocketAddress) clientChannel.localAddress();
     if (requestProto.getHost().equals(inetSocketAddress.getHostString()) &&
         requestProto.getPort() == inetSocketAddress.getPort()) {
