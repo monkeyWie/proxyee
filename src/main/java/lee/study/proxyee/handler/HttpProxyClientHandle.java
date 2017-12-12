@@ -6,6 +6,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.util.ReferenceCountUtil;
+import lee.study.proxyee.exception.HttpProxyExceptionHandle;
 import lee.study.proxyee.intercept.HttpProxyInterceptPipeline;
 
 public class HttpProxyClientHandle extends ChannelInboundHandlerAdapter {
@@ -44,6 +45,8 @@ public class HttpProxyClientHandle extends ChannelInboundHandlerAdapter {
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
     ctx.channel().close();
     clientChannel.close();
-    super.exceptionCaught(ctx, cause);
+    HttpProxyExceptionHandle exceptionHandle = ((HttpProxyServerHandle) clientChannel.pipeline()
+        .get("serverHandle")).getExceptionHandle();
+    exceptionHandle.afterCatch(clientChannel,ctx.channel(),cause);
   }
 }

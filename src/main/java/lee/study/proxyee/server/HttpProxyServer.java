@@ -21,6 +21,7 @@ import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import lee.study.proxyee.crt.CertUtil;
+import lee.study.proxyee.exception.HttpProxyExceptionHandle;
 import lee.study.proxyee.handler.HttpProxyServerHandle;
 import lee.study.proxyee.intercept.CertDownIntercept;
 import lee.study.proxyee.intercept.HttpProxyIntercept;
@@ -45,6 +46,7 @@ public class HttpProxyServer {
   public static EventLoopGroup proxyGroup;
 
   private HttpProxyInterceptInitializer proxyInterceptInitializer;
+  private HttpProxyExceptionHandle httpProxyExceptionHandle;
   private ProxyConfig proxyConfig;
 
   private void init() throws Exception {
@@ -69,11 +71,20 @@ public class HttpProxyServer {
     if (proxyInterceptInitializer == null) {
       proxyInterceptInitializer = new HttpProxyInterceptInitializer();
     }
+    if (httpProxyExceptionHandle == null) {
+      httpProxyExceptionHandle = new HttpProxyExceptionHandle();
+    }
   }
 
   public HttpProxyServer proxyInterceptInitializer(
       HttpProxyInterceptInitializer proxyInterceptInitializer) {
     this.proxyInterceptInitializer = proxyInterceptInitializer;
+    return this;
+  }
+
+  public HttpProxyServer httpProxyExceptionHandle(
+      HttpProxyExceptionHandle httpProxyExceptionHandle) {
+    this.httpProxyExceptionHandle = httpProxyExceptionHandle;
     return this;
   }
 
@@ -99,7 +110,8 @@ public class HttpProxyServer {
             protected void initChannel(Channel ch) throws Exception {
               ch.pipeline().addLast("httpCodec", new HttpServerCodec());
               ch.pipeline().addLast("serverHandle",
-                  new HttpProxyServerHandle(proxyInterceptInitializer, proxyConfig));
+                  new HttpProxyServerHandle(proxyInterceptInitializer, proxyConfig,
+                      httpProxyExceptionHandle));
             }
           });
       ChannelFuture f = b
@@ -145,7 +157,21 @@ public class HttpProxyServer {
               }
             });
           }
-        }).start(9999);
+        })
+        .httpProxyExceptionHandle(new HttpProxyExceptionHandle() {
+          @Override
+          public void beforeCatch(Channel clientChannel, Throwable cause) {
+            System.out.println("111111111111111");
+            super.beforeCatch(clientChannel, cause);
+          }
+
+          @Override
+          public void afterCatch(Channel clientChannel, Channel proxyChannel, Throwable cause) {
+            System.out.println("22222222222222");
+            super.afterCatch(clientChannel, proxyChannel, cause);
+          }
+        })
+        .start(9999);
   }
 
 }

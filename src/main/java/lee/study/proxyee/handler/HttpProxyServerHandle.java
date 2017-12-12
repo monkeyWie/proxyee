@@ -21,6 +21,7 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.resolver.NoopAddressResolverGroup;
 import lee.study.proxyee.crt.CertPool;
+import lee.study.proxyee.exception.HttpProxyExceptionHandle;
 import lee.study.proxyee.intercept.HttpProxyIntercept;
 import lee.study.proxyee.intercept.HttpProxyInterceptInitializer;
 import lee.study.proxyee.intercept.HttpProxyInterceptPipeline;
@@ -39,13 +40,18 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
   private int status = 0;
   private ProxyConfig proxyConfig;
   private HttpProxyInterceptPipeline interceptPipeline;
+  private HttpProxyExceptionHandle exceptionHandle;
 
   public HttpProxyInterceptPipeline getInterceptPipeline() {
     return interceptPipeline;
   }
 
+  public HttpProxyExceptionHandle getExceptionHandle() {
+    return exceptionHandle;
+  }
+
   public HttpProxyServerHandle(HttpProxyInterceptInitializer interceptInitializer,
-      ProxyConfig proxyConfig) {
+      ProxyConfig proxyConfig, HttpProxyExceptionHandle exceptionHandle) {
     this.proxyConfig = proxyConfig;
 
     //默认拦截器
@@ -83,6 +89,8 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
       }
     });
     interceptInitializer.init(this.interceptPipeline);
+
+    this.exceptionHandle = exceptionHandle;
   }
 
   @Override
@@ -92,7 +100,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
       //第一次建立连接取host和端口号和处理代理握手
       if (status == 0) {
         ProtoUtil.RequestProto requestProto = ProtoUtil.getRequestProto(request);
-        if(requestProto==null){ //bad request
+        if (requestProto == null) { //bad request
           ctx.channel().close();
           return;
         }
@@ -145,13 +153,13 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
       cf.channel().close();
     }
     ctx.channel().close();
-    super.exceptionCaught(ctx, cause);
+    exceptionHandle.beforeCatch(ctx.channel(), cause);
   }
 
   private void handleProxyData(final Channel channel, final Object msg, boolean isHttp)
       throws Exception {
     if (cf == null) {
-      if(!(msg instanceof HttpRequest)){  //connection异常 还有HttpContent进来，不转发
+      if (!(msg instanceof HttpRequest)) {  //connection异常 还有HttpContent进来，不转发
         return;
       }
       ProxyHandler proxyHandler = ProxyHandleFactory.build(proxyConfig);
