@@ -62,15 +62,15 @@ public class CertDownIntercept extends HttpProxyIntercept {
         clientChannel.writeAndFlush(httpContent);
       }
     } else {
-      super.beforeRequest(clientChannel, httpRequest, pipeline);
+      pipeline.beforeRequest(clientChannel, httpRequest);
     }
   }
 
   @Override
-  public void beforeRequest(Channel clientChannel, HttpContent httpContent,
+  public void beforeRequest(Channel clientChannel, HttpRequest httpRequest, HttpContent httpContent,
       HttpProxyInterceptPipeline pipeline) throws Exception {
     if (!crtFlag) {
-      super.beforeRequest(clientChannel, httpContent, pipeline);
+      pipeline.beforeRequest(clientChannel, httpRequest, httpContent);
     }
   }
 }

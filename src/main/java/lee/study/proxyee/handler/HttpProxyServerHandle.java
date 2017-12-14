@@ -25,6 +25,7 @@ import lee.study.proxyee.exception.HttpProxyExceptionHandle;
 import lee.study.proxyee.intercept.HttpProxyIntercept;
 import lee.study.proxyee.intercept.HttpProxyInterceptInitializer;
 import lee.study.proxyee.intercept.HttpProxyInterceptPipeline;
+import lee.study.proxyee.model.HttpRequestInfo;
 import lee.study.proxyee.proxy.ProxyConfig;
 import lee.study.proxyee.proxy.ProxyHandleFactory;
 import lee.study.proxyee.server.HttpProxyServer;
@@ -36,11 +37,13 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
   private ChannelFuture cf;
   private String host;
   private int port;
-  private boolean isSSL = false;
+  private boolean isSsl = false;
   private int status = 0;
   private ProxyConfig proxyConfig;
   private HttpProxyInterceptPipeline interceptPipeline;
   private HttpProxyExceptionHandle exceptionHandle;
+
+  private HttpRequest httpRequest;
 
   public HttpProxyInterceptPipeline getInterceptPipeline() {
     return interceptPipeline;
@@ -63,14 +66,14 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
       }
 
       @Override
-      public void beforeRequest(Channel clientChannel, HttpContent httpContent,
-          HttpProxyInterceptPipeline pipeline) throws Exception {
+      public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
+          HttpContent httpContent, HttpProxyInterceptPipeline pipeline) throws Exception {
         handleProxyData(clientChannel, httpContent, true);
       }
 
       @Override
       public void afterResponse(Channel clientChannel, Channel proxyChannel,
-          HttpResponse httpResponse,
+          HttpRequest httpRequest, HttpResponse httpResponse,
           HttpProxyInterceptPipeline pipeline) throws Exception {
         clientChannel.writeAndFlush(httpResponse);
         if (HttpHeaderValues.WEBSOCKET.toString()
@@ -83,7 +86,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
 
       @Override
       public void afterResponse(Channel clientChannel, Channel proxyChannel,
-          HttpContent httpContent,
+          HttpRequest httpRequest, HttpResponse httpResponse, HttpContent httpContent,
           HttpProxyInterceptPipeline pipeline) throws Exception {
         clientChannel.writeAndFlush(httpContent);
       }
@@ -116,17 +119,18 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
           return;
         }
       }
-      interceptPipeline.beforeRequest(ctx.channel(), request);
+      this.httpRequest = HttpRequestInfo.adapter(request);
+      interceptPipeline.beforeRequest(ctx.channel(), this.httpRequest);
     } else if (msg instanceof HttpContent) {
       if (status != 2) {
-        interceptPipeline.beforeRequest(ctx.channel(), (HttpContent) msg);
+        interceptPipeline.beforeRequest(ctx.channel(), this.httpRequest, (HttpContent) msg);
       } else {
         status = 1;
       }
     } else { //ssl和websocket的握手处理
       ByteBuf byteBuf = (ByteBuf) msg;
       if (byteBuf.getByte(0) == 22) {//ssl握手
-        isSSL = true;
+        isSsl = true;
         SslContext sslCtx = SslContextBuilder
             .forServer(HttpProxyServer.serverPriKey, CertPool.getCert(this.host)).build();
         ctx.pipeline().addFirst("httpCodec", new HttpServerCodec());
@@ -168,9 +172,9 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
         有些服务器对于client hello不带SNI扩展时会直接返回Received fatal alert: handshake_failure(握手错误)
         例如：https://cdn.mdn.mozilla.net/static/img/favicon32.7f3da72dcea1.png
        */
-      RequestProto proto = new RequestProto(host,port,isSSL);
+      RequestProto requestProto = new RequestProto(host, port, isSsl);
       ChannelInitializer channelInitializer =
-          isHttp ? new HttpProxyInitializer(channel, proto, proxyHandler)
+          isHttp ? new HttpProxyInitializer(channel, requestProto, proxyHandler)
               : new TunnelProxyInitializer(channel, proxyHandler);
       Bootstrap bootstrap = new Bootstrap();
       bootstrap.group(HttpProxyServer.proxyGroup) // 注册线程池
@@ -191,6 +195,13 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
                     }
                 }
             });*/
+    }
+    if (msg instanceof HttpRequest) {
+      HttpProxyClientHandle httpProxyClientHandle = (HttpProxyClientHandle) cf.channel().pipeline()
+          .get("proxyClientHandle");
+      if (httpProxyClientHandle != null) {
+        httpProxyClientHandle.setHttpRequest(HttpRequestInfo.adapter((HttpRequest) msg));
+      }
     }
     cf.channel().writeAndFlush(msg);
   }

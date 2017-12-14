@@ -33,6 +33,6 @@ public class HttpProxyInitializer extends ChannelInitializer {
       ch.pipeline().addLast(HttpProxyServer.clientSslCtx.newHandler(ch.alloc(),requestProto.getHost(),requestProto.getPort()));
     }
     ch.pipeline().addLast("httpCodec", new HttpClientCodec());
-    ch.pipeline().addLast(new HttpProxyClientHandle(clientChannel));
+    ch.pipeline().addLast("proxyClientHandle",new HttpProxyClientHandle(clientChannel));
   }
 }
