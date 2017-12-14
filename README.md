@@ -11,12 +11,12 @@
 ```
 //new HttpProxyServer().start(9999);
 
-new HttpProxyServer()
-//  .proxyConfig(new ProxyConfig(ProxyType.SOCKS5, "127.0.0.1", 1085))  //使用socks5二级代理
+  new HttpProxyServer()
+//        .proxyConfig(new ProxyConfig(ProxyType.SOCKS5, "127.0.0.1", 1085))  //使用socks5二级代理
     .proxyInterceptInitializer(new HttpProxyInterceptInitializer() {
       @Override
       public void init(HttpProxyInterceptPipeline pipeline) {
-        pipeline.addLast(new CertDownIntercept());  //开启网页下载证书功能
+        pipeline.addLast(new CertDownIntercept());  //处理证书下载
         pipeline.addLast(new HttpProxyIntercept() {
           @Override
           public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
@@ -27,18 +27,33 @@ new HttpProxyServer()
             //转到下一个拦截器处理
             pipeline.beforeRequest(clientChannel, httpRequest);
           }
-
+  
           @Override
           public void afterResponse(Channel clientChannel, Channel proxyChannel,
-              HttpResponse httpResponse,
+              HttpRequest httpRequest, HttpResponse httpResponse,
               HttpProxyInterceptPipeline pipeline) throws Exception {
             //拦截响应，添加一个响应头
             httpResponse.headers().add("intercept", "test");
-            pipeline.afterResponse(clientChannel, proxyChannel, httpResponse);
+            //转到下一个拦截器处理
+            pipeline.afterResponse(clientChannel, proxyChannel, httpRequest, httpResponse);
           }
         });
       }
-    }).start(9999);
+    })
+    .httpProxyExceptionHandle(new HttpProxyExceptionHandle() {
+      @Override
+      public void beforeCatch(Channel clientChannel, Throwable cause) {
+        System.out.println("111111111111111");
+        super.beforeCatch(clientChannel, cause);
+      }
+  
+      @Override
+      public void afterCatch(Channel clientChannel, Channel proxyChannel, Throwable cause) {
+        System.out.println("22222222222222");
+        super.afterCatch(clientChannel, proxyChannel, cause);
+      }
+    })
+    .start(9999);
 ```
 
 #### 流程
