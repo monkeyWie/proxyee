@@ -52,7 +52,8 @@ public class CertUtil {
   }
 
   /**
-   * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.der
+   * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out
+   * ca_private.der
    */
   public static PrivateKey loadPriKey(byte[] bts) throws Exception {
     EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(bts);
@@ -60,21 +61,24 @@ public class CertUtil {
   }
 
   /**
-   * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.der
+   * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out
+   * ca_private.der
    */
   public static PrivateKey loadPriKey(String path) throws Exception {
     return loadPriKey(Files.readAllBytes(Paths.get(path)));
   }
 
   /**
-   * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.der
+   * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out
+   * ca_private.der
    */
   public static PrivateKey loadPriKey(URI uri) throws Exception {
     return loadPriKey(Paths.get(uri).toString());
   }
 
   /**
-   * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.der
+   * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out
+   * ca_private.der
    */
   public static PrivateKey loadPriKey(InputStream inputStream) throws Exception {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -182,7 +186,8 @@ public class CertUtil {
     String subject = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=" + hosts[0];
     //doc from https://www.cryptoworkshop.com/guide/
     JcaX509v3CertificateBuilder jv3Builder = new JcaX509v3CertificateBuilder(new X500Name(issuer),
-        BigInteger.ONE,
+        //issue#3 修复ElementaryOS上证书不安全问题(serialNumber为1时证书会提示不安全)，避免serialNumber冲突，采用时间戳+4位随机数生成
+        BigInteger.valueOf(System.currentTimeMillis() + (long) (Math.random() * 10000) + 1000),
         HttpProxyServer.caNotBefore,
         HttpProxyServer.caNotAfter,
         new X500Name(subject),
@@ -197,9 +202,5 @@ public class CertUtil {
     //SHA256 用SHA1浏览器可能会提示证书不安全
     ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSAEncryption").build(caPriKey);
     return new JcaX509CertificateConverter().getCertificate(jv3Builder.build(signer));
-  }
-
-  public static void main(String[] args) {
-
   }
 }
