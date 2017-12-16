@@ -67,10 +67,10 @@ public class CertDownIntercept extends HttpProxyIntercept {
   }
 
   @Override
-  public void beforeRequest(Channel clientChannel, HttpRequest httpRequest, HttpContent httpContent,
+  public void beforeRequest(Channel clientChannel, HttpContent httpContent,
       HttpProxyInterceptPipeline pipeline) throws Exception {
     if (!crtFlag) {
-      pipeline.beforeRequest(clientChannel, httpRequest, httpContent);
+      pipeline.beforeRequest(clientChannel, httpContent);
     }
   }
 }

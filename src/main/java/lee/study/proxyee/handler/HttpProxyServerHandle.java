@@ -43,8 +43,6 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
   private HttpProxyInterceptPipeline interceptPipeline;
   private HttpProxyExceptionHandle exceptionHandle;
 
-  private HttpRequest httpRequest;
-
   public HttpProxyInterceptPipeline getInterceptPipeline() {
     return interceptPipeline;
   }
@@ -66,15 +64,14 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
       }
 
       @Override
-      public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
-          HttpContent httpContent, HttpProxyInterceptPipeline pipeline) throws Exception {
+      public void beforeRequest(Channel clientChannel, HttpContent httpContent,
+          HttpProxyInterceptPipeline pipeline) throws Exception {
         handleProxyData(clientChannel, httpContent, true);
       }
 
       @Override
       public void afterResponse(Channel clientChannel, Channel proxyChannel,
-          HttpRequest httpRequest, HttpResponse httpResponse,
-          HttpProxyInterceptPipeline pipeline) throws Exception {
+          HttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) throws Exception {
         clientChannel.writeAndFlush(httpResponse);
         if (HttpHeaderValues.WEBSOCKET.toString()
             .equals(httpResponse.headers().get(HttpHeaderNames.UPGRADE))) {
@@ -86,8 +83,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
 
       @Override
       public void afterResponse(Channel clientChannel, Channel proxyChannel,
-          HttpRequest httpRequest, HttpResponse httpResponse, HttpContent httpContent,
-          HttpProxyInterceptPipeline pipeline) throws Exception {
+          HttpContent httpContent, HttpProxyInterceptPipeline pipeline) throws Exception {
         clientChannel.writeAndFlush(httpContent);
       }
     });
@@ -119,11 +115,10 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
           return;
         }
       }
-      this.httpRequest = HttpRequestInfo.adapter(request);
-      interceptPipeline.beforeRequest(ctx.channel(), this.httpRequest);
+      interceptPipeline.beforeRequest(ctx.channel(), request);
     } else if (msg instanceof HttpContent) {
       if (status != 2) {
-        interceptPipeline.beforeRequest(ctx.channel(), this.httpRequest, (HttpContent) msg);
+        interceptPipeline.beforeRequest(ctx.channel(), (HttpContent) msg);
       } else {
         status = 1;
       }
@@ -195,13 +190,6 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
                     }
                 }
             });*/
-    }
-    if (msg instanceof HttpRequest) {
-      HttpProxyClientHandle httpProxyClientHandle = (HttpProxyClientHandle) cf.channel().pipeline()
-          .get("proxyClientHandle");
-      if (httpProxyClientHandle != null) {
-        httpProxyClientHandle.setHttpRequest(HttpRequestInfo.adapter((HttpRequest) msg));
-      }
     }
     cf.channel().writeAndFlush(msg);
   }

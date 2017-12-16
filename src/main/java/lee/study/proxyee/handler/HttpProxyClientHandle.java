@@ -14,15 +14,8 @@ public class HttpProxyClientHandle extends ChannelInboundHandlerAdapter {
 
   private Channel clientChannel;
 
-  private HttpRequest httpRequest;
-  private HttpResponse httpResponse;
-
   public HttpProxyClientHandle(Channel clientChannel) {
     this.clientChannel = clientChannel;
-  }
-
-  public void setHttpRequest(HttpRequest httpRequest) {
-    this.httpRequest = httpRequest;
   }
 
   @Override
@@ -35,11 +28,9 @@ public class HttpProxyClientHandle extends ChannelInboundHandlerAdapter {
     HttpProxyInterceptPipeline interceptPipeline = ((HttpProxyServerHandle) clientChannel.pipeline()
         .get("serverHandle")).getInterceptPipeline();
     if (msg instanceof HttpResponse) {
-      this.httpResponse = (HttpResponse) msg;
-      interceptPipeline.afterResponse(clientChannel, ctx.channel(), httpRequest, this.httpResponse);
+      interceptPipeline.afterResponse(clientChannel, ctx.channel(), (HttpResponse) msg);
     } else if (msg instanceof HttpContent) {
-      interceptPipeline.afterResponse(clientChannel, ctx.channel(), httpRequest, this.httpResponse,
-          (HttpContent) msg);
+      interceptPipeline.afterResponse(clientChannel, ctx.channel(), (HttpContent) msg);
     } else {
       clientChannel.writeAndFlush(msg);
     }

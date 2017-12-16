@@ -18,6 +18,25 @@ public class HttpProxyInterceptPipeline implements Iterable<HttpProxyIntercept> 
   private int pos3 = 0;
   private int pos4 = 0;
 
+  private HttpRequest httpRequest;
+  private HttpResponse httpResponse;
+
+  public HttpRequest getHttpRequest() {
+    return httpRequest;
+  }
+
+  public void setHttpRequest(HttpRequest httpRequest) {
+    this.httpRequest = httpRequest;
+  }
+
+  public HttpResponse getHttpResponse() {
+    return httpResponse;
+  }
+
+  public void setHttpResponse(HttpResponse httpResponse) {
+    this.httpResponse = httpResponse;
+  }
+
   public HttpProxyInterceptPipeline(HttpProxyIntercept defaultIntercept) {
     this.intercepts = new LinkedList<>();
     this.defaultIntercept = defaultIntercept;
@@ -41,38 +60,41 @@ public class HttpProxyInterceptPipeline implements Iterable<HttpProxyIntercept> 
   }
 
   public void beforeRequest(Channel clientChannel, HttpRequest httpRequest) throws Exception {
+    if (this.pos1 == 0) {
+      this.httpRequest = httpRequest;
+    }
     if (this.pos1 < intercepts.size()) {
       HttpProxyIntercept intercept = intercepts.get(this.pos1++);
-      intercept.beforeRequest(clientChannel, httpRequest, this);
+      intercept.beforeRequest(clientChannel, this.httpRequest, this);
     }
     this.pos1 = 0;
   }
 
-  public void beforeRequest(Channel clientChannel, HttpRequest httpRequest, HttpContent httpContent)
-      throws Exception {
+  public void beforeRequest(Channel clientChannel, HttpContent httpContent) throws Exception {
     if (this.pos2 < intercepts.size()) {
       HttpProxyIntercept intercept = intercepts.get(this.pos2++);
-      intercept.beforeRequest(clientChannel, httpRequest, httpContent, this);
+      intercept.beforeRequest(clientChannel, httpContent, this);
     }
     this.pos2 = 0;
   }
 
-  public void afterResponse(Channel clientChannel, Channel proxyChannel, HttpRequest httpRequest,
-      HttpResponse httpResponse) throws Exception {
+  public void afterResponse(Channel clientChannel, Channel proxyChannel, HttpResponse httpResponse)
+      throws Exception {
+    if (this.pos3 == 0) {
+      this.httpResponse = httpResponse;
+    }
     if (this.pos3 < intercepts.size()) {
       HttpProxyIntercept intercept = intercepts.get(this.pos3++);
-      intercept.afterResponse(clientChannel, proxyChannel, httpRequest, httpResponse, this);
+      intercept.afterResponse(clientChannel, proxyChannel, this.httpResponse, this);
     }
     this.pos3 = 0;
   }
 
-  public void afterResponse(Channel clientChannel, Channel proxyChannel, HttpRequest httpRequest,
-      HttpResponse httpResponse, HttpContent httpContent)
+  public void afterResponse(Channel clientChannel, Channel proxyChannel, HttpContent httpContent)
       throws Exception {
     if (this.pos4 < intercepts.size()) {
       HttpProxyIntercept intercept = intercepts.get(this.pos4++);
-      intercept
-          .afterResponse(clientChannel, proxyChannel, httpRequest, httpResponse, httpContent, this);
+      intercept.afterResponse(clientChannel, proxyChannel, httpContent, this);
     }
     this.pos4 = 0;
   }

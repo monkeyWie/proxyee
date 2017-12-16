@@ -7,9 +7,9 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.ssl.SslContext;
@@ -149,12 +149,12 @@ public class HttpProxyServer {
 
               @Override
               public void afterResponse(Channel clientChannel, Channel proxyChannel,
-                  HttpRequest httpRequest, HttpResponse httpResponse,
-                  HttpProxyInterceptPipeline pipeline) throws Exception {
+                  HttpContent httpContent, HttpProxyInterceptPipeline pipeline) throws Exception {
+
                 //拦截响应，添加一个响应头
-                httpResponse.headers().add("intercept", "test");
+                pipeline.getHttpRequest().headers().add("intercept", "test");
                 //转到下一个拦截器处理
-                pipeline.afterResponse(clientChannel, proxyChannel, httpRequest, httpResponse);
+                pipeline.afterResponse(clientChannel, proxyChannel, httpContent);
               }
             });
           }
