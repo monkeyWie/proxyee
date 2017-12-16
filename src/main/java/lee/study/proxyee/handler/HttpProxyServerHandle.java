@@ -25,7 +25,6 @@ import lee.study.proxyee.exception.HttpProxyExceptionHandle;
 import lee.study.proxyee.intercept.HttpProxyIntercept;
 import lee.study.proxyee.intercept.HttpProxyInterceptInitializer;
 import lee.study.proxyee.intercept.HttpProxyInterceptPipeline;
-import lee.study.proxyee.model.HttpRequestInfo;
 import lee.study.proxyee.proxy.ProxyConfig;
 import lee.study.proxyee.proxy.ProxyHandleFactory;
 import lee.study.proxyee.server.HttpProxyServer;
@@ -98,7 +97,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
       HttpRequest request = (HttpRequest) msg;
       //第一次建立连接取host和端口号和处理代理握手
       if (status == 0) {
-        ProtoUtil.RequestProto requestProto = ProtoUtil.getRequestProto(request);
+        RequestProto requestProto = ProtoUtil.getRequestProto(request);
         if (requestProto == null) { //bad request
           ctx.channel().close();
           return;
@@ -115,6 +114,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
           return;
         }
       }
+      interceptPipeline.setRequestProto(new RequestProto(host,port,isSsl));
       interceptPipeline.beforeRequest(ctx.channel(), request);
     } else if (msg instanceof HttpContent) {
       if (status != 2) {

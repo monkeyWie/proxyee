@@ -7,6 +7,7 @@ import io.netty.handler.codec.http.HttpResponse;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import lee.study.proxyee.util.ProtoUtil.RequestProto;
 
 public class HttpProxyInterceptPipeline implements Iterable<HttpProxyIntercept> {
 
@@ -18,6 +19,7 @@ public class HttpProxyInterceptPipeline implements Iterable<HttpProxyIntercept> 
   private int pos3 = 0;
   private int pos4 = 0;
 
+  private RequestProto requestProto;
   private HttpRequest httpRequest;
   private HttpResponse httpResponse;
 
@@ -35,6 +37,14 @@ public class HttpProxyInterceptPipeline implements Iterable<HttpProxyIntercept> 
 
   public void setHttpResponse(HttpResponse httpResponse) {
     this.httpResponse = httpResponse;
+  }
+
+  public RequestProto getRequestProto() {
+    return requestProto;
+  }
+
+  public void setRequestProto(RequestProto requestProto) {
+    this.requestProto = requestProto;
   }
 
   public HttpProxyInterceptPipeline(HttpProxyIntercept defaultIntercept) {
