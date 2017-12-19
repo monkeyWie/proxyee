@@ -13,6 +13,7 @@ import io.netty.handler.codec.http.HttpVersion;
 import java.net.InetSocketAddress;
 import lee.study.proxyee.crt.CertUtil;
 import lee.study.proxyee.util.ProtoUtil;
+import lee.study.proxyee.util.ProtoUtil.RequestProto;
 
 /**
  * 处理证书下载页面 http://proxyServerIp:proxyServerPort
@@ -24,7 +25,7 @@ public class CertDownIntercept extends HttpProxyIntercept {
   @Override
   public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
       HttpProxyInterceptPipeline pipeline) throws Exception {
-    ProtoUtil.RequestProto requestProto = ProtoUtil.getRequestProto(httpRequest);
+    RequestProto requestProto = ProtoUtil.getRequestProto(httpRequest);
     if (requestProto == null) { //bad request
       clientChannel.close();
       return;

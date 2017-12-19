@@ -178,7 +178,8 @@ public class CertUtil {
    *
    * @param issuer 颁发机构
    */
-  public static X509Certificate genCert(String issuer, PublicKey serverPubKey, PrivateKey caPriKey,
+  public static X509Certificate genCert(String issuer, PrivateKey caPriKey, Date caNotBefore,
+      Date caNotAfter, PublicKey serverPubKey,
       String... hosts) throws Exception {
         /* String issuer = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=ProxyeeRoot";
         String subject = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=" + host;*/
@@ -188,8 +189,8 @@ public class CertUtil {
     JcaX509v3CertificateBuilder jv3Builder = new JcaX509v3CertificateBuilder(new X500Name(issuer),
         //issue#3 修复ElementaryOS上证书不安全问题(serialNumber为1时证书会提示不安全)，避免serialNumber冲突，采用时间戳+4位随机数生成
         BigInteger.valueOf(System.currentTimeMillis() + (long) (Math.random() * 10000) + 1000),
-        HttpProxyServer.caNotBefore,
-        HttpProxyServer.caNotAfter,
+        caNotBefore,
+        caNotAfter,
         new X500Name(subject),
         serverPubKey);
     //SAN扩展证书支持的域名，否则浏览器提示证书不安全

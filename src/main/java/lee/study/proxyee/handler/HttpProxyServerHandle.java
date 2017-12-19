@@ -28,6 +28,7 @@ import lee.study.proxyee.intercept.HttpProxyInterceptPipeline;
 import lee.study.proxyee.proxy.ProxyConfig;
 import lee.study.proxyee.proxy.ProxyHandleFactory;
 import lee.study.proxyee.server.HttpProxyServer;
+import lee.study.proxyee.server.HttpProxyServerConfig;
 import lee.study.proxyee.util.ProtoUtil;
 import lee.study.proxyee.util.ProtoUtil.RequestProto;
 
@@ -38,9 +39,14 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
   private int port;
   private boolean isSsl = false;
   private int status = 0;
+  private HttpProxyServerConfig serverConfig;
   private ProxyConfig proxyConfig;
   private HttpProxyInterceptPipeline interceptPipeline;
   private HttpProxyExceptionHandle exceptionHandle;
+
+  public HttpProxyServerConfig getServerConfig() {
+    return serverConfig;
+  }
 
   public HttpProxyInterceptPipeline getInterceptPipeline() {
     return interceptPipeline;
@@ -50,8 +56,10 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
     return exceptionHandle;
   }
 
-  public HttpProxyServerHandle(HttpProxyInterceptInitializer interceptInitializer,
+  public HttpProxyServerHandle(HttpProxyServerConfig serverConfig,
+      HttpProxyInterceptInitializer interceptInitializer,
       ProxyConfig proxyConfig, HttpProxyExceptionHandle exceptionHandle) {
+    this.serverConfig = serverConfig;
     this.proxyConfig = proxyConfig;
 
     //默认拦截器
@@ -114,7 +122,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
           return;
         }
       }
-      interceptPipeline.setRequestProto(new RequestProto(host,port,isSsl));
+      interceptPipeline.setRequestProto(new RequestProto(host, port, isSsl));
       interceptPipeline.beforeRequest(ctx.channel(), request);
     } else if (msg instanceof HttpContent) {
       if (status != 2) {
@@ -127,7 +135,8 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
       if (byteBuf.getByte(0) == 22) {//ssl握手
         isSsl = true;
         SslContext sslCtx = SslContextBuilder
-            .forServer(HttpProxyServer.serverPriKey, CertPool.getCert(this.host)).build();
+            .forServer(serverConfig.getServerPriKey(), CertPool.getCert(this.host, serverConfig))
+            .build();
         ctx.pipeline().addFirst("httpCodec", new HttpServerCodec());
         ctx.pipeline().addFirst("sslHandle", sslCtx.newHandler(ctx.alloc()));
         //重新过一遍pipeline，拿到解密后的的http报文
@@ -172,7 +181,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
           isHttp ? new HttpProxyInitializer(channel, requestProto, proxyHandler)
               : new TunnelProxyInitializer(channel, proxyHandler);
       Bootstrap bootstrap = new Bootstrap();
-      bootstrap.group(HttpProxyServer.proxyGroup) // 注册线程池
+      bootstrap.group(serverConfig.getLoopGroup()) // 注册线程池
           .channel(NioSocketChannel.class) // 使用NioSocketChannel来作为连接用的channel类
           .handler(channelInitializer);
       if (proxyConfig != null) {

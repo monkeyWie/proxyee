@@ -37,44 +37,58 @@ public class HttpProxyServer {
   public final static HttpResponseStatus SUCCESS = new HttpResponseStatus(200,
       "Connection established");
 
-  public static SslContext clientSslCtx;
-  public static String issuer;
-  public static Date caNotBefore;
-  public static Date caNotAfter;
-  public static PrivateKey caPriKey;
-  public static PrivateKey serverPriKey;
-  public static PublicKey serverPubKey;
-  public static EventLoopGroup proxyGroup;
-
+  private HttpProxyServerConfig serverConfig;
   private HttpProxyInterceptInitializer proxyInterceptInitializer;
   private HttpProxyExceptionHandle httpProxyExceptionHandle;
   private ProxyConfig proxyConfig;
 
+  public HttpProxyServer() {
+    try {
+      init();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  public SslContext getClientSslContext() {
+    return serverConfig.getClientSslCtx();
+  }
+
   private void init() throws Exception {
     //注册BouncyCastleProvider加密库
     Security.addProvider(new BouncyCastleProvider());
-    clientSslCtx = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE)
-        .build();
-    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-    X509Certificate certificate = CertUtil.loadCert(classLoader.getResourceAsStream("ca.crt"));
-    //读取CA证书使用者信息
-    issuer = CertUtil.getSubject(certificate);
-    //读取CA证书有效时段(server证书有效期超出CA证书的，在手机上会提示证书不安全)
-    caNotBefore = certificate.getNotBefore();
-    caNotAfter = certificate.getNotAfter();
-    //CA私钥用于给动态生成的网站SSL证书签证
-    caPriKey = CertUtil.loadPriKey(classLoader.getResourceAsStream("ca_private.der"));
-    //生产一对随机公私钥用于网站SSL证书动态创建
-    KeyPair keyPair = CertUtil.genKeyPair();
-    serverPriKey = keyPair.getPrivate();
-    serverPubKey = keyPair.getPublic();
-    proxyGroup = new NioEventLoopGroup();
+    if (serverConfig == null) {
+      serverConfig = new HttpProxyServerConfig();
+      serverConfig.setClientSslCtx(
+          SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE)
+              .build());
+      ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+      X509Certificate certificate = CertUtil.loadCert(classLoader.getResourceAsStream("ca.crt"));
+      //读取CA证书使用者信息
+      serverConfig.setIssuer(CertUtil.getSubject(certificate));
+      //读取CA证书有效时段(server证书有效期超出CA证书的，在手机上会提示证书不安全)
+      serverConfig.setCaNotBefore(certificate.getNotBefore());
+      serverConfig.setCaNotAfter(certificate.getNotAfter());
+      //CA私钥用于给动态生成的网站SSL证书签证
+      serverConfig
+          .setCaPriKey(CertUtil.loadPriKey(classLoader.getResourceAsStream("ca_private.der")));
+      //生产一对随机公私钥用于网站SSL证书动态创建
+      KeyPair keyPair = CertUtil.genKeyPair();
+      serverConfig.setServerPriKey(keyPair.getPrivate());
+      serverConfig.setServerPubKey(keyPair.getPublic());
+      serverConfig.setLoopGroup(new NioEventLoopGroup());
+    }
     if (proxyInterceptInitializer == null) {
       proxyInterceptInitializer = new HttpProxyInterceptInitializer();
     }
     if (httpProxyExceptionHandle == null) {
       httpProxyExceptionHandle = new HttpProxyExceptionHandle();
     }
+  }
+
+  public HttpProxyServer serverConfig(HttpProxyServerConfig serverConfig) {
+    this.serverConfig = serverConfig;
+    return this;
   }
 
   public HttpProxyServer proxyInterceptInitializer(
@@ -99,7 +113,6 @@ public class HttpProxyServer {
     EventLoopGroup bossGroup = new NioEventLoopGroup();
     EventLoopGroup workerGroup = new NioEventLoopGroup();
     try {
-      init();
       ServerBootstrap b = new ServerBootstrap();
       b.group(bossGroup, workerGroup)
           .channel(NioServerSocketChannel.class)
@@ -111,7 +124,7 @@ public class HttpProxyServer {
             protected void initChannel(Channel ch) throws Exception {
               ch.pipeline().addLast("httpCodec", new HttpServerCodec());
               ch.pipeline().addLast("serverHandle",
-                  new HttpProxyServerHandle(proxyInterceptInitializer, proxyConfig,
+                  new HttpProxyServerHandle(serverConfig, proxyInterceptInitializer, proxyConfig,
                       httpProxyExceptionHandle));
             }
           });
