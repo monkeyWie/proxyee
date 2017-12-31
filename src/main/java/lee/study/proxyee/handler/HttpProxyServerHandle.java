@@ -4,14 +4,17 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
+import io.netty.handler.codec.http.HttpMessage;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpServerCodec;
@@ -20,6 +23,17 @@ import io.netty.handler.proxy.ProxyHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.resolver.NoopAddressResolverGroup;
+import java.nio.ByteBuffer;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import lee.study.proxyee.crt.CertPool;
 import lee.study.proxyee.exception.HttpProxyExceptionHandle;
 import lee.study.proxyee.intercept.HttpProxyIntercept;
@@ -43,6 +57,8 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
   private ProxyConfig proxyConfig;
   private HttpProxyInterceptPipeline interceptPipeline;
   private HttpProxyExceptionHandle exceptionHandle;
+  private List requestList;
+  private boolean isConnect;
 
   public HttpProxyServerConfig getServerConfig() {
     return serverConfig;
@@ -188,23 +204,29 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
         //代理服务器解析DNS和连接
         bootstrap.resolver(NoopAddressResolverGroup.INSTANCE);
       }
-      cf = bootstrap.connect(host, port).sync();
-            /*cf.addListener(new ChannelFutureListener() {
-                public void operationComplete(ChannelFuture future) throws Exception {
-                    System.out.println("11111"+msg);
-                    if (future.isSuccess()) {
-                        future.channel().writeAndFlush(msg);
-                    } else {
-                        ctx.channel().close();
-                    }
-                }
-            });*/
+      requestList = new LinkedList();
+      cf = bootstrap.connect(host, port);
+      cf.addListener((ChannelFutureListener) future -> {
+        if (future.isSuccess()) {
+          future.channel().writeAndFlush(msg);
+          synchronized (requestList){
+            requestList.forEach((obj)-> future.channel().write(obj));
+            isConnect = true;
+          }
+        } else {
+          future.channel().close();
+          channel.close();
+        }
+      });
+    }else {
+      synchronized (requestList){
+        if(isConnect){
+          cf.channel().writeAndFlush(msg);
+        }else {
+          requestList.add(msg);
+        }
+      }
     }
-    cf.channel().writeAndFlush(msg);
-  }
-
-  public static void main(String[] args) {
-    System.out.println((char) 22);
   }
 
 }
