@@ -55,6 +55,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
   private int status = 0;
   private HttpProxyServerConfig serverConfig;
   private ProxyConfig proxyConfig;
+  private HttpProxyInterceptInitializer interceptInitializer;
   private HttpProxyInterceptPipeline interceptPipeline;
   private HttpProxyExceptionHandle exceptionHandle;
   private List requestList;
@@ -77,41 +78,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
       ProxyConfig proxyConfig, HttpProxyExceptionHandle exceptionHandle) {
     this.serverConfig = serverConfig;
     this.proxyConfig = proxyConfig;
-
-    //默认拦截器
-    this.interceptPipeline = new HttpProxyInterceptPipeline(new HttpProxyIntercept() {
-      @Override
-      public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
-          HttpProxyInterceptPipeline pipeline) throws Exception {
-        handleProxyData(clientChannel, httpRequest, true);
-      }
-
-      @Override
-      public void beforeRequest(Channel clientChannel, HttpContent httpContent,
-          HttpProxyInterceptPipeline pipeline) throws Exception {
-        handleProxyData(clientChannel, httpContent, true);
-      }
-
-      @Override
-      public void afterResponse(Channel clientChannel, Channel proxyChannel,
-          HttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) throws Exception {
-        clientChannel.writeAndFlush(httpResponse);
-        if (HttpHeaderValues.WEBSOCKET.toString()
-            .equals(httpResponse.headers().get(HttpHeaderNames.UPGRADE))) {
-          //websocket转发原始报文
-          proxyChannel.pipeline().remove("httpCodec");
-          clientChannel.pipeline().remove("httpCodec");
-        }
-      }
-
-      @Override
-      public void afterResponse(Channel clientChannel, Channel proxyChannel,
-          HttpContent httpContent, HttpProxyInterceptPipeline pipeline) throws Exception {
-        clientChannel.writeAndFlush(httpContent);
-      }
-    });
-    interceptInitializer.init(this.interceptPipeline);
-
+    this.interceptInitializer = interceptInitializer;
     this.exceptionHandle = exceptionHandle;
   }
 
@@ -138,6 +105,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
           return;
         }
       }
+      interceptPipeline = buildPiepeline();
       interceptPipeline.setRequestProto(new RequestProto(host, port, isSsl));
       interceptPipeline.beforeRequest(ctx.channel(), request);
     } else if (msg instanceof HttpContent) {
@@ -227,6 +195,42 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
         }
       }
     }
+  }
+
+  private HttpProxyInterceptPipeline buildPiepeline(){
+    HttpProxyInterceptPipeline interceptPipeline = new HttpProxyInterceptPipeline(new HttpProxyIntercept() {
+      @Override
+      public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
+          HttpProxyInterceptPipeline pipeline) throws Exception {
+        handleProxyData(clientChannel, httpRequest, true);
+      }
+
+      @Override
+      public void beforeRequest(Channel clientChannel, HttpContent httpContent,
+          HttpProxyInterceptPipeline pipeline) throws Exception {
+        handleProxyData(clientChannel, httpContent, true);
+      }
+
+      @Override
+      public void afterResponse(Channel clientChannel, Channel proxyChannel,
+          HttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) throws Exception {
+        clientChannel.writeAndFlush(httpResponse);
+        if (HttpHeaderValues.WEBSOCKET.toString()
+            .equals(httpResponse.headers().get(HttpHeaderNames.UPGRADE))) {
+          //websocket转发原始报文
+          proxyChannel.pipeline().remove("httpCodec");
+          clientChannel.pipeline().remove("httpCodec");
+        }
+      }
+
+      @Override
+      public void afterResponse(Channel clientChannel, Channel proxyChannel,
+          HttpContent httpContent, HttpProxyInterceptPipeline pipeline) throws Exception {
+        clientChannel.writeAndFlush(httpContent);
+      }
+    });
+    interceptInitializer.init(interceptPipeline);
+    return interceptPipeline;
   }
 
 }
