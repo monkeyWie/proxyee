@@ -42,6 +42,9 @@ public class HttpProxyServer {
   private HttpProxyExceptionHandle httpProxyExceptionHandle;
   private ProxyConfig proxyConfig;
 
+  private EventLoopGroup bossGroup;
+  private EventLoopGroup workerGroup;
+
   public HttpProxyServer() {
     try {
       init();
@@ -109,9 +112,8 @@ public class HttpProxyServer {
   }
 
   public void start(int port) {
-
-    EventLoopGroup bossGroup = new NioEventLoopGroup();
-    EventLoopGroup workerGroup = new NioEventLoopGroup();
+    bossGroup = new NioEventLoopGroup();
+    workerGroup = new NioEventLoopGroup();
     try {
       ServerBootstrap b = new ServerBootstrap();
       b.group(bossGroup, workerGroup)
@@ -138,6 +140,11 @@ public class HttpProxyServer {
       bossGroup.shutdownGracefully();
       workerGroup.shutdownGracefully();
     }
+  }
+
+  public void close() {
+    bossGroup.shutdownGracefully();
+    workerGroup.shutdownGracefully();
   }
 
   public static void main(String[] args) throws Exception {
