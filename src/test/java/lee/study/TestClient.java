@@ -69,7 +69,7 @@ public class TestClient {
           }
         });
     //https://cdn.mdn.mozilla.net/static/img/favicon32.7f3da72dcea1.png
-    ChannelFuture cf = bootstrap.connect("127.0.0.1", 80).sync();
+    ChannelFuture cf = bootstrap.connect("www.baidu.com", 443).sync();
     HttpRequest httpRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET,
         "/");
     httpRequest.headers().add(HttpHeaderNames.HOST, "cdn.mdn.mozilla.net");
