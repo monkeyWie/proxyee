@@ -177,8 +177,9 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
       cf.addListener((ChannelFutureListener) future -> {
         if (future.isSuccess()) {
           future.channel().writeAndFlush(msg);
-          synchronized (requestList){
-            requestList.forEach((obj)-> future.channel().write(obj));
+          synchronized (requestList) {
+            requestList.forEach((obj) -> future.channel().write(obj));
+            requestList.clear();
             isConnect = true;
           }
         } else {
@@ -186,49 +187,50 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
           channel.close();
         }
       });
-    }else {
-      synchronized (requestList){
-        if(isConnect){
+    } else {
+      synchronized (requestList) {
+        if (isConnect) {
           cf.channel().writeAndFlush(msg);
-        }else {
+        } else {
           requestList.add(msg);
         }
       }
     }
   }
 
-  private HttpProxyInterceptPipeline buildPiepeline(){
-    HttpProxyInterceptPipeline interceptPipeline = new HttpProxyInterceptPipeline(new HttpProxyIntercept() {
-      @Override
-      public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
-          HttpProxyInterceptPipeline pipeline) throws Exception {
-        handleProxyData(clientChannel, httpRequest, true);
-      }
+  private HttpProxyInterceptPipeline buildPiepeline() {
+    HttpProxyInterceptPipeline interceptPipeline = new HttpProxyInterceptPipeline(
+        new HttpProxyIntercept() {
+          @Override
+          public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
+              HttpProxyInterceptPipeline pipeline) throws Exception {
+            handleProxyData(clientChannel, httpRequest, true);
+          }
 
-      @Override
-      public void beforeRequest(Channel clientChannel, HttpContent httpContent,
-          HttpProxyInterceptPipeline pipeline) throws Exception {
-        handleProxyData(clientChannel, httpContent, true);
-      }
+          @Override
+          public void beforeRequest(Channel clientChannel, HttpContent httpContent,
+              HttpProxyInterceptPipeline pipeline) throws Exception {
+            handleProxyData(clientChannel, httpContent, true);
+          }
 
-      @Override
-      public void afterResponse(Channel clientChannel, Channel proxyChannel,
-          HttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) throws Exception {
-        clientChannel.writeAndFlush(httpResponse);
-        if (HttpHeaderValues.WEBSOCKET.toString()
-            .equals(httpResponse.headers().get(HttpHeaderNames.UPGRADE))) {
-          //websocket转发原始报文
-          proxyChannel.pipeline().remove("httpCodec");
-          clientChannel.pipeline().remove("httpCodec");
-        }
-      }
+          @Override
+          public void afterResponse(Channel clientChannel, Channel proxyChannel,
+              HttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) throws Exception {
+            clientChannel.writeAndFlush(httpResponse);
+            if (HttpHeaderValues.WEBSOCKET.toString()
+                .equals(httpResponse.headers().get(HttpHeaderNames.UPGRADE))) {
+              //websocket转发原始报文
+              proxyChannel.pipeline().remove("httpCodec");
+              clientChannel.pipeline().remove("httpCodec");
+            }
+          }
 
-      @Override
-      public void afterResponse(Channel clientChannel, Channel proxyChannel,
-          HttpContent httpContent, HttpProxyInterceptPipeline pipeline) throws Exception {
-        clientChannel.writeAndFlush(httpContent);
-      }
-    });
+          @Override
+          public void afterResponse(Channel clientChannel, Channel proxyChannel,
+              HttpContent httpContent, HttpProxyInterceptPipeline pipeline) throws Exception {
+            clientChannel.writeAndFlush(httpContent);
+          }
+        });
     interceptInitializer.init(interceptPipeline);
     return interceptPipeline;
   }

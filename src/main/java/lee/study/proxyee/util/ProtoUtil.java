@@ -13,7 +13,13 @@ public class ProtoUtil {
     int port = -1;
     String hostStr = httpRequest.headers().get(HttpHeaderNames.HOST);
     if(hostStr==null){
-      return null;
+      Pattern pattern = Pattern.compile("^(?:https?://)?(?<host>[^/]*)/?.*$");
+      Matcher matcher = pattern.matcher(httpRequest.uri());
+      if(matcher.find()){
+        hostStr = matcher.group("host");
+      }else{
+        return null;
+      }
     }
     String uriStr = httpRequest.uri();
     Pattern pattern = Pattern.compile("^(?:https?://)?(?<host>[^:]*)(?::(?<port>\\d+))?$");
