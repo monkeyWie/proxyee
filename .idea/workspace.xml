@@ -1,13 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6153bd81-e954-4767-b919-e2a003ab81f7" name="Default" comment="调整为每次http请求对应一个pipeline">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__io_netty_netty_all_4_1_15_Final.xml" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_netty_netty_all_4_1_15_Final.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_bouncycastle_bcpkix_jdk15on_1_58.xml" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_bouncycastle_bcpkix_jdk15on_1_58.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_bouncycastle_bcprov_jdk15on_1_58.xml" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_bouncycastle_bcprov_jdk15on_1_58.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/lee/study/TestClient.java" afterPath="$PROJECT_DIR$/src/test/java/lee/study/TestClient.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/lee/study/TestServer.java" afterPath="$PROJECT_DIR$/src/test/java/lee/study/TestServer.java" />
+    <list default="true" id="6153bd81-e954-4767-b919-e2a003ab81f7" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -38,41 +33,8 @@
       <file leaf-file-name="HttpProxyServerHandle.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/lee/study/proxyee/handler/HttpProxyServerHandle.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2738">
+            <state relative-caret-position="2220">
               <caret line="124" column="57" lean-forward="false" selection-start-line="124" selection-start-column="57" selection-end-line="124" selection-end-column="57" />
-              <folding>
-                <marker date="1514710003878" expanded="true" signature="6489:7403" ph="{...}" />
-                <marker date="1514710003878" expanded="true" signature="7400:7403" ph="{...}" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="SslContext.java" pinned="false" current-in-tab="false">
-        <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/ssl/SslContext.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="31228">
-              <caret line="912" column="35" lean-forward="false" selection-start-line="912" selection-start-column="35" selection-end-line="912" selection-end-column="35" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="JdkSslContext.java" pinned="false" current-in-tab="false">
-        <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/ssl/JdkSslContext.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="6253">
-              <caret line="223" column="22" lean-forward="false" selection-start-line="223" selection-start-column="22" selection-end-line="223" selection-end-column="22" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="SslHandler.java" pinned="false" current-in-tab="false">
-        <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/ssl/SslHandler.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="37">
-              <caret line="1176" column="38" lean-forward="false" selection-start-line="1176" selection-start-column="38" selection-end-line="1176" selection-end-column="38" />
               <folding />
             </state>
           </provider>
@@ -82,29 +44,7 @@
         <entry file="file://$PROJECT_DIR$/.gitignore">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="349">
-              <caret line="18" column="0" lean-forward="true" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="AbstractByteBuf.java" pinned="false" current-in-tab="false">
-        <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/buffer/AbstractByteBuf.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2035">
-              <caret line="96" column="0" lean-forward="false" selection-start-line="96" selection-start-column="0" selection-end-line="96" selection-end-column="0" />
-              <folding>
-                <element signature="e#3139#3140#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ByteToMessageDecoder.java" pinned="false" current-in-tab="false">
-        <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/codec/ByteToMessageDecoder.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="5328">
-              <caret line="179" column="16" lean-forward="false" selection-start-line="179" selection-start-column="16" selection-end-line="179" selection-end-column="16" />
+              <caret line="18" column="0" lean-forward="false" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -113,7 +53,7 @@
       <file leaf-file-name="TestServer.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/test/java/lee/study/TestServer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1369">
+            <state relative-caret-position="1110">
               <caret line="64" column="0" lean-forward="false" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
               <folding>
                 <element signature="e#3575#4466#0" expanded="true" />
@@ -123,34 +63,12 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SslContextBuilder.java" pinned="false" current-in-tab="false">
-        <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/ssl/SslContextBuilder.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="15207">
-              <caret line="442" column="76" lean-forward="false" selection-start-line="442" selection-start-column="76" selection-end-line="442" selection-end-column="76" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="HttpProxyServer.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/lee/study/proxyee/server/HttpProxyServer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="222">
+            <state relative-caret-position="180">
               <caret line="35" column="16" lean-forward="false" selection-start-line="35" selection-start-column="16" selection-end-line="35" selection-end-column="16" />
-              <folding>
-                <marker date="1515839689104" expanded="true" signature="5386:5390" ph="{...}" />
-                <marker date="1515839689104" expanded="true" signature="5450:7498" ph="{...}" />
-                <marker date="1515839689104" expanded="true" signature="5648:5771" ph="init(pipeline) → {" />
-                <marker date="1515839689104" expanded="true" signature="5891:6911" ph="{...}" />
-                <marker date="1515839689104" expanded="true" signature="6077:6451" ph="{...}" />
-                <marker date="1515839689104" expanded="true" signature="6659:6897" ph="{...}" />
-                <marker date="1515839689104" expanded="true" signature="6922:6935" ph="}" />
-                <marker date="1515839689104" expanded="true" signature="7002:7471" ph="{...}" />
-                <marker date="1515839689104" expanded="true" signature="7098:7215" ph="{...}" />
-              </folding>
+              <folding />
             </state>
           </provider>
         </entry>
@@ -211,8 +129,8 @@
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
-        <option name="mavenHome" value="D:/Program Files/apache-maven-3.5.0" />
-        <option name="userSettingsFile" value="D:\Program Files\apache-maven-3.5.0\conf\settings.xml" />
+        <option name="mavenHome" value="D:/apache-maven-3.3.9" />
+        <option name="userSettingsFile" value="D:\apache-maven-3.3.9\conf\settings.xml" />
       </MavenGeneralSettings>
     </option>
   </component>
@@ -249,10 +167,28 @@
             <id>Abstraction issuesJava</id>
           </State>
           <State>
+            <id>Android &gt; Lint &gt; Correctness</id>
+          </State>
+          <State>
             <id>Google Web Toolkit issues</id>
           </State>
           <State>
+            <id>Gradle</id>
+          </State>
+          <State>
             <id>Java</id>
+          </State>
+          <State>
+            <id>Kotlin</id>
+          </State>
+          <State>
+            <id>Maven</id>
+          </State>
+          <State>
+            <id>OSGi</id>
+          </State>
+          <State>
+            <id>Probable bugsGradle</id>
           </State>
           <State>
             <id>Security issuesJava</id>
@@ -285,6 +221,7 @@
     </navigator>
     <panes>
       <pane id="AndroidView" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -292,19 +229,23 @@
               <item name="proxyee" type="b2602c69:ProjectViewProjectNode" />
               <item name="proxyee" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="proxyee" type="b2602c69:ProjectViewProjectNode" />
+              <item name="proxyee" type="462c0819:PsiDirectoryNode" />
+              <item name=".idea" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
       <pane id="Scratches" />
       <pane id="Scope" />
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="settings.editor.selected.configurable" value="Errors" />
+    <property name="settings.editor.selected.configurable" value="MavenSettings" />
   </component>
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
@@ -532,6 +473,7 @@
       <workItem from="1514893367251" duration="8060000" />
       <workItem from="1515147762872" duration="54000" />
       <workItem from="1515839673884" duration="67000" />
+      <workItem from="1516096303796" duration="150000" />
     </task>
     <task id="LOCAL-00001" summary="fix bug">
       <created>1512050865217</created>
@@ -572,10 +514,10 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="46405000" />
+    <option name="totallyTimeSpent" value="46555000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -585,11 +527,11 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32979977" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3477322" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.43227327" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3286219" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32847533" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33097762" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2937365" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29774678" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32991362" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -670,17 +612,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="148">
           <caret line="30" column="13" lean-forward="false" selection-start-line="30" selection-start-column="13" selection-end-line="30" selection-end-column="13" />
-          <folding>
-            <marker date="1515839689104" expanded="true" signature="5386:5390" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="5450:7498" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="5648:5771" ph="init(pipeline) → {" />
-            <marker date="1515839689104" expanded="true" signature="5891:6911" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="6077:6451" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="6659:6897" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="6922:6935" ph="}" />
-            <marker date="1515839689104" expanded="true" signature="7002:7471" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="7098:7215" ph="{...}" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -702,17 +634,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="148">
           <caret line="25" column="13" lean-forward="false" selection-start-line="25" selection-start-column="13" selection-end-line="25" selection-end-column="13" />
-          <folding>
-            <marker date="1515839689104" expanded="true" signature="5386:5390" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="5450:7498" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="5648:5771" ph="init(pipeline) → {" />
-            <marker date="1515839689104" expanded="true" signature="5891:6911" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="6077:6451" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="6659:6897" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="6922:6935" ph="}" />
-            <marker date="1515839689104" expanded="true" signature="7002:7471" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="7098:7215" ph="{...}" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -720,10 +642,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="999">
           <caret line="44" column="46" lean-forward="false" selection-start-line="44" selection-start-column="46" selection-end-line="44" selection-end-column="46" />
-          <folding>
-            <marker date="1514710003878" expanded="true" signature="6489:7403" ph="{...}" />
-            <marker date="1514710003878" expanded="true" signature="7400:7403" ph="{...}" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -738,17 +657,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="148">
           <caret line="25" column="13" lean-forward="false" selection-start-line="25" selection-start-column="13" selection-end-line="25" selection-end-column="13" />
-          <folding>
-            <marker date="1515839689104" expanded="true" signature="5386:5390" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="5450:7498" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="5648:5771" ph="init(pipeline) → {" />
-            <marker date="1515839689104" expanded="true" signature="5891:6911" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="6077:6451" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="6659:6897" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="6922:6935" ph="}" />
-            <marker date="1515839689104" expanded="true" signature="7002:7471" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="7098:7215" ph="{...}" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -756,10 +665,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="999">
           <caret line="44" column="46" lean-forward="false" selection-start-line="44" selection-start-column="46" selection-end-line="44" selection-end-column="46" />
-          <folding>
-            <marker date="1514710003878" expanded="true" signature="6489:7403" ph="{...}" />
-            <marker date="1514710003878" expanded="true" signature="7400:7403" ph="{...}" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -808,13 +714,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://D:/Program Files/Java/jdk1.8.0_152/jre/lib/rt.jar!/sun/misc/HexDumpEncoder.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="158">
-          <caret line="11" column="13" lean-forward="false" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="jar://D:/Program Files/Java/jdk1.8.0_152/jre/lib/rt.jar!/sun/misc/HexDumpEncoder.class" />
     <entry file="file://$PROJECT_DIR$/src/main/java/lee/study/proxyee/intercept/HttpProxyInterceptPipeline.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="962">
@@ -836,28 +736,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://D:/Program Files/Java/jdk1.8.0_152/src.zip!/java/io/RandomAccessFile.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="19536">
-          <caret line="552" column="16" lean-forward="false" selection-start-line="552" selection-start-column="16" selection-end-line="552" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="jar://D:/Program Files/Java/jdk1.8.0_152/src.zip!/java/io/RandomAccessFile.java" />
     <entry file="file://$PROJECT_DIR$/src/main/java/lee/study/proxyee/util/Test.java" />
-    <entry file="jar://G:/data/maven/org/bouncycastle/bcpkix-jdk15on/1.58/bcpkix-jdk15on-1.58.jar!/org/bouncycastle/operator/jcajce/JcaContentSignerBuilder.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="271">
-          <caret line="31" column="9" lean-forward="false" selection-start-line="31" selection-start-column="9" selection-end-line="31" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://G:/data/maven/org/bouncycastle/bcpkix-jdk15on/1.58/bcpkix-jdk15on-1.58-sources.jar!/org/bouncycastle/operator/jcajce/JcaContentSignerBuilder.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="481">
-          <caret line="30" column="52" lean-forward="false" selection-start-line="30" selection-start-column="34" selection-end-line="30" selection-end-column="52" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="jar://G:/data/maven/org/bouncycastle/bcpkix-jdk15on/1.58/bcpkix-jdk15on-1.58.jar!/org/bouncycastle/operator/jcajce/JcaContentSignerBuilder.class" />
+    <entry file="jar://G:/data/maven/org/bouncycastle/bcpkix-jdk15on/1.58/bcpkix-jdk15on-1.58-sources.jar!/org/bouncycastle/operator/jcajce/JcaContentSignerBuilder.java" />
     <entry file="file://$PROJECT_DIR$/src/test/java/lee/study/TestClient.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1887">
@@ -879,83 +761,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/codec/DecoderResultProvider.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="259">
-          <caret line="21" column="17" lean-forward="false" selection-start-line="21" selection-start-column="17" selection-end-line="21" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/codec/http/HttpRequest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="37" column="44" lean-forward="false" selection-start-line="37" selection-start-column="44" selection-end-line="37" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/codec/http/HttpMessage.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="257">
-          <caret line="26" column="17" lean-forward="false" selection-start-line="26" selection-start-column="17" selection-end-line="26" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/codec/http/DefaultHttpRequest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="296">
-          <caret line="22" column="51" lean-forward="true" selection-start-line="22" selection-start-column="51" selection-end-line="22" selection-end-column="51" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/codec/http/DefaultHttpMessage.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="296">
-          <caret line="22" column="54" lean-forward="false" selection-start-line="22" selection-start-column="54" selection-end-line="22" selection-end-column="54" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/codec/http/DefaultHttpObject.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="185">
-          <caret line="19" column="47" lean-forward="false" selection-start-line="19" selection-start-column="47" selection-end-line="19" selection-end-column="47" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/codec/http/HttpObject.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="185">
-          <caret line="20" column="17" lean-forward="false" selection-start-line="20" selection-start-column="17" selection-end-line="20" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://D:/Program Files/Java/jdk1.8.0_152/src.zip!/java/util/concurrent/BlockingDeque.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6142">
-          <caret line="199" column="55" lean-forward="false" selection-start-line="199" selection-start-column="42" selection-end-line="199" selection-end-column="55" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://D:/Program Files/Java/jdk1.8.0_152/src.zip!/java/util/concurrent/LinkedBlockingQueue.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="7622">
-          <caret line="248" column="11" lean-forward="false" selection-start-line="248" selection-start-column="11" selection-end-line="248" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://D:/Program Files/Java/jdk1.8.0_152/src.zip!/java/util/Queue.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6105">
-          <caret line="198" column="6" lean-forward="false" selection-start-line="198" selection-start-column="6" selection-end-line="198" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://D:/Program Files/Java/jdk1.8.0_152/src.zip!/java/util/PriorityQueue.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3589">
-          <caret line="121" column="11" lean-forward="false" selection-start-line="121" selection-start-column="11" selection-end-line="121" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/codec/DecoderResultProvider.java" />
+    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/codec/http/HttpRequest.java" />
+    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/codec/http/HttpMessage.java" />
+    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/codec/http/DefaultHttpRequest.java" />
+    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/codec/http/DefaultHttpMessage.java" />
+    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/codec/http/DefaultHttpObject.java" />
+    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/codec/http/HttpObject.java" />
+    <entry file="jar://D:/Program Files/Java/jdk1.8.0_152/src.zip!/java/util/concurrent/BlockingDeque.java" />
+    <entry file="jar://D:/Program Files/Java/jdk1.8.0_152/src.zip!/java/util/concurrent/LinkedBlockingQueue.java" />
+    <entry file="jar://D:/Program Files/Java/jdk1.8.0_152/src.zip!/java/util/Queue.java" />
+    <entry file="jar://D:/Program Files/Java/jdk1.8.0_152/src.zip!/java/util/PriorityQueue.java" />
     <entry file="file://$PROJECT_DIR$/src/main/java/lee/study/proxyee/intercept/HttpProxyInterceptInitializer.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="111">
@@ -974,46 +790,19 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/codec/http/HttpResponseStatus.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="20461">
-          <caret line="574" column="11" lean-forward="false" selection-start-line="574" selection-start-column="11" selection-end-line="574" selection-end-column="11" />
-          <folding>
-            <element signature="e#18008#18009#0" expanded="true" />
-            <element signature="e#18055#18056#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
+    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/codec/http/HttpResponseStatus.java" />
     <entry file="file://$PROJECT_DIR$/src/main/java/lee/study/proxyee/server/HttpProxyServer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="222">
+        <state relative-caret-position="180">
           <caret line="35" column="16" lean-forward="false" selection-start-line="35" selection-start-column="16" selection-end-line="35" selection-end-column="16" />
-          <folding>
-            <marker date="1515839689104" expanded="true" signature="5386:5390" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="5450:7498" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="5648:5771" ph="init(pipeline) → {" />
-            <marker date="1515839689104" expanded="true" signature="5891:6911" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="6077:6451" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="6659:6897" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="6922:6935" ph="}" />
-            <marker date="1515839689104" expanded="true" signature="7002:7471" ph="{...}" />
-            <marker date="1515839689104" expanded="true" signature="7098:7215" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/codec/ByteToMessageDecoder.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5328">
-          <caret line="179" column="16" lean-forward="false" selection-start-line="179" selection-start-column="16" selection-end-line="179" selection-end-column="16" />
           <folding />
         </state>
       </provider>
     </entry>
+    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/codec/ByteToMessageDecoder.java" />
     <entry file="file://$PROJECT_DIR$/src/test/java/lee/study/TestServer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1369">
+        <state relative-caret-position="1110">
           <caret line="64" column="0" lean-forward="false" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
           <folding>
             <element signature="e#3575#4466#0" expanded="true" />
@@ -1022,65 +811,23 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/ssl/SslContextBuilder.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15207">
-          <caret line="442" column="76" lean-forward="false" selection-start-line="442" selection-start-column="76" selection-end-line="442" selection-end-column="76" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
+    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/ssl/SslContextBuilder.java" />
     <entry file="file://$PROJECT_DIR$/src/main/java/lee/study/proxyee/handler/HttpProxyServerHandle.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2738">
+        <state relative-caret-position="2220">
           <caret line="124" column="57" lean-forward="false" selection-start-line="124" selection-start-column="57" selection-end-line="124" selection-end-column="57" />
-          <folding>
-            <marker date="1514710003878" expanded="true" signature="6489:7403" ph="{...}" />
-            <marker date="1514710003878" expanded="true" signature="7400:7403" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/ssl/SslContext.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="31228">
-          <caret line="912" column="35" lean-forward="false" selection-start-line="912" selection-start-column="35" selection-end-line="912" selection-end-column="35" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/ssl/JdkSslContext.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6253">
-          <caret line="223" column="22" lean-forward="false" selection-start-line="223" selection-start-column="22" selection-end-line="223" selection-end-column="22" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/buffer/AbstractByteBuf.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2035">
-          <caret line="96" column="0" lean-forward="false" selection-start-line="96" selection-start-column="0" selection-end-line="96" selection-end-column="0" />
-          <folding>
-            <element signature="e#3139#3140#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/ssl/SslHandler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="37">
-          <caret line="1176" column="38" lean-forward="false" selection-start-line="1176" selection-start-column="38" selection-end-line="1176" selection-end-column="38" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
+    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/ssl/SslContext.java" />
+    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/ssl/JdkSslContext.java" />
+    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/buffer/AbstractByteBuf.java" />
+    <entry file="jar://G:/data/maven/io/netty/netty-all/4.1.15.Final/netty-all-4.1.15.Final-sources.jar!/io/netty/handler/ssl/SslHandler.java" />
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="349">
-          <caret line="18" column="0" lean-forward="true" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
+          <caret line="18" column="0" lean-forward="false" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
           <folding />
         </state>
       </provider>
