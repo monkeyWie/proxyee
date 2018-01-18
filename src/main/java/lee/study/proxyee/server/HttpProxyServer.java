@@ -7,20 +7,16 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpContent;
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.Security;
 import java.security.cert.X509Certificate;
-import java.util.Date;
 import lee.study.proxyee.crt.CertUtil;
 import lee.study.proxyee.exception.HttpProxyExceptionHandle;
 import lee.study.proxyee.handler.HttpProxyServerHandle;
@@ -118,8 +114,8 @@ public class HttpProxyServer {
       ServerBootstrap b = new ServerBootstrap();
       b.group(bossGroup, workerGroup)
           .channel(NioServerSocketChannel.class)
-//        .option(ChannelOption.SO_BACKLOG, 100)
-//                    .handler(new LoggingHandler(LogLevel.ERROR))
+//          .option(ChannelOption.SO_BACKLOG, 100)
+//          .handler(new LoggingHandler(LogLevel.DEBUG))
           .childHandler(new ChannelInitializer<Channel>() {
 
             @Override
@@ -161,20 +157,20 @@ public class HttpProxyServer {
               public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
                   HttpProxyInterceptPipeline pipeline) throws Exception {
                 //替换UA，伪装成手机浏览器
-                httpRequest.headers().set(HttpHeaderNames.USER_AGENT,
-                    "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1");
+                /*httpRequest.headers().set(HttpHeaderNames.USER_AGENT,
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1");*/
                 //转到下一个拦截器处理
                 pipeline.beforeRequest(clientChannel, httpRequest);
               }
 
               @Override
               public void afterResponse(Channel clientChannel, Channel proxyChannel,
-                  HttpContent httpContent, HttpProxyInterceptPipeline pipeline) throws Exception {
+                  HttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) throws Exception {
 
                 //拦截响应，添加一个响应头
-                pipeline.getHttpRequest().headers().add("intercept", "test");
+                httpResponse.headers().add("intercept", "test");
                 //转到下一个拦截器处理
-                pipeline.afterResponse(clientChannel, proxyChannel, httpContent);
+                pipeline.afterResponse(clientChannel, proxyChannel, httpResponse);
               }
             });
           }
