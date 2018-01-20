@@ -177,15 +177,15 @@ public class HttpProxyServer {
         })
         .httpProxyExceptionHandle(new HttpProxyExceptionHandle() {
           @Override
-          public void beforeCatch(Channel clientChannel, Throwable cause) {
+          public void beforeCatch(Channel clientChannel, Throwable cause) throws Exception {
             System.out.println("111111111111111");
-            super.beforeCatch(clientChannel, cause);
+            cause.printStackTrace();
           }
 
           @Override
-          public void afterCatch(Channel clientChannel, Channel proxyChannel, Throwable cause) {
+          public void afterCatch(Channel clientChannel, Channel proxyChannel, Throwable cause) throws Exception {
             System.out.println("22222222222222");
-            super.afterCatch(clientChannel, proxyChannel, cause);
+            cause.printStackTrace();
           }
         })
         .start(9999);
