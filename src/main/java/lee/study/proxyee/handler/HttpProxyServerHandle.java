@@ -23,6 +23,7 @@ import io.netty.handler.proxy.ProxyHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.resolver.NoopAddressResolverGroup;
+import io.netty.util.ReferenceCountUtil;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
@@ -112,6 +113,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
       if (status != 2) {
         interceptPipeline.beforeRequest(ctx.channel(), (HttpContent) msg);
       } else {
+        ReferenceCountUtil.release(msg);
         status = 1;
       }
     } else { //ssl和websocket的握手处理
