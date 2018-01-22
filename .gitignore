@@ -18,5 +18,6 @@ pom.properties
 hs_err_pid*
 
 .idea/libraries/
+.idea/workspace.xml
 
 target/
