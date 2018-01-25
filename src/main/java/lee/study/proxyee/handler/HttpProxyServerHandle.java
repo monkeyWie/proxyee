@@ -10,11 +10,9 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
-import io.netty.handler.codec.http.HttpMessage;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpServerCodec;
@@ -24,17 +22,8 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.resolver.NoopAddressResolverGroup;
 import io.netty.util.ReferenceCountUtil;
-import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import lee.study.proxyee.crt.CertPool;
 import lee.study.proxyee.exception.HttpProxyExceptionHandle;
 import lee.study.proxyee.intercept.HttpProxyIntercept;
@@ -185,6 +174,8 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
             isConnect = true;
           }
         } else {
+          requestList.forEach((obj) -> ReferenceCountUtil.release(obj));
+          requestList.clear();
           future.channel().close();
           channel.close();
         }
@@ -236,5 +227,4 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
     interceptInitializer.init(interceptPipeline);
     return interceptPipeline;
   }
-
 }
