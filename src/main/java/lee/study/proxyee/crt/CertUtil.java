@@ -14,6 +14,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.EncodedKeySpec;
@@ -22,7 +23,6 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -31,12 +31,18 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 public class CertUtil {
 
   private static KeyFactory keyFactory = null;
+
+  static {
+    //注册BouncyCastleProvider加密库
+    Security.addProvider(new BouncyCastleProvider());
+  }
 
   private static KeyFactory getKeyFactory() throws NoSuchAlgorithmException {
     if (keyFactory == null) {
@@ -219,7 +225,8 @@ public class CertUtil {
         caNotAfter,
         new X500Name(subject),
         keyPair.getPublic());
-    ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSAEncryption").build(keyPair.getPrivate());
+    ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSAEncryption")
+        .build(keyPair.getPrivate());
     return new JcaX509CertificateConverter().getCertificate(jv3Builder.build(signer));
   }
 }

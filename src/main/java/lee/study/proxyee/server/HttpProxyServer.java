@@ -15,7 +15,6 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import java.security.KeyPair;
 import java.security.PrivateKey;
-import java.security.Security;
 import java.security.cert.X509Certificate;
 import lee.study.proxyee.crt.CertUtil;
 import lee.study.proxyee.exception.HttpProxyExceptionHandle;
@@ -25,7 +24,6 @@ import lee.study.proxyee.intercept.HttpProxyIntercept;
 import lee.study.proxyee.intercept.HttpProxyInterceptInitializer;
 import lee.study.proxyee.intercept.HttpProxyInterceptPipeline;
 import lee.study.proxyee.proxy.ProxyConfig;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class HttpProxyServer {
 
@@ -50,9 +48,16 @@ public class HttpProxyServer {
     }
   }
 
+  public HttpProxyServer(HttpProxyCACertFactory caCertFactory) {
+    this.caCertFactory = caCertFactory;
+    try {
+      init();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
   private void init() throws Exception {
-    //注册BouncyCastleProvider加密库
-    Security.addProvider(new BouncyCastleProvider());
     if (serverConfig == null) {
       serverConfig = new HttpProxyServerConfig();
       serverConfig.setClientSslCtx(
@@ -108,11 +113,6 @@ public class HttpProxyServer {
 
   public HttpProxyServer proxyConfig(ProxyConfig proxyConfig) {
     this.proxyConfig = proxyConfig;
-    return this;
-  }
-
-  public HttpProxyServer caCertFactory(HttpProxyCACertFactory caCertFactory) {
-    this.caCertFactory = caCertFactory;
     return this;
   }
 
