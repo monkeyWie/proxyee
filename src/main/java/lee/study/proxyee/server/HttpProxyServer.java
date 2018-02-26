@@ -11,10 +11,10 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import java.security.KeyPair;
+import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import lee.study.proxyee.crt.CertUtil;
@@ -33,6 +33,7 @@ public class HttpProxyServer {
   public final static HttpResponseStatus SUCCESS = new HttpResponseStatus(200,
       "Connection established");
 
+  private HttpProxyCACertFactory caCertFactory;
   private HttpProxyServerConfig serverConfig;
   private HttpProxyInterceptInitializer proxyInterceptInitializer;
   private HttpProxyExceptionHandle httpProxyExceptionHandle;
@@ -49,10 +50,6 @@ public class HttpProxyServer {
     }
   }
 
-  public SslContext getClientSslContext() {
-    return serverConfig.getClientSslCtx();
-  }
-
   private void init() throws Exception {
     //注册BouncyCastleProvider加密库
     Security.addProvider(new BouncyCastleProvider());
@@ -62,15 +59,22 @@ public class HttpProxyServer {
           SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE)
               .build());
       ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-      X509Certificate certificate = CertUtil.loadCert(classLoader.getResourceAsStream("ca.crt"));
+      X509Certificate caCert;
+      PrivateKey caPriKey;
+      if (caCertFactory == null) {
+        caCert = CertUtil.loadCert(classLoader.getResourceAsStream("ca.crt"));
+        caPriKey = CertUtil.loadPriKey(classLoader.getResourceAsStream("ca_private.der"));
+      } else {
+        caCert = caCertFactory.getCACert();
+        caPriKey = caCertFactory.getCAPriKey();
+      }
       //读取CA证书使用者信息
-      serverConfig.setIssuer(CertUtil.getSubject(certificate));
+      serverConfig.setIssuer(CertUtil.getSubject(caCert));
       //读取CA证书有效时段(server证书有效期超出CA证书的，在手机上会提示证书不安全)
-      serverConfig.setCaNotBefore(certificate.getNotBefore());
-      serverConfig.setCaNotAfter(certificate.getNotAfter());
+      serverConfig.setCaNotBefore(caCert.getNotBefore());
+      serverConfig.setCaNotAfter(caCert.getNotAfter());
       //CA私钥用于给动态生成的网站SSL证书签证
-      serverConfig
-          .setCaPriKey(CertUtil.loadPriKey(classLoader.getResourceAsStream("ca_private.der")));
+      serverConfig.setCaPriKey(caPriKey);
       //生产一对随机公私钥用于网站SSL证书动态创建
       KeyPair keyPair = CertUtil.genKeyPair();
       serverConfig.setServerPriKey(keyPair.getPrivate());
@@ -104,6 +108,11 @@ public class HttpProxyServer {
 
   public HttpProxyServer proxyConfig(ProxyConfig proxyConfig) {
     this.proxyConfig = proxyConfig;
+    return this;
+  }
+
+  public HttpProxyServer caCertFactory(HttpProxyCACertFactory caCertFactory) {
+    this.caCertFactory = caCertFactory;
     return this;
   }
 
@@ -183,7 +192,8 @@ public class HttpProxyServer {
           }
 
           @Override
-          public void afterCatch(Channel clientChannel, Channel proxyChannel, Throwable cause) throws Exception {
+          public void afterCatch(Channel clientChannel, Channel proxyChannel, Throwable cause)
+              throws Exception {
             System.out.println("22222222222222");
             cause.printStackTrace();
           }

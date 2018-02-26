@@ -37,7 +37,6 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 public class CertUtil {
 
   private static KeyFactory keyFactory = null;
-  private static final long TEN_YEAR = TimeUnit.DAYS.toMillis(3650);
 
   private static KeyFactory getKeyFactory() throws NoSuchAlgorithmException {
     if (keyFactory == null) {
