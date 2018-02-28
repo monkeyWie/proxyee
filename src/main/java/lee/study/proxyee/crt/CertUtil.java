@@ -1,6 +1,7 @@
 package lee.study.proxyee.crt;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -23,9 +24,11 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
@@ -225,8 +228,25 @@ public class CertUtil {
         caNotAfter,
         new X500Name(subject),
         keyPair.getPublic());
+    jv3Builder.addExtension(Extension.basicConstraints, true, new BasicConstraints(0));
     ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSAEncryption")
         .build(keyPair.getPrivate());
     return new JcaX509CertificateConverter().getCertificate(jv3Builder.build(signer));
+  }
+
+  public static void main(String[] args) throws Exception {
+    //生成ca证书和私钥
+    KeyPair keyPair = CertUtil.genKeyPair();
+    File caCertFile = new File("e:/ssl/Proxyee.crt");
+    if(caCertFile.exists()){
+      caCertFile.delete();
+    }
+    Files.write(Paths.get(caCertFile.toURI()),
+        CertUtil.genCACert(
+            "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=Proxyee",
+            new Date(),
+            new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(3650)),
+            keyPair)
+            .getEncoded());
   }
 }
