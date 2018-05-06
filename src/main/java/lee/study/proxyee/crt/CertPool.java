@@ -1,9 +1,5 @@
 package lee.study.proxyee.crt;
 
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import lee.study.proxyee.server.HttpProxyServer;
-
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
