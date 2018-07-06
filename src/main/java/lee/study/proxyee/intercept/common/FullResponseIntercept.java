@@ -7,13 +7,12 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.charset.Charset;
 import lee.study.proxyee.intercept.HttpProxyIntercept;
 import lee.study.proxyee.intercept.HttpProxyInterceptInitializer;
 import lee.study.proxyee.intercept.HttpProxyInterceptPipeline;
 import lee.study.proxyee.server.HttpProxyServer;
+import lee.study.proxyee.util.ByteUtil;
 
 public abstract class FullResponseIntercept extends HttpProxyIntercept {
 
@@ -34,7 +33,7 @@ public abstract class FullResponseIntercept extends HttpProxyIntercept {
   public final void afterResponse(Channel clientChannel, Channel proxyChannel, HttpResponse httpResponse,
       HttpProxyInterceptPipeline pipeline) throws Exception {
     if (httpResponse instanceof FullHttpResponse) {
-      handelResponse(pipeline.getHttpRequest(), pipeline.getHttpResponse(), pipeline);
+      handelResponse(pipeline.getHttpRequest(), (FullHttpResponse) httpResponse, pipeline);
     } else if (match(pipeline.getHttpRequest(), pipeline.getHttpResponse(), pipeline)) {
       pipeline.resetAfterHead();
       proxyChannel.pipeline().addAfter("httpCodec", "decompress", new HttpContentDecompressor());
@@ -61,7 +60,7 @@ public abstract class FullResponseIntercept extends HttpProxyIntercept {
   /**
    * 拦截并处理响应
    */
-  public abstract void handelResponse(HttpRequest httpRequest, HttpResponse httpResponse, HttpProxyInterceptPipeline pipeline);
+  public abstract void handelResponse(HttpRequest httpRequest, FullHttpResponse httpResponse, HttpProxyInterceptPipeline pipeline);
 
   public static void main(String[] args) {
     new HttpProxyServer()
@@ -72,11 +71,21 @@ public abstract class FullResponseIntercept extends HttpProxyIntercept {
 
               @Override
               public boolean match(HttpRequest httpRequest, HttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) {
-                return false;
+                return true;
               }
 
               @Override
-              public void handelResponse(HttpRequest httpRequest, HttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) {
+              public void handelResponse(HttpRequest httpRequest, FullHttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) {
+                //打印原始响应信息
+                System.out.println(httpResponse.toString());
+                System.out.println(httpResponse.content().toString(Charset.defaultCharset()));
+                //修改响应头和响应体
+                int index = ByteUtil.findText(httpResponse.content(), "<head>");
+                ByteUtil.insertText(httpResponse.content(), index, "<script>alert(1)</script>");
+                httpResponse.headers().set("handel", "edit head");
+                if (httpResponse.headers().contains(HttpHeaderNames.CONTENT_LENGTH)) {
+                  httpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
+                }
               }
             });
           }

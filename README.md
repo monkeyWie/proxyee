@@ -54,6 +54,36 @@ new HttpProxyServer()
       }
     })
     .start(9999);
+    
+    //使用FullResponseIntercept修改响应体
+    new HttpProxyServer()
+      .proxyInterceptInitializer(new HttpProxyInterceptInitializer() {
+        @Override
+        public void init(HttpProxyInterceptPipeline pipeline) {
+          pipeline.addLast(new FullResponseIntercept() {
+  
+            @Override
+            public boolean match(HttpRequest httpRequest, HttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) {
+              return true;
+            }
+  
+            @Override
+            public void handelResponse(HttpRequest httpRequest, FullHttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) {
+              //打印原始响应信息
+              System.out.println(httpResponse.toString());
+              System.out.println(httpResponse.content().toString(Charset.defaultCharset()));
+              //修改响应头和响应体
+              int index = ByteUtil.findText(httpResponse.content(), "<head>");
+              ByteUtil.insertText(httpResponse.content(), index, "<script>alert(1)</script>");
+              httpResponse.headers().set("handel", "edit head");
+              if (httpResponse.headers().contains(HttpHeaderNames.CONTENT_LENGTH)) {
+                httpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
+              }
+            }
+          });
+        }
+      })
+      .start(9999);
 ```
 
 #### 流程
