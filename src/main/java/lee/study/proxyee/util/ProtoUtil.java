@@ -3,23 +3,21 @@ package lee.study.proxyee.util;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpRequest;
 import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ProtoUtil {
 
-  public static RequestProto getRequestProto(HttpRequest httpRequest) throws MalformedURLException {
+  public static RequestProto getRequestProto(HttpRequest httpRequest) {
     RequestProto requestProto = new RequestProto();
     int port = -1;
     String hostStr = httpRequest.headers().get(HttpHeaderNames.HOST);
-    if(hostStr==null){
+    if (hostStr == null) {
       Pattern pattern = Pattern.compile("^(?:https?://)?(?<host>[^/]*)/?.*$");
       Matcher matcher = pattern.matcher(httpRequest.uri());
-      if(matcher.find()){
+      if (matcher.find()) {
         hostStr = matcher.group("host");
-      }else{
+      } else {
         return null;
       }
     }

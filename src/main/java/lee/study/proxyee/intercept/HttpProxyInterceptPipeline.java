@@ -14,10 +14,10 @@ public class HttpProxyInterceptPipeline implements Iterable<HttpProxyIntercept> 
   private List<HttpProxyIntercept> intercepts;
   private HttpProxyIntercept defaultIntercept;
 
-  private int pos1 = 0;
-  private int pos2 = 0;
-  private int pos3 = 0;
-  private int pos4 = 0;
+  private int posBeforeHead = 0;
+  private int posBeforeContent = 0;
+  private int posAfterHead = 0;
+  private int posAfterContent = 0;
 
   private RequestProto requestProto;
   private HttpRequest httpRequest;
@@ -70,91 +70,91 @@ public class HttpProxyInterceptPipeline implements Iterable<HttpProxyIntercept> 
   }
 
   public void beforeRequest(Channel clientChannel, HttpRequest httpRequest) throws Exception {
-    if (this.pos1 == 0) {
+    if (this.posBeforeHead == 0) {
       this.httpRequest = httpRequest;
     }
-    if (this.pos1 < intercepts.size()) {
-      HttpProxyIntercept intercept = intercepts.get(this.pos1++);
+    if (this.posBeforeHead < intercepts.size()) {
+      HttpProxyIntercept intercept = intercepts.get(this.posBeforeHead++);
       intercept.beforeRequest(clientChannel, this.httpRequest, this);
     }
-    this.pos1 = 0;
+    this.posBeforeHead = 0;
   }
 
   public void beforeRequest(Channel clientChannel, HttpContent httpContent) throws Exception {
-    if (this.pos2 < intercepts.size()) {
-      HttpProxyIntercept intercept = intercepts.get(this.pos2++);
+    if (this.posBeforeContent < intercepts.size()) {
+      HttpProxyIntercept intercept = intercepts.get(this.posBeforeContent++);
       intercept.beforeRequest(clientChannel, httpContent, this);
     }
-    this.pos2 = 0;
+    this.posBeforeContent = 0;
   }
 
   public void afterResponse(Channel clientChannel, Channel proxyChannel, HttpResponse httpResponse)
       throws Exception {
-    if (this.pos3 == 0) {
+    if (this.posAfterHead == 0) {
       this.httpResponse = httpResponse;
     }
-    if (this.pos3 < intercepts.size()) {
-      HttpProxyIntercept intercept = intercepts.get(this.pos3++);
+    if (this.posAfterHead < intercepts.size()) {
+      HttpProxyIntercept intercept = intercepts.get(this.posAfterHead++);
       intercept.afterResponse(clientChannel, proxyChannel, this.httpResponse, this);
     }
-    this.pos3 = 0;
+    this.posAfterHead = 0;
   }
 
   public void afterResponse(Channel clientChannel, Channel proxyChannel, HttpContent httpContent)
       throws Exception {
-    if (this.pos4 < intercepts.size()) {
-      HttpProxyIntercept intercept = intercepts.get(this.pos4++);
+    if (this.posAfterContent < intercepts.size()) {
+      HttpProxyIntercept intercept = intercepts.get(this.posAfterContent++);
       intercept.afterResponse(clientChannel, proxyChannel, httpContent, this);
     }
-    this.pos4 = 0;
+    this.posAfterContent = 0;
   }
 
-  public int pos1() {
-    return this.pos1;
+  public int posBeforeHead() {
+    return this.posBeforeHead;
   }
 
-  public int pos2() {
-    return this.pos2;
+  public int posBeforeContent() {
+    return this.posBeforeContent;
   }
 
-  public int pos3() {
-    return this.pos3;
+  public int posAfterHead() {
+    return this.posAfterHead;
   }
 
-  public int pos4() {
-    return this.pos4;
+  public int posAfterContent() {
+    return this.posAfterContent;
   }
 
-  public void pos1(int pos) {
-    this.pos1 = pos;
+  public void posBeforeHead(int pos) {
+    this.posBeforeHead = pos;
   }
 
-  public void pos2(int pos) {
-    this.pos2 = pos;
+  public void posBeforeContent(int pos) {
+    this.posBeforeContent = pos;
   }
 
-  public void pos3(int pos) {
-    this.pos3 = pos;
+  public void posAfterHead(int pos) {
+    this.posAfterHead = pos;
   }
 
-  public void pos4(int pos) {
-    this.pos4 = pos;
+  public void posAfterContent(int pos) {
+    this.posAfterContent = pos;
   }
 
-  public void reset1() {
-    pos1(0);
+  public void resetBeforeHead() {
+    posBeforeHead(0);
   }
 
-  public void reset2() {
-    pos2(0);
+  public void resetBeforeContent() {
+    posBeforeContent(0);
   }
 
-  public void reset3() {
-    pos3(0);
+  public void resetAfterHead() {
+    posAfterHead(0);
   }
 
-  public void reset4() {
-    pos4(0);
+  public void resetAfterContent() {
+    posAfterContent(0);
   }
 
   @Override

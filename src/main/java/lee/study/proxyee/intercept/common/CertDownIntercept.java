@@ -1,4 +1,4 @@
-package lee.study.proxyee.intercept;
+package lee.study.proxyee.intercept.common;
 
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.DefaultHttpResponse;
@@ -12,6 +12,8 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import java.net.InetSocketAddress;
 import lee.study.proxyee.crt.CertUtil;
+import lee.study.proxyee.intercept.HttpProxyIntercept;
+import lee.study.proxyee.intercept.HttpProxyInterceptPipeline;
 import lee.study.proxyee.util.ProtoUtil;
 import lee.study.proxyee.util.ProtoUtil.RequestProto;
 

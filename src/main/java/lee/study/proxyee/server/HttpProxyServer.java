@@ -19,7 +19,7 @@ import java.security.cert.X509Certificate;
 import lee.study.proxyee.crt.CertUtil;
 import lee.study.proxyee.exception.HttpProxyExceptionHandle;
 import lee.study.proxyee.handler.HttpProxyServerHandle;
-import lee.study.proxyee.intercept.CertDownIntercept;
+import lee.study.proxyee.intercept.common.CertDownIntercept;
 import lee.study.proxyee.intercept.HttpProxyIntercept;
 import lee.study.proxyee.intercept.HttpProxyInterceptInitializer;
 import lee.study.proxyee.intercept.HttpProxyInterceptPipeline;
