@@ -27,16 +27,8 @@ public class HttpProxyInterceptPipeline implements Iterable<HttpProxyIntercept> 
     return httpRequest;
   }
 
-  public void setHttpRequest(HttpRequest httpRequest) {
-    this.httpRequest = httpRequest;
-  }
-
   public HttpResponse getHttpResponse() {
     return httpResponse;
-  }
-
-  public void setHttpResponse(HttpResponse httpResponse) {
-    this.httpResponse = httpResponse;
   }
 
   public RequestProto getRequestProto() {
@@ -70,9 +62,7 @@ public class HttpProxyInterceptPipeline implements Iterable<HttpProxyIntercept> 
   }
 
   public void beforeRequest(Channel clientChannel, HttpRequest httpRequest) throws Exception {
-    if (this.posBeforeHead == 0) {
-      this.httpRequest = httpRequest;
-    }
+    this.httpRequest = httpRequest;
     if (this.posBeforeHead < intercepts.size()) {
       HttpProxyIntercept intercept = intercepts.get(this.posBeforeHead++);
       intercept.beforeRequest(clientChannel, this.httpRequest, this);
@@ -90,9 +80,7 @@ public class HttpProxyInterceptPipeline implements Iterable<HttpProxyIntercept> 
 
   public void afterResponse(Channel clientChannel, Channel proxyChannel, HttpResponse httpResponse)
       throws Exception {
-    if (this.posAfterHead == 0) {
-      this.httpResponse = httpResponse;
-    }
+    this.httpResponse = httpResponse;
     if (this.posAfterHead < intercepts.size()) {
       HttpProxyIntercept intercept = intercepts.get(this.posAfterHead++);
       intercept.afterResponse(clientChannel, proxyChannel, this.httpResponse, this);
