@@ -5,7 +5,7 @@
 
   <groupId>com.github.monkeywie</groupId>
   <artifactId>proxyee</artifactId>
-  <version>1.0</version>
+  <version>1.0.1</version>
   <build>
     <plugins>
       <plugin>
@@ -21,7 +21,28 @@
   <packaging>jar</packaging>
 
   <name>proxyee</name>
-  <url>http://maven.apache.org</url>
+  <description>HTTP proxy server,support HTTPS and websocket.MITM impl,intercept and tamper HTTPS traffic.</description>
+  <url>https://github.com/monkeyWie/proxyee</url>
+
+  <licenses>
+    <license>
+      <name>The MIT License (MIT)</name>
+      <url>http://opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>monkeyWie</name>
+      <email>liwei2633@163.com</email>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:https://github.com/monkeyWie/proxyee.git</connection>
+    <developerConnection>scm:git:https://github.com/monkeyWie/proxyee.git</developerConnection>
+    <url>https://github.com/monkeyWie/proxyee</url>
+  </scm>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -56,11 +77,75 @@
       <artifactId>netty-handler-proxy</artifactId>
       <version>${netty.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk15on</artifactId>
       <version>1.58</version>
     </dependency>
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <!--Compiler-->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+          </plugin>
+          <!-- Source -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <!-- Javadoc -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <!-- GPG mvn clean deploy -P release -Dgpg.passphrase=YourPassphase-->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+      <distributionManagement>
+        <repository>
+          <id>releases</id>
+          <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+        <snapshotRepository>
+          <id>snapshots</id>
+          <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </snapshotRepository>
+      </distributionManagement>
+    </profile>
+  </profiles>
 </project>

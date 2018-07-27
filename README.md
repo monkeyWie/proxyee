@@ -11,40 +11,41 @@
 ```
 //启动一个普通的http代理服务器，不解密https
 new HttpProxyServer().start(9999);
-
+```
+```
 //启动一个解密https的代理服务器，并且拦截百度首页，注入js和修改响应头
 //当开启了https解密时，需要安装CA证书(`src/resources/ca.crt`)至受信任的根证书颁发机构。
 HttpProxyServerConfig config =  new HttpProxyServerConfig();
-    config.setHandleSsl(true);
-    new HttpProxyServer()
-        .serverConfig(config)
-        .proxyInterceptInitializer(new HttpProxyInterceptInitializer() {
+config.setHandleSsl(true);
+new HttpProxyServer()
+    .serverConfig(config)
+    .proxyInterceptInitializer(new HttpProxyInterceptInitializer() {
+      @Override
+      public void init(HttpProxyInterceptPipeline pipeline) {
+        pipeline.addLast(new FullResponseIntercept() {
+
           @Override
-          public void init(HttpProxyInterceptPipeline pipeline) {
-            pipeline.addLast(new FullResponseIntercept() {
-
-              @Override
-              public boolean match(HttpRequest httpRequest, HttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) {
-                //在匹配到百度首页时插入js
-                return HttpUtil.checkUrl(pipeline.getHttpRequest(), "^www.baidu.com$")
-                    && isHtml(httpRequest, httpResponse);
-              }
-
-              @Override
-              public void handelResponse(HttpRequest httpRequest, FullHttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) {
-                //打印原始响应信息
-                System.out.println(httpResponse.toString());
-                System.out.println(httpResponse.content().toString(Charset.defaultCharset()));
-                //修改响应头和响应体
-                httpResponse.headers().set("handel", "edit head");
-                /*int index = ByteUtil.findText(httpResponse.content(), "<head>");
-                ByteUtil.insertText(httpResponse.content(), index, "<script>alert(1)</script>");*/
-                httpResponse.content().writeBytes("<script>alert('hello proxyee')</script>".getBytes());
-              }
-            });
+          public boolean match(HttpRequest httpRequest, HttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) {
+            //在匹配到百度首页时插入js
+            return HttpUtil.checkUrl(pipeline.getHttpRequest(), "^www.baidu.com$")
+                && isHtml(httpRequest, httpResponse);
           }
-        })
-        .start(9999);
+
+          @Override
+          public void handelResponse(HttpRequest httpRequest, FullHttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) {
+            //打印原始响应信息
+            System.out.println(httpResponse.toString());
+            System.out.println(httpResponse.content().toString(Charset.defaultCharset()));
+            //修改响应头和响应体
+            httpResponse.headers().set("handel", "edit head");
+            /*int index = ByteUtil.findText(httpResponse.content(), "<head>");
+            ByteUtil.insertText(httpResponse.content(), index, "<script>alert(1)</script>");*/
+            httpResponse.content().writeBytes("<script>alert('hello proxyee')</script>".getBytes());
+          }
+        });
+      }
+    })
+    .start(9999);
 ```
 更多demo代码在test包内可以找到，这里就不一一展示了
 

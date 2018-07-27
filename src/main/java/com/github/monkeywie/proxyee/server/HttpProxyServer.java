@@ -35,36 +35,41 @@ public class HttpProxyServer {
   private EventLoopGroup bossGroup;
   private EventLoopGroup workerGroup;
 
-  private void init() throws Exception {
+  private void init(){
     if (serverConfig == null) {
       serverConfig = new HttpProxyServerConfig();
     }
     serverConfig.setProxyLoopGroup(new NioEventLoopGroup(serverConfig.getProxyGroupThreads()));
+
     if(serverConfig.isHandleSsl()){
-      serverConfig.setClientSslCtx(
-          SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE)
-              .build());
-      ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-      X509Certificate caCert;
-      PrivateKey caPriKey;
-      if (caCertFactory == null) {
-        caCert = CertUtil.loadCert(classLoader.getResourceAsStream("ca.crt"));
-        caPriKey = CertUtil.loadPriKey(classLoader.getResourceAsStream("ca_private.der"));
-      } else {
-        caCert = caCertFactory.getCACert();
-        caPriKey = caCertFactory.getCAPriKey();
+      try {
+        serverConfig.setClientSslCtx(
+            SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE)
+                .build());
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        X509Certificate caCert;
+        PrivateKey caPriKey;
+        if (caCertFactory == null) {
+          caCert = CertUtil.loadCert(classLoader.getResourceAsStream("ca.crt"));
+          caPriKey = CertUtil.loadPriKey(classLoader.getResourceAsStream("ca_private.der"));
+        } else {
+          caCert = caCertFactory.getCACert();
+          caPriKey = caCertFactory.getCAPriKey();
+        }
+        //读取CA证书使用者信息
+        serverConfig.setIssuer(CertUtil.getSubject(caCert));
+        //读取CA证书有效时段(server证书有效期超出CA证书的，在手机上会提示证书不安全)
+        serverConfig.setCaNotBefore(caCert.getNotBefore());
+        serverConfig.setCaNotAfter(caCert.getNotAfter());
+        //CA私钥用于给动态生成的网站SSL证书签证
+        serverConfig.setCaPriKey(caPriKey);
+        //生产一对随机公私钥用于网站SSL证书动态创建
+        KeyPair keyPair = CertUtil.genKeyPair();
+        serverConfig.setServerPriKey(keyPair.getPrivate());
+        serverConfig.setServerPubKey(keyPair.getPublic());
+      }catch (Exception e){
+        serverConfig.setHandleSsl(false);
       }
-      //读取CA证书使用者信息
-      serverConfig.setIssuer(CertUtil.getSubject(caCert));
-      //读取CA证书有效时段(server证书有效期超出CA证书的，在手机上会提示证书不安全)
-      serverConfig.setCaNotBefore(caCert.getNotBefore());
-      serverConfig.setCaNotAfter(caCert.getNotAfter());
-      //CA私钥用于给动态生成的网站SSL证书签证
-      serverConfig.setCaPriKey(caPriKey);
-      //生产一对随机公私钥用于网站SSL证书动态创建
-      KeyPair keyPair = CertUtil.genKeyPair();
-      serverConfig.setServerPriKey(keyPair.getPrivate());
-      serverConfig.setServerPubKey(keyPair.getPublic());
     }
     if (proxyInterceptInitializer == null) {
       proxyInterceptInitializer = new HttpProxyInterceptInitializer();
@@ -101,7 +106,7 @@ public class HttpProxyServer {
     return this;
   }
 
-  public void start(int port) throws Exception {
+  public void start(int port){
     init();
     bossGroup = new NioEventLoopGroup(serverConfig.getBossGroupThreads());
     workerGroup = new NioEventLoopGroup(serverConfig.getWorkerGroupThreads());
