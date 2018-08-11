@@ -35,6 +35,8 @@ public abstract class FullResponseIntercept extends HttpProxyIntercept {
       if (fullHttpResponse.headers().contains(HttpHeaderNames.CONTENT_LENGTH)) {
         httpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, fullHttpResponse.content().readableBytes());
       }
+      proxyChannel.pipeline().remove("decompress");
+      proxyChannel.pipeline().remove("aggregator");
     } else if (match(pipeline.getHttpRequest(), pipeline.getHttpResponse(), pipeline)) {
       pipeline.resetAfterHead();
       proxyChannel.pipeline().addAfter("httpCodec", "decompress", new HttpContentDecompressor());
