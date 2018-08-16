@@ -33,6 +33,7 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.resolver.NoopAddressResolverGroup;
 import io.netty.util.ReferenceCountUtil;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -95,7 +96,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
           return;
         }
       }
-      interceptPipeline = buildPiepeline();
+      interceptPipeline = buildPipeline();
       interceptPipeline.setRequestProto(new RequestProto(host, port, isSsl));
       interceptPipeline.beforeRequest(ctx.channel(), request);
     } else if (msg instanceof HttpContent) {
@@ -171,12 +172,12 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
         if (future.isSuccess()) {
           future.channel().writeAndFlush(msg);
           synchronized (requestList) {
-            requestList.forEach((obj) -> future.channel().writeAndFlush(obj));
+            requestList.forEach(obj -> future.channel().writeAndFlush(obj));
             requestList.clear();
             isConnect = true;
           }
         } else {
-          requestList.forEach((obj) -> ReferenceCountUtil.release(obj));
+          requestList.forEach(obj -> ReferenceCountUtil.release(obj));
           requestList.clear();
           future.channel().close();
           channel.close();
@@ -193,12 +194,17 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
     }
   }
 
-  private HttpProxyInterceptPipeline buildPiepeline() {
+  private HttpProxyInterceptPipeline buildPipeline() {
     HttpProxyInterceptPipeline interceptPipeline = new HttpProxyInterceptPipeline(
         new HttpProxyIntercept() {
           @Override
           public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
               HttpProxyInterceptPipeline pipeline) throws Exception {
+            //fix issues#27
+            if (httpRequest.uri().indexOf("/") != 0) {
+              URL url = new URL(httpRequest.uri());
+              httpRequest.setUri(url.getPath());
+            }
             handleProxyData(clientChannel, httpRequest, true);
           }
 
