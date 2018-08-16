@@ -200,10 +200,10 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
           @Override
           public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
               HttpProxyInterceptPipeline pipeline) throws Exception {
-            //fix issues#27
+            //fix issues #27
             if (httpRequest.uri().indexOf("/") != 0) {
               URL url = new URL(httpRequest.uri());
-              httpRequest.setUri(url.getPath());
+              httpRequest.setUri(url.getFile());
             }
             handleProxyData(clientChannel, httpRequest, true);
           }
