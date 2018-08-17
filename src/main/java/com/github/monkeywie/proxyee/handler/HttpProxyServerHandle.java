@@ -98,6 +98,11 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
       }
       interceptPipeline = buildPipeline();
       interceptPipeline.setRequestProto(new RequestProto(host, port, isSsl));
+      //fix issues #27
+      if (request.uri().indexOf("/") != 0) {
+        URL url = new URL(request.uri());
+        request.setUri(url.getFile());
+      }
       interceptPipeline.beforeRequest(ctx.channel(), request);
     } else if (msg instanceof HttpContent) {
       if (status != 2) {
@@ -200,11 +205,6 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
           @Override
           public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
               HttpProxyInterceptPipeline pipeline) throws Exception {
-            //fix issues #27
-            if (httpRequest.uri().indexOf("/") != 0) {
-              URL url = new URL(httpRequest.uri());
-              httpRequest.setUri(url.getFile());
-            }
             handleProxyData(clientChannel, httpRequest, true);
           }
 
