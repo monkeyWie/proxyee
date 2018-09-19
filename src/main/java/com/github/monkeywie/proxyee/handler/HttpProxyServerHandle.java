@@ -33,6 +33,7 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.resolver.NoopAddressResolverGroup;
 import io.netty.util.ReferenceCountUtil;
+import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
@@ -116,8 +117,9 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
         ByteBuf byteBuf = (ByteBuf) msg;
         if (byteBuf.getByte(0) == 22) {//ssl握手
           isSsl = true;
+          int port = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
           SslContext sslCtx = SslContextBuilder
-              .forServer(serverConfig.getServerPriKey(), CertPool.getCert(this.host, serverConfig))
+              .forServer(serverConfig.getServerPriKey(), CertPool.getCert(port,this.host, serverConfig))
               .build();
           ctx.pipeline().addFirst("httpCodec", new HttpServerCodec());
           ctx.pipeline().addFirst("sslHandle", sslCtx.newHandler(ctx.alloc()));

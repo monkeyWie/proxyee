@@ -12,6 +12,9 @@ public class ProxyConfig implements Serializable {
   private String user;
   private String pwd;
 
+  public ProxyConfig() {
+  }
+
   public ProxyConfig(ProxyType proxyType, String host, int port) {
     this.proxyType = proxyType;
     this.host = host;

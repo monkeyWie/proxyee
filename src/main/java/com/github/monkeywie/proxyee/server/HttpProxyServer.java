@@ -1,5 +1,6 @@
 package com.github.monkeywie.proxyee.server;
 
+import com.github.monkeywie.proxyee.crt.CertPool;
 import com.github.monkeywie.proxyee.crt.CertUtil;
 import com.github.monkeywie.proxyee.exception.HttpProxyExceptionHandle;
 import com.github.monkeywie.proxyee.handler.HttpProxyServerHandle;
@@ -14,6 +15,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import java.security.KeyPair;
@@ -35,13 +38,13 @@ public class HttpProxyServer {
   private EventLoopGroup bossGroup;
   private EventLoopGroup workerGroup;
 
-  private void init(){
+  private void init() {
     if (serverConfig == null) {
       serverConfig = new HttpProxyServerConfig();
     }
     serverConfig.setProxyLoopGroup(new NioEventLoopGroup(serverConfig.getProxyGroupThreads()));
 
-    if(serverConfig.isHandleSsl()){
+    if (serverConfig.isHandleSsl()) {
       try {
         serverConfig.setClientSslCtx(
             SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE)
@@ -67,7 +70,7 @@ public class HttpProxyServer {
         KeyPair keyPair = CertUtil.genKeyPair();
         serverConfig.setServerPriKey(keyPair.getPrivate());
         serverConfig.setServerPubKey(keyPair.getPublic());
-      }catch (Exception e){
+      } catch (Exception e) {
         serverConfig.setHandleSsl(false);
       }
     }
@@ -106,7 +109,7 @@ public class HttpProxyServer {
     return this;
   }
 
-  public void start(int port){
+  public void start(int port) {
     init();
     bossGroup = new NioEventLoopGroup(serverConfig.getBossGroupThreads());
     workerGroup = new NioEventLoopGroup(serverConfig.getWorkerGroupThreads());
@@ -115,7 +118,7 @@ public class HttpProxyServer {
       b.group(bossGroup, workerGroup)
           .channel(NioServerSocketChannel.class)
 //          .option(ChannelOption.SO_BACKLOG, 100)
-//          .handler(new LoggingHandler(LogLevel.DEBUG))
+          .handler(new LoggingHandler(LogLevel.DEBUG))
           .childHandler(new ChannelInitializer<Channel>() {
 
             @Override
@@ -142,6 +145,7 @@ public class HttpProxyServer {
     serverConfig.getProxyLoopGroup().shutdownGracefully();
     bossGroup.shutdownGracefully();
     workerGroup.shutdownGracefully();
+    CertPool.clear();
   }
 
 }
