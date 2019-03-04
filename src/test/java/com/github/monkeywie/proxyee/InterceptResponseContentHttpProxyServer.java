@@ -2,6 +2,7 @@ package com.github.monkeywie.proxyee;
 
 import com.github.monkeywie.proxyee.intercept.HttpProxyInterceptInitializer;
 import com.github.monkeywie.proxyee.intercept.HttpProxyInterceptPipeline;
+import com.github.monkeywie.proxyee.intercept.common.CertDownIntercept;
 import com.github.monkeywie.proxyee.intercept.common.FullResponseIntercept;
 import com.github.monkeywie.proxyee.server.HttpProxyServer;
 import com.github.monkeywie.proxyee.server.HttpProxyServerConfig;
@@ -21,6 +22,7 @@ public class InterceptResponseContentHttpProxyServer {
         .proxyInterceptInitializer(new HttpProxyInterceptInitializer() {
           @Override
           public void init(HttpProxyInterceptPipeline pipeline) {
+            pipeline.addLast(new CertDownIntercept());
             pipeline.addLast(new FullResponseIntercept() {
 
               @Override
