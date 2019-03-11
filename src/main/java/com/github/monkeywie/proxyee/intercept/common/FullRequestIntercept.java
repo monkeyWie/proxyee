@@ -28,6 +28,8 @@ public abstract class FullRequestIntercept extends HttpProxyIntercept {
     if (httpRequest instanceof FullHttpRequest) {
       FullHttpRequest fullHttpRequest = (FullHttpRequest) httpRequest;
       handelRequest(fullHttpRequest, pipeline);
+      fullHttpRequest.content().markReaderIndex();
+      fullHttpRequest.content().retain();
       if (fullHttpRequest.headers().contains(HttpHeaderNames.CONTENT_LENGTH)) {
         fullHttpRequest.headers().set(HttpHeaderNames.CONTENT_LENGTH, fullHttpRequest.content().readableBytes());
       }
@@ -51,6 +53,8 @@ public abstract class FullRequestIntercept extends HttpProxyIntercept {
     if(pipeline.getHttpRequest() instanceof FullHttpRequest){
       clientChannel.pipeline().remove("decompress");
       clientChannel.pipeline().remove("aggregator");
+      FullHttpRequest httpRequest = (FullHttpRequest) pipeline.getHttpRequest();
+      httpRequest.content().resetReaderIndex();
     }
     pipeline.afterResponse(clientChannel, proxyChannel, httpResponse);
   }
@@ -63,5 +67,5 @@ public abstract class FullRequestIntercept extends HttpProxyIntercept {
   /**
    * 拦截并处理响应
    */
-  public abstract void handelRequest(FullHttpRequest httpRequest, HttpProxyInterceptPipeline pipeline);
+  public void handelRequest(FullHttpRequest httpRequest, HttpProxyInterceptPipeline pipeline){}
 }

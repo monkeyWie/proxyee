@@ -3,12 +3,8 @@ package com.github.monkeywie.proxyee.intercept.common;
 import com.github.monkeywie.proxyee.intercept.HttpProxyIntercept;
 import com.github.monkeywie.proxyee.intercept.HttpProxyInterceptPipeline;
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpContentDecompressor;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.*;
+import io.netty.util.ReferenceCountUtil;
 
 public abstract class FullResponseIntercept extends HttpProxyIntercept {
 
@@ -39,7 +35,7 @@ public abstract class FullResponseIntercept extends HttpProxyIntercept {
       }
       proxyChannel.pipeline().remove("decompress");
       proxyChannel.pipeline().remove("aggregator");
-    } else if (match(pipeline.getHttpRequest(), pipeline.getHttpResponse(), pipeline)) {
+    } else if (matchHandle(pipeline.getHttpRequest(), pipeline.getHttpResponse(), pipeline)) {
       pipeline.resetAfterHead();
       proxyChannel.pipeline().addAfter("httpCodec", "decompress", new HttpContentDecompressor());
       proxyChannel.pipeline()
@@ -52,7 +48,7 @@ public abstract class FullResponseIntercept extends HttpProxyIntercept {
 
   @Deprecated
   /**
-   * 剥离到工具类中了：{@link com.github.monkeywie.proxyee.util#isHtml(HttpRequest,HttpResponse)}
+   * 剥离到工具类中了：{@link com.github.monkeywie.proxyee.util#isHtml(HttpRequest, HttpResponse)}
    */
   protected boolean isHtml(HttpRequest httpRequest, HttpResponse httpResponse) {
     String accept = httpRequest.headers().get(HttpHeaderNames.ACCEPT);
@@ -60,6 +56,18 @@ public abstract class FullResponseIntercept extends HttpProxyIntercept {
     return httpResponse.status().code() == 200 && accept != null && accept
             .matches("^.*text/html.*$") && contentType != null && contentType
             .matches("^text/html.*$");
+  }
+
+  private boolean matchHandle(HttpRequest httpRequest, HttpResponse httpResponse,
+                              HttpProxyInterceptPipeline pipeline) {
+    boolean isMatch = match(httpRequest, httpResponse, pipeline);
+    if (httpRequest instanceof FullHttpRequest) {
+      FullHttpRequest fullHttpRequest = (FullHttpRequest) httpRequest;
+      if (fullHttpRequest.content().refCnt() > 0) {
+        ReferenceCountUtil.release(fullHttpRequest);
+      }
+    }
+    return isMatch;
   }
 
   /**
@@ -71,6 +79,7 @@ public abstract class FullResponseIntercept extends HttpProxyIntercept {
   /**
    * 拦截并处理响应
    */
-  public abstract void handelResponse(HttpRequest httpRequest, FullHttpResponse httpResponse,
-                                      HttpProxyInterceptPipeline pipeline);
+  public void handelResponse(HttpRequest httpRequest, FullHttpResponse httpResponse,
+                             HttpProxyInterceptPipeline pipeline) {
+  }
 }
