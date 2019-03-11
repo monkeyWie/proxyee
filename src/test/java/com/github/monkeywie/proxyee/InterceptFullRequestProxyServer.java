@@ -14,7 +14,7 @@ import io.netty.handler.codec.http.*;
 import java.nio.charset.Charset;
 
 
-public class InterceptRequestContentHttpProxyServer {
+public class InterceptFullRequestProxyServer {
 
   /*
     curl -x 127.0.0.1:9999 \

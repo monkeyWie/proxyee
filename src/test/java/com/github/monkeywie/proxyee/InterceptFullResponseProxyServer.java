@@ -13,7 +13,7 @@ import io.netty.handler.codec.http.HttpResponse;
 
 import java.nio.charset.Charset;
 
-public class InterceptResponseContentHttpProxyServer {
+public class InterceptFullResponseProxyServer {
 
   public static void main(String[] args) throws Exception {
     HttpProxyServerConfig config = new HttpProxyServerConfig();
