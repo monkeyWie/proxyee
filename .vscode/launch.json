@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - InterceptPassHttpProxyServer",
+            "request": "launch",
+            "mainClass": "com.github.monkeywie.proxyee.InterceptPassHttpProxyServer",
+            "projectName": "proxyee"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - InterceptRedirectHttpProxyServer",
+            "request": "launch",
+            "mainClass": "com.github.monkeywie.proxyee.InterceptRedirectHttpProxyServer",
+            "projectName": "proxyee"
+        }
+    ]
+}

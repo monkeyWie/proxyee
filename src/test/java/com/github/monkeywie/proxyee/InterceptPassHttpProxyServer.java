@@ -8,14 +8,18 @@ import com.github.monkeywie.proxyee.server.HttpProxyServer;
 import com.github.monkeywie.proxyee.server.HttpProxyServerConfig;
 import com.github.monkeywie.proxyee.util.HttpUtil;
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.HttpRequest;
 
 /**
  * @Author: LiWei
- * @Description 匹配到百度首页时重定向到指定url
+ * @Description 反向代理功能实现
  * @Date: 2019/3/4 16:23
  */
-public class InterceptRedirectHttpProxyServer {
+public class InterceptPassHttpProxyServer {
+
+
+    // curl -k -x 127.0.0.1:9999 https://www.baidu.com
+
     public static void main(String[] args) throws Exception {
         HttpProxyServerConfig config = new HttpProxyServerConfig();
         config.setHandleSsl(true);
@@ -28,15 +32,11 @@ public class InterceptRedirectHttpProxyServer {
                             @Override
                             public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
                                                       HttpProxyInterceptPipeline pipeline) throws Exception {
-                                //匹配到百度首页跳转到淘宝
-                                if (HttpUtil.checkUrl(pipeline.getHttpRequest(), "^www.baidu.com$")) {
-                                    HttpResponse hookResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-                                    hookResponse.setStatus(HttpResponseStatus.FOUND);
-                                    hookResponse.headers().set(HttpHeaderNames.LOCATION, "http://www.taobao.com");
-                                    clientChannel.writeAndFlush(hookResponse);
-                                    HttpContent lastContent = new DefaultLastHttpContent();
-                                    clientChannel.writeAndFlush(lastContent);
-                                    return;
+                                //匹配到百度的请求反向代理到淘宝
+                                if (HttpUtil.checkUrl(httpRequest, "^www.baidu.com$")) {
+                                    pipeline.getRequestProto().setHost("www.taobao.com");
+                                    pipeline.getRequestProto().setPort(443);
+                                    pipeline.getRequestProto().setSsl(true);
                                 }
                                 pipeline.beforeRequest(clientChannel, httpRequest);
                             }

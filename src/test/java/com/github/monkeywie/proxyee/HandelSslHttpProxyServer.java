@@ -5,11 +5,11 @@ import com.github.monkeywie.proxyee.server.HttpProxyServerConfig;
 
 public class HandelSslHttpProxyServer {
 
-  public static void main(String[] args) throws Exception {
-    HttpProxyServerConfig config =  new HttpProxyServerConfig();
-    config.setHandleSsl(true);
-    new HttpProxyServer()
-        .serverConfig(config)
-        .start(9999);
-  }
+    public static void main(String[] args) throws Exception {
+        HttpProxyServerConfig config = new HttpProxyServerConfig();
+        config.setHandleSsl(true);
+        new HttpProxyServer()
+                .serverConfig(config)
+                .start(9999);
+    }
 }
