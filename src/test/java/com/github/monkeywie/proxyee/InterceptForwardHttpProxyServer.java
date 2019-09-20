@@ -12,10 +12,10 @@ import io.netty.handler.codec.http.HttpRequest;
 
 /**
  * @Author: LiWei
- * @Description 反向代理功能实现
+ * @Description 请求转发功能实现
  * @Date: 2019/3/4 16:23
  */
-public class InterceptPassHttpProxyServer {
+public class InterceptForwardHttpProxyServer {
 
 
     // curl -k -x 127.0.0.1:9999 https://www.baidu.com
@@ -32,7 +32,7 @@ public class InterceptPassHttpProxyServer {
                             @Override
                             public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
                                                       HttpProxyInterceptPipeline pipeline) throws Exception {
-                                //匹配到百度的请求反向代理到淘宝
+                                //匹配到百度的请求转发到淘宝
                                 if (HttpUtil.checkUrl(httpRequest, "^www.baidu.com$")) {
                                     pipeline.getRequestProto().setHost("www.taobao.com");
                                     pipeline.getRequestProto().setPort(443);
