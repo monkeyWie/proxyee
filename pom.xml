@@ -152,7 +152,6 @@
             <id>exec</id>
             <build>
                 <plugins>
-
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
@@ -160,7 +159,7 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>com.xxg.Main</mainClass>
+                                    <mainClass>com.github.monkeywie.proxyee.HttpProxyServerApp</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>
@@ -177,7 +176,6 @@
                             </execution>
                         </executions>
                     </plugin>
-
                 </plugins>
             </build>
         </profile>
