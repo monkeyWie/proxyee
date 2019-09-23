@@ -149,17 +149,22 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
              * hello不带SNI扩展时会直接返回Received fatal alert: handshake_failure(握手错误)
              * 例如：https://cdn.mdn.mozilla.net/static/img/favicon32.7f3da72dcea1.png
              */
-            RequestProto requestProto = interceptPipeline.getRequestProto();
-            HttpRequest httpRequest = (HttpRequest) msg;
-            // 检查requestProto是否有修改
-            RequestProto newRP = ProtoUtil.getRequestProto(httpRequest);
-            if (!newRP.equals(requestProto)) {
-                // 更新Host请求头
-                if ((requestProto.getSsl() && requestProto.getPort() == 443)
-                        || (!requestProto.getSsl() && requestProto.getPort() == 80)) {
-                    httpRequest.headers().set(HttpHeaderNames.HOST, requestProto.getHost());
-                } else {
-                    httpRequest.headers().set(HttpHeaderNames.HOST, requestProto.getHost() + ":" + requestProto.getPort());
+            RequestProto requestProto;
+            if (interceptPipeline == null) {
+                requestProto = new RequestProto(host, port, isSsl);
+            } else {
+                requestProto = interceptPipeline.getRequestProto();
+                HttpRequest httpRequest = (HttpRequest) msg;
+                // 检查requestProto是否有修改
+                RequestProto newRP = ProtoUtil.getRequestProto(httpRequest);
+                if (!newRP.equals(requestProto)) {
+                    // 更新Host请求头
+                    if ((requestProto.getSsl() && requestProto.getPort() == 443)
+                            || (!requestProto.getSsl() && requestProto.getPort() == 80)) {
+                        httpRequest.headers().set(HttpHeaderNames.HOST, requestProto.getHost());
+                    } else {
+                        httpRequest.headers().set(HttpHeaderNames.HOST, requestProto.getHost() + ":" + requestProto.getPort());
+                    }
                 }
             }
             ChannelInitializer channelInitializer = isHttp ? new HttpProxyInitializer(channel, requestProto, proxyHandler)
