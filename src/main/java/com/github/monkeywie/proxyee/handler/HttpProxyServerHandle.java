@@ -5,6 +5,7 @@ import com.github.monkeywie.proxyee.exception.HttpProxyExceptionHandle;
 import com.github.monkeywie.proxyee.intercept.HttpProxyIntercept;
 import com.github.monkeywie.proxyee.intercept.HttpProxyInterceptInitializer;
 import com.github.monkeywie.proxyee.intercept.HttpProxyInterceptPipeline;
+import com.github.monkeywie.proxyee.intercept.HttpTunnelIntercept;
 import com.github.monkeywie.proxyee.proxy.ProxyConfig;
 import com.github.monkeywie.proxyee.proxy.ProxyHandleFactory;
 import com.github.monkeywie.proxyee.server.HttpProxyServer;
@@ -38,6 +39,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
     private ProxyConfig proxyConfig;
     private HttpProxyInterceptInitializer interceptInitializer;
     private HttpProxyInterceptPipeline interceptPipeline;
+    private HttpTunnelIntercept tunnelIntercept;
     private HttpProxyExceptionHandle exceptionHandle;
     private List requestList;
     private boolean isConnect;
@@ -54,11 +56,11 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
         return exceptionHandle;
     }
 
-    public HttpProxyServerHandle(HttpProxyServerConfig serverConfig, HttpProxyInterceptInitializer interceptInitializer,
-                                 ProxyConfig proxyConfig, HttpProxyExceptionHandle exceptionHandle) {
+    public HttpProxyServerHandle(HttpProxyServerConfig serverConfig, HttpProxyInterceptInitializer interceptInitializer, HttpTunnelIntercept tunnelIntercept, ProxyConfig proxyConfig, HttpProxyExceptionHandle exceptionHandle) {
         this.serverConfig = serverConfig;
         this.proxyConfig = proxyConfig;
         this.interceptInitializer = interceptInitializer;
+        this.tunnelIntercept = tunnelIntercept;
         this.exceptionHandle = exceptionHandle;
     }
 
@@ -150,8 +152,11 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
              * 例如：https://cdn.mdn.mozilla.net/static/img/favicon32.7f3da72dcea1.png
              */
             RequestProto requestProto;
-            if (interceptPipeline == null) {
+            if (!isHttp) {
                 requestProto = new RequestProto(host, port, isSsl);
+                if (this.tunnelIntercept != null) {
+                    this.tunnelIntercept.handle(requestProto);
+                }
             } else {
                 requestProto = interceptPipeline.getRequestProto();
                 HttpRequest httpRequest = (HttpRequest) msg;
