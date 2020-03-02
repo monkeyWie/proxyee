@@ -232,10 +232,11 @@ public class CertUtil {
     public static void main(String[] args) throws Exception {
         //生成ca证书和私钥
         KeyPair keyPair = CertUtil.genKeyPair();
-        File caCertFile = new File("e:/ssl/Proxyee.crt");
+        File caCertFile = new File("./ca.crt");
         if (caCertFile.exists()) {
             caCertFile.delete();
         }
+        
         Files.write(Paths.get(caCertFile.toURI()),
                 CertUtil.genCACert(
                         "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=Proxyee",
@@ -243,5 +244,13 @@ public class CertUtil {
                         new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(3650)),
                         keyPair)
                         .getEncoded());
+
+        File caPriKeyFile = new File("./ca_private.der");
+        if (caPriKeyFile.exists()) {
+            caPriKeyFile.delete();
+        }
+        
+        Files.write(caPriKeyFile.toPath(), 
+                new PKCS8EncodedKeySpec(keyPair.getPrivate().getEncoded()).getEncoded());
     }
 }
