@@ -3,12 +3,14 @@ package com.github.monkeywie.proxyee.intercept.common;
 import com.github.monkeywie.proxyee.crt.CertUtil;
 import com.github.monkeywie.proxyee.intercept.HttpProxyIntercept;
 import com.github.monkeywie.proxyee.intercept.HttpProxyInterceptPipeline;
+import com.github.monkeywie.proxyee.server.HttpProxyCACertFactory;
 import com.github.monkeywie.proxyee.util.ProtoUtil;
 import com.github.monkeywie.proxyee.util.ProtoUtil.RequestProto;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.*;
 
 import java.net.InetSocketAddress;
+import java.security.cert.X509Certificate;
 
 /**
  * 处理证书下载页面 http://proxyServerIp:proxyServerPort
@@ -16,6 +18,18 @@ import java.net.InetSocketAddress;
 public class CertDownIntercept extends HttpProxyIntercept {
 
     private boolean crtFlag = false;
+
+    private X509Certificate cert = null;
+
+    public CertDownIntercept() {}
+
+    public CertDownIntercept(HttpProxyCACertFactory certFactory) throws Exception {
+        this.cert = certFactory.getCACert();
+    }
+
+    public CertDownIntercept(X509Certificate caCert) {
+        this.cert = caCert;
+    }
 
     @Override
     public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
@@ -32,9 +46,12 @@ public class CertDownIntercept extends HttpProxyIntercept {
             if (httpRequest.uri().matches("^.*/ca.crt.*$")) {  //下载证书
                 HttpResponse httpResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1,
                         HttpResponseStatus.OK);
-                byte[] bts = CertUtil
-                        .loadCert(Thread.currentThread().getContextClassLoader().getResourceAsStream("ca.crt"))
-                        .getEncoded();
+
+                byte[] bts = this.cert == null ? CertUtil
+                .loadCert(Thread.currentThread().getContextClassLoader().getResourceAsStream("ca.crt"))
+                .getEncoded() :
+                cert.getEncoded();
+
                 httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/x-x509-ca-cert");
                 httpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, bts.length);
                 httpResponse.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
