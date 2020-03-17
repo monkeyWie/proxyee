@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class CertUtil {
 
@@ -191,7 +192,15 @@ public class CertUtil {
         /* String issuer = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=ProxyeeRoot";
         String subject = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=" + host;*/
         //根据CA证书subject来动态生成目标服务器证书的issuer和subject
-        String subject = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=" + hosts[0];
+        String subject = Stream.of(issuer.split(", ")).map(item -> {
+            String[] arr = item.split("=");
+            if ("CN".equals(arr[0])) {
+                return "CN=" + hosts[0];
+            } else {
+                return item;
+            }
+        }).collect(Collectors.joining(", "));
+
         //doc from https://www.cryptoworkshop.com/guide/
         JcaX509v3CertificateBuilder jv3Builder = new JcaX509v3CertificateBuilder(new X500Name(issuer),
                 //issue#3 修复ElementaryOS上证书不安全问题(serialNumber为1时证书会提示不安全)，避免serialNumber冲突，采用时间戳+4位随机数生成
@@ -236,7 +245,7 @@ public class CertUtil {
         if (caCertFile.exists()) {
             caCertFile.delete();
         }
-        
+
         Files.write(Paths.get(caCertFile.toURI()),
                 CertUtil.genCACert(
                         "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=Proxyee",
@@ -249,8 +258,8 @@ public class CertUtil {
         if (caPriKeyFile.exists()) {
             caPriKeyFile.delete();
         }
-        
-        Files.write(caPriKeyFile.toPath(), 
+
+        Files.write(caPriKeyFile.toPath(),
                 new PKCS8EncodedKeySpec(keyPair.getPrivate().getEncoded()).getEncoded());
     }
 }
