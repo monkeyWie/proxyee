@@ -7,6 +7,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.util.ReferenceCountUtil;
 
 public class HttpProxyClientHandle extends ChannelInboundHandlerAdapter {
@@ -28,6 +29,10 @@ public class HttpProxyClientHandle extends ChannelInboundHandlerAdapter {
                 .get("serverHandle")).getInterceptPipeline();
         if (msg instanceof HttpResponse) {
             interceptPipeline.afterResponse(clientChannel, ctx.channel(), (HttpResponse) msg);
+        } else if (msg instanceof LastHttpContent) {
+            clientChannel.writeAndFlush(msg);
+            ctx.close().sync();
+            clientChannel.close().sync();
         } else if (msg instanceof HttpContent) {
             interceptPipeline.afterResponse(clientChannel, ctx.channel(), (HttpContent) msg);
         } else {
