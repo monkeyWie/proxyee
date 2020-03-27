@@ -73,4 +73,4 @@ HTTP 通讯
 - [JAVA写HTTP代理服务器(三)-https明文捕获](https://segmentfault.com/a/1190000011811150)
 
 #### 感谢
-![](https://www.jetbrains.com/?from=proxyee)
+[![intellij-idea](idea.svg)](https://www.jetbrains.com/?from=proxyee)
