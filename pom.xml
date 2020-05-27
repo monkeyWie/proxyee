@@ -5,7 +5,7 @@
 
     <groupId>com.github.monkeywie</groupId>
     <artifactId>proxyee</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <build>
         <plugins>
             <plugin>
@@ -120,6 +120,9 @@
                                 </goals>
                             </execution>
                         </executions>
+                        <configuration>
+                            <doclint>none</doclint>
+                        </configuration>
                     </plugin>
                     <!-- GPG mvn clean deploy -P release -Dgpg.passphrase=YourPassphase-->
                     <plugin>
