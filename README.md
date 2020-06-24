@@ -10,13 +10,13 @@
     
     注1：安卓手机上安装证书若弹出键入凭据存储的密码，输入锁屏密码即可。
     
-    注2：由于android高版本新安全机制，系统不再信任用户安装的证书，你需要root后，使用
+    注2：Android 7以及以上，系统不再信任用户安装的证书，你需要root后，使用
     cat ca.crt > $(openssl x509 -inform PEM -subject_hash_old -in ca.crt  | head -1).0
     命令生成 d1488b25.0 文件，然后把文件移动到
     /system/etc/security/cacerts/
     并给与644权限
     
-    注3：在Android 7以上，即使你把证书添加进系统证书里，这个证书在chrome里也是不工作的。原因是chrome从2018年开始只信任有效期少于27个月的证书(https://www.entrustdatacard.com/blog/2018/february/chrome-requires-ct-after-april-2018)。所以你需要自行生成证书文件。
+    注3：在Android 7以及以上，即使你把证书添加进系统证书里，这个证书在chrome里也是不工作的。原因是chrome从2018年开始只信任有效期少于27个月的证书(https://www.entrustdatacard.com/blog/2018/february/chrome-requires-ct-after-april-2018)。所以你需要自行生成证书文件。
 
 #### 生成证书文件
 	key的生成
