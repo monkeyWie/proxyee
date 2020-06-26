@@ -18,23 +18,22 @@
     
     注3：在Android 7以及以上，即使你把证书添加进系统证书里，这个证书在chrome里也是不工作的。原因是chrome从2018年开始只信任有效期少于27个月的证书(https://www.entrustdatacard.com/blog/2018/february/chrome-requires-ct-after-april-2018)。所以你需要自行生成证书文件。
 
-#### 生成证书文件
-	key的生成
-	openssl genrsa -out server.key 2048
-	这样是生成RSA密钥，openssl格式，2048位强度。server.key是密钥文件名。
+#### 自定义根证书
+- 通过运行`com.github.monkeywie.proxyee.crt.CertUtil`类的main方法生成
+
+- 通过openssl
+```sh
+#key的生成，这样是生成RSA密钥，openssl格式，2048位强度。ca.key是密钥文件名。
+openssl genrsa -out ca.key 2048
+
+#key的转换，转换成netty支持私钥编码格式
+openssl rsa -in ca.key -out ca_private.der -outform der
 	
-	key的转换
-	openssl rsa -in server.key -out server_private.der -outform der
-	把生成的key文件转成der文件
-	
-	csr的生成
-	openssl req -new -key server.key -out server.csr
-	需要依次输入国家，地区，组织，email。最重要的是有一个common name，可以写你的名字或者域名。
-	
-	crt的生成
-	openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
-	
-	然后把server.crt 和 server_private.der 复制到项目的src/resources/中，然后更改com.github.monkeywie.proxyee.server.HttpProxyServer.java 中的第60和第61行
+#crt的生成，通过-subj选项可以自定义证书的相关信息
+openssl req -sha256 -new -x509 -days 365 -key ca.key -out ca.crt \
+    -subj "/C=CN/ST=GD/L=SZ/O=lee/OU=study/CN=testRoot"
+```
+然后把ca.crt 和 ca_private.der 复制到项目的src/resources/中，或者实现HttpProxyCACertFactory接口来自定义加载根证书和私钥
 
 #### 二级代理
 
