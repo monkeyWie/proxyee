@@ -1,29 +1,54 @@
-### HTTP 代理服务器
+<div align="center">
+  <h1>Proxyee</h1>
+  <p>
+  
+[![maven](https://img.shields.io/maven-central/v/com.github.monkeywie/proxyee.svg)](https://search.maven.org/search?q=com.github.monkeywie)
+[![license](https://img.shields.io/github/license/monkeywie/proxyee.svg)](https://opensource.org/licenses/MIT)
 
-    支持HTTP、HTTPS、WebSocket,HTTPS采用动态签发SSL证书,可以拦截http、https的报文并进行处理。
-    例如：http(s)协议抓包,http(s)动态替换请求内容或响应内容等等。
+  </p>
+  <p>
 
-#### HTTPS 支持
+  [English](/README.md) | [中文](/README_zh-CN.md)
 
-    需要导入项目中的CA证书(src/resources/ca.crt)至受信任的根证书颁发机构。
-    可以使用CertDownIntercept拦截器，开启网页下载证书功能，访问http://serverIP:serverPort即可进入。
-    注：安卓手机上安装证书若弹出键入凭据存储的密码，输入锁屏密码即可。
+  </p>
+</div>
 
-#### 二级代理
+---
 
-    可设置二级代理服务器,支持http,socks4,socks5。
+## Introduction
 
-#### 启动
+Proxyee is a JAVA written HTTP proxy server library that supports HTTP, HTTPS, Websocket protocols, and supports MIMT (Man-in-the-middle), which can capture and tamper with HTTP, HTTPS packet.
 
+## Usage
+
+```xml
+<dependency>
+    <groupId>com.github.monkeywie</groupId>
+    <artifactId>proxyee</artifactId>
+    <version>1.2.2</version>
+</dependency>
 ```
-//启动一个普通的http代理服务器，不解密https
+
+## Demo
+
+- Normal HTTP proxy
+
+```java
 new HttpProxyServer().start(9999);
 ```
 
-```
-//启动一个解密https的代理服务器，并且拦截百度首页，注入js和修改响应头
-//当开启了https解密时，需要安装CA证书(`src/resources/ca.crt`)至受信任的根证书颁发机构。
+- MIMT HTTP proxy
+
+The following is a demonstration of a MIMT attack that modifies the response header and response body when visiting the Baidu homepage, as shown in the figure below：
+
+![20200724152245](https://raw.githubusercontent.com/monkeyWie/pic-bed/master/proxyee/20200724152245.png)
+
+Code：
+
+```java
 HttpProxyServerConfig config =  new HttpProxyServerConfig();
+//enable HTTPS support
+//If not enabled, HTTPS will not be intercepted, but forwarded directly to the raw packet.
 config.setHandleSsl(true);
 new HttpProxyServer()
     .serverConfig(config)
@@ -34,20 +59,18 @@ new HttpProxyServer()
 
           @Override
           public boolean match(HttpRequest httpRequest, HttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) {
-            //在匹配到百度首页时插入js
+            //Insert js when matching to Baidu homepage
             return HttpUtil.checkUrl(pipeline.getHttpRequest(), "^www.baidu.com$")
                 && isHtml(httpRequest, httpResponse);
           }
 
           @Override
           public void handelResponse(HttpRequest httpRequest, FullHttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) {
-            //打印原始响应信息
+            //Print raw packet
             System.out.println(httpResponse.toString());
             System.out.println(httpResponse.content().toString(Charset.defaultCharset()));
-            //修改响应头和响应体
+            //Edit response header and response body
             httpResponse.headers().set("handel", "edit head");
-            /*int index = ByteUtil.findText(httpResponse.content(), "<head>");
-            ByteUtil.insertText(httpResponse.content(), index, "<script>alert(1)</script>");*/
             httpResponse.content().writeBytes("<script>alert('hello proxyee')</script>".getBytes());
           }
         });
@@ -56,21 +79,68 @@ new HttpProxyServer()
     .start(9999);
 ```
 
-更多 demo 代码在 test 包内可以找到，这里就不一一展示了
+> Note: When https support is enabled, you need to install the CA certificate (`src/resources/ca.crt`) to a trusted root certificate authority.
 
-#### 流程
+More demo code can be found in the test package.
 
-SSL 握手
+## HTTPS support
+
+The CA certificate (src/resources/ca.crt) from the project needs to be imported to a trusted root certificate authority.
+You can use the CertDownIntercept interceptor to enable the web certificate download feature, visit http://serverIP:serverPort to access.
+
+> Note 1: If the certificate installation on Android phones pops up the password stored in your credentials, just enter the lock screen password.
+> 
+> Note 2: Android 7 and above, the system no longer trusts user-installed certificates, you need to root and use the
+> cat ca.crt > $(openssl x509 -inform PEM -subject_hash_old -in ca.crt | head -1).0
+> command generates the d1488b25.0 file, and then moves the file to the
+> /system/etc/security/cacerts/
+> And give 644 access.
+> 
+> Note 3: In Android 7 and above, even if you add the certificate to the system certificate, this certificate does not work in chrome. The reason is that chrome will only trust certificates with validity less than 27 months from 2018 (https://www.entrustdatacard.com/blog/2018/february/chrome-requires-ct-after-april-2018). So you need to generate the certificate file yourself.
+
+### Custom CA
+
+Since the root certificate and private key attached to the project are public, they are only suitable for local development and debugging, please generate your own root certificate and private key when using in the official environment, otherwise there will be risks.
+
+-  running the main method of the`com.github.monkeywie.proxyee.crt.CertUtil` class
+
+- use openssl
+
+```sh
+openssl genrsa -out ca.key 2048
+openssl rsa -in ca.key -out ca_private.der -outform der
+openssl req -sha256 -new -x509 -days 365 -key ca.key -out ca.crt \
+    -subj "/C=CN/ST=GD/L=SZ/O=lee/OU=study/CN=testRoot"
+```
+
+Copy `ca.crt` and `ca_private.der` to the project src/resources/ after generation, or implement the HttpProxyCACertFactory interface to custom load the root certificate and private key.
+
+## Pre-proxy support
+
+
+Pre-proxy can be set,support http,socks4,socks5 protocol.
+
+```java
+new HttpProxyServer()
+    .proxyConfig(new ProxyConfig(ProxyType.SOCKS5, "127.0.0.1", 1085))
+    .start(9999);
+```
+
+## Flow
+
+SSL handshake
 ![SSL握手](https://raw.githubusercontent.com/monkeyWie/pic-bed/master/proxyee/20190918134332.png)
 
-HTTP 通讯
+HTTP communication
 
 ![HTTP通讯](https://raw.githubusercontent.com/monkeyWie/pic-bed/master/proxyee/20190918134232.png)
 
-#### 讲解
-- [JAVA写HTTP代理服务器(一)-socket实现](https://segmentfault.com/a/1190000011810997)
-- [JAVA写HTTP代理服务器(二)-netty实现](https://segmentfault.com/a/1190000011811082)
-- [JAVA写HTTP代理服务器(三)-https明文捕获](https://segmentfault.com/a/1190000011811150)
+## How it works
 
-#### 感谢
+- [JAVA 写 HTTP 代理服务器(一)-socket 实现](https://segmentfault.com/a/1190000011810997)
+- [JAVA 写 HTTP 代理服务器(二)-netty 实现](https://segmentfault.com/a/1190000011811082)
+- [JAVA 写 HTTP 代理服务器(三)-https 明文捕获](https://segmentfault.com/a/1190000011811150)
+
+## Thanks
+
 [![intellij-idea](idea.svg)](https://www.jetbrains.com/?from=proxyee)

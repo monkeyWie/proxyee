@@ -195,6 +195,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
                 } else {
                     requestList.forEach(obj -> ReferenceCountUtil.release(obj));
                     requestList.clear();
+                    getExceptionHandle().beforeCatch(channel, future.cause());
                     future.channel().close();
                     channel.close();
                 }

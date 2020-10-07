@@ -15,6 +15,8 @@ public abstract class FullResponseIntercept extends HttpProxyIntercept {
 
     private int maxContentLength;
 
+    private Boolean isMatch;
+
     public FullResponseIntercept() {
         this(DEFAULT_MAX_CONTENT_LENGTH);
     }
@@ -29,19 +31,29 @@ public abstract class FullResponseIntercept extends HttpProxyIntercept {
                                     HttpProxyInterceptPipeline pipeline) throws Exception {
         if (httpResponse instanceof FullHttpResponse) {
             FullHttpResponse fullHttpResponse = (FullHttpResponse) httpResponse;
-            handelResponse(pipeline.getHttpRequest(), fullHttpResponse, pipeline);
-            if (fullHttpResponse.headers().contains(HttpHeaderNames.CONTENT_LENGTH)) {
-                httpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, fullHttpResponse.content().readableBytes());
+            // 判断是第一个处理FullResponse的拦截器是否匹配
+            boolean isFirstMatch = isMatch != null && isMatch == true;
+            // 判断后续的拦截器是否匹配
+            boolean isAfterMatch = isFirstMatch ? false : matchHandle(pipeline.getHttpRequest(), pipeline.getHttpResponse(), pipeline);
+            if (isFirstMatch || isAfterMatch) {
+                handleResponse(pipeline.getHttpRequest(), fullHttpResponse, pipeline);
+                if (fullHttpResponse.headers().contains(HttpHeaderNames.CONTENT_LENGTH)) {
+                    httpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, fullHttpResponse.content().readableBytes());
+                }
             }
-            proxyChannel.pipeline().remove("decompress");
-            proxyChannel.pipeline().remove("aggregator");
-        } else if (matchHandle(pipeline.getHttpRequest(), pipeline.getHttpResponse(), pipeline)) {
-            pipeline.resetAfterHead();
-            proxyChannel.pipeline().addAfter("httpCodec", "decompress", new HttpContentDecompressor());
-            proxyChannel.pipeline()
-                    .addAfter("decompress", "aggregator", new HttpObjectAggregator(maxContentLength));
-            proxyChannel.pipeline().fireChannelRead(httpResponse);
-            return;
+            if (isFirstMatch) {
+                proxyChannel.pipeline().remove("decompress");
+                proxyChannel.pipeline().remove("aggregator");
+            }
+        } else {
+            this.isMatch = matchHandle(pipeline.getHttpRequest(), pipeline.getHttpResponse(), pipeline);
+            if (this.isMatch) {
+                proxyChannel.pipeline().addAfter("httpCodec", "decompress", new HttpContentDecompressor());
+                proxyChannel.pipeline()
+                        .addAfter("decompress", "aggregator", new HttpObjectAggregator(maxContentLength));
+                proxyChannel.pipeline().fireChannelRead(httpResponse);
+                return;
+            }
         }
         pipeline.afterResponse(clientChannel, proxyChannel, httpResponse);
     }
@@ -79,7 +91,7 @@ public abstract class FullResponseIntercept extends HttpProxyIntercept {
     /**
      * 拦截并处理响应
      */
-    public void handelResponse(HttpRequest httpRequest, FullHttpResponse httpResponse,
+    public void handleResponse(HttpRequest httpRequest, FullHttpResponse httpResponse,
                                HttpProxyInterceptPipeline pipeline) {
     }
 }

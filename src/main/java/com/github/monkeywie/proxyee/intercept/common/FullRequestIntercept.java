@@ -27,7 +27,7 @@ public abstract class FullRequestIntercept extends HttpProxyIntercept {
     public final void beforeRequest(Channel clientChannel, HttpRequest httpRequest, HttpProxyInterceptPipeline pipeline) throws Exception {
         if (httpRequest instanceof FullHttpRequest) {
             FullHttpRequest fullHttpRequest = (FullHttpRequest) httpRequest;
-            handelRequest(fullHttpRequest, pipeline);
+            handleRequest(fullHttpRequest, pipeline);
             fullHttpRequest.content().markReaderIndex();
             fullHttpRequest.content().retain();
             if (fullHttpRequest.headers().contains(HttpHeaderNames.CONTENT_LENGTH)) {
@@ -67,6 +67,6 @@ public abstract class FullRequestIntercept extends HttpProxyIntercept {
     /**
      * 拦截并处理响应
      */
-    public void handelRequest(FullHttpRequest httpRequest, HttpProxyInterceptPipeline pipeline) {
+    public void handleRequest(FullHttpRequest httpRequest, HttpProxyInterceptPipeline pipeline) {
     }
 }

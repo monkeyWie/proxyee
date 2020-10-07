@@ -5,7 +5,7 @@
 
     <groupId>com.github.monkeywie</groupId>
     <artifactId>proxyee</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.2</version>
     <build>
         <plugins>
             <plugin>
@@ -49,7 +49,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
-        <netty.version>4.1.25.Final</netty.version>
+        <netty.version>4.1.50.Final</netty.version>
     </properties>
 
     <dependencies>

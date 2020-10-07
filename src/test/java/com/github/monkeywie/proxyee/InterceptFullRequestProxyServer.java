@@ -52,7 +52,7 @@ public class InterceptFullRequestProxyServer {
                             }
 
                             @Override
-                            public void handelRequest(FullHttpRequest httpRequest, HttpProxyInterceptPipeline pipeline) {
+                            public void handleRequest(FullHttpRequest httpRequest, HttpProxyInterceptPipeline pipeline) {
                                 ByteBuf content = httpRequest.content();
                                 //打印请求信息
                                 System.out.println(httpRequest.toString());
