@@ -39,7 +39,7 @@ public abstract class FullRequestIntercept extends HttpProxyIntercept {
             //添加gzip解压处理
             clientChannel.pipeline().addAfter("httpCodec", "decompress", new HttpContentDecompressor());
             //添加Full request解码器
-            clientChannel.pipeline().addAfter("decompress", "aggregator", new HttpObjectAggregator(DEFAULT_MAX_CONTENT_LENGTH));
+            clientChannel.pipeline().addAfter("decompress", "aggregator", new HttpObjectAggregator(maxContentLength));
             //重新过一遍处理器链
             clientChannel.pipeline().fireChannelRead(httpRequest);
             return;
@@ -51,8 +51,12 @@ public abstract class FullRequestIntercept extends HttpProxyIntercept {
     public void afterResponse(Channel clientChannel, Channel proxyChannel, HttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) throws Exception {
         //如果是FullHttpRequest
         if (pipeline.getHttpRequest() instanceof FullHttpRequest) {
-            clientChannel.pipeline().remove("decompress");
-            clientChannel.pipeline().remove("aggregator");
+            if (clientChannel.pipeline().get("decompress") != null) {
+                clientChannel.pipeline().remove("decompress");
+            }
+            if (clientChannel.pipeline().get("aggregator") != null) {
+                clientChannel.pipeline().remove("aggregator");
+            }
             FullHttpRequest httpRequest = (FullHttpRequest) pipeline.getHttpRequest();
             httpRequest.content().resetReaderIndex();
         }
