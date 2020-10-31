@@ -118,6 +118,10 @@ public class HttpProxyServer {
     }
 
     public void start(int port) {
+        start(null, port);
+    }
+
+    public void start(String ip, int port) {
         init();
         bossGroup = new NioEventLoopGroup(serverConfig.getBossGroupThreads());
         workerGroup = new NioEventLoopGroup(serverConfig.getWorkerGroupThreads());
@@ -137,9 +141,12 @@ public class HttpProxyServer {
                                             httpProxyExceptionHandle));
                         }
                     });
-            ChannelFuture f = b
-                    .bind(port)
-                    .sync();
+            ChannelFuture f;
+            if (ip == null) {
+                f = b.bind(port).sync();
+            } else {
+                f = b.bind(ip, port).sync();
+            }
             f.channel().closeFuture().sync();
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,4 +1,4 @@
-﻿*.class
+*.class
 
 # BlueJ files
 *.ctxt
@@ -25,3 +25,5 @@ hs_err_pid*
 .settings/
 
 target/
+
+.vscode/

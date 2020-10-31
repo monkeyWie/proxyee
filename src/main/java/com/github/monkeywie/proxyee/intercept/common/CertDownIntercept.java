@@ -21,12 +21,28 @@ public class CertDownIntercept extends HttpProxyIntercept {
 
     private X509Certificate cert = null;
 
+    /**
+     * Using proxyee's own CA certificate to construct CertDownIntercept
+     */
     public CertDownIntercept() {}
 
+    /**
+     * Using CA public key in {@linkplain HttpProxyCACertFactory CaCertFactory} to construct CertDownIntercept
+     * <p> Visitors will receive a CA certificate from CaCertFactory instead of proxyee's built-in certificate.
+     * @param certFactory The same factory as {@link com.github.monkeywie.proxyee.server.HttpProxyServer}
+     *                    ({@link com.github.monkeywie.proxyee.server.HttpProxyServer#caCertFactory(HttpProxyCACertFactory)})
+     *                    is required, otherwise HTTP processing will fail
+     * @throws Exception When factory throws an exception, it will be thrown directly.
+     */
     public CertDownIntercept(HttpProxyCACertFactory certFactory) throws Exception {
         this.cert = certFactory.getCACert();
     }
 
+    /**
+     * Provide certificate structure CertDownIntercept directly.
+     * @param caCert The public key of CA certificate consistent with 
+     *               {@link com.github.monkeywie.proxyee.server.HttpProxyServer}.
+     */
     public CertDownIntercept(X509Certificate caCert) {
         this.cert = caCert;
     }
