@@ -13,7 +13,6 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 import java.io.*;
 import java.math.BigInteger;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
@@ -23,7 +22,6 @@ import java.security.cert.X509Certificate;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -71,22 +69,6 @@ public class CertUtil {
      * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out
      * ca_private.der
      */
-    public static PrivateKey loadPriKey(String path) throws Exception {
-        return loadPriKey(Files.readAllBytes(Paths.get(path)));
-    }
-
-    /**
-     * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out
-     * ca_private.der
-     */
-    public static PrivateKey loadPriKey(URI uri) throws Exception {
-        return loadPriKey(Paths.get(uri).toString());
-    }
-
-    /**
-     * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out
-     * ca_private.der
-     */
     public static PrivateKey loadPriKey(InputStream inputStream)
             throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -101,44 +83,6 @@ public class CertUtil {
     }
 
     /**
-     * 从文件加载RSA公钥 openssl rsa -in ca.key -pubout -outform DER -out ca_pub.der
-     */
-    public static PublicKey loadPubKey(byte[] bts) throws Exception {
-        EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(bts);
-        return getKeyFactory().generatePublic(publicKeySpec);
-    }
-
-    /**
-     * 从文件加载RSA公钥 openssl rsa -in ca.key -pubout -outform DER -out ca_pub.der
-     */
-    public static PublicKey loadPubKey(String path) throws Exception {
-        EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(Files.readAllBytes(Paths.get(path)));
-        return getKeyFactory().generatePublic(publicKeySpec);
-    }
-
-    /**
-     * 从文件加载RSA公钥 openssl rsa -in ca.key -pubout -outform DER -out ca_pub.der
-     */
-    public static PublicKey loadPubKey(URI uri) throws Exception {
-        return loadPubKey(Paths.get(uri).toString());
-    }
-
-    /**
-     * 从文件加载RSA公钥 openssl rsa -in ca.key -pubout -outform DER -out ca_pub.der
-     */
-    public static PublicKey loadPubKey(InputStream inputStream) throws Exception {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        byte[] bts = new byte[1024];
-        int len;
-        while ((len = inputStream.read(bts)) != -1) {
-            outputStream.write(bts, 0, len);
-        }
-        inputStream.close();
-        outputStream.close();
-        return loadPubKey(outputStream.toByteArray());
-    }
-
-    /**
      * 从文件加载证书
      */
     public static X509Certificate loadCert(InputStream inputStream) throws CertificateException {
@@ -147,34 +91,9 @@ public class CertUtil {
     }
 
     /**
-     * 从文件加载证书
-     */
-    public static X509Certificate loadCert(String path) throws Exception {
-        return loadCert(new FileInputStream(path));
-    }
-
-    /**
-     * 从文件加载证书
-     */
-    public static X509Certificate loadCert(URI uri) throws Exception {
-        return loadCert(Paths.get(uri).toString());
-    }
-
-    /**
      * 读取ssl证书使用者信息
      */
-    public static String getSubject(InputStream inputStream) throws Exception {
-        X509Certificate certificate = loadCert(inputStream);
-        //读出来顺序是反的需要反转下
-        List<String> tempList = Arrays.asList(certificate.getIssuerDN().toString().split(", "));
-        return IntStream.rangeClosed(0, tempList.size() - 1)
-                .mapToObj(i -> tempList.get(tempList.size() - i - 1)).collect(Collectors.joining(", "));
-    }
-
-    /**
-     * 读取ssl证书使用者信息
-     */
-    public static String getSubject(X509Certificate certificate) throws Exception {
+    public static String getSubject(X509Certificate certificate) {
         //读出来顺序是反的需要反转下
         List<String> tempList = Arrays.asList(certificate.getIssuerDN().toString().split(", "));
         return IntStream.rangeClosed(0, tempList.size() - 1)
