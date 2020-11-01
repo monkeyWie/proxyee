@@ -27,7 +27,9 @@ final class CertUtilsInternal {
             loadGenerator();
         } catch (Exception e) {
             // 拦截未考虑的异常以防导致类加载失败, 然后程序 Boom!
+            // 为保证即使加载失败也能正常运行, 在此例外加载 BC 默认加密实现(保持鲁棒性)
             log.error("An uncaught exception was thrown while loading the certificate generator", e);
+            generatorMap.put(DEFAULT_GENERATOR_NAME, new BouncyCastleCertGenerator());
         }
     }
 
