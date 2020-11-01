@@ -23,6 +23,7 @@ public interface CertGenerator {
      * @param serverPubKey 服务端证书公钥.
      * @param hosts 证书所属域名.
      * @return 返回指定域名所属的服务端 X509 证书.
+     * @throws Exception 当发生任意异常时, 异常将直接抛出至调用方.
      */
     X509Certificate generateServerCert(String issuer, PrivateKey caPriKey, Date caNotBefore,
                                        Date caNotAfter, PublicKey serverPubKey,
@@ -35,6 +36,7 @@ public interface CertGenerator {
      * @param caNotAfter 证书失效时间, 过了这个时间后证书即失效.
      * @param keyPair RSA 密钥对.
      * @return 返回自签名 CA 证书.
+     * @throws Exception 当发生任意异常时, 异常将直接抛出至调用方.
      */
     X509Certificate generateCaCert(String subject, Date caNotBefore, Date caNotAfter, KeyPair keyPair) throws Exception;
 
