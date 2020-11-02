@@ -21,6 +21,8 @@ jobs:
           maven-repo-server-username: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
           maven-repo-server-password: ${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}
 
+          maven-args: "-Prelease"
+
           git-release-bot-name: "monkeyWie"
           git-release-bot-email: "liwei-8466@qq.com"
 
