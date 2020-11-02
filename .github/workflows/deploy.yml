@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v2
       - uses: qcastel/github-actions-maven-release@master
         with:
           release-branch-name: "master"
