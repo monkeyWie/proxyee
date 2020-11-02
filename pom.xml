@@ -124,7 +124,7 @@
                             <doclint>none</doclint>
                         </configuration>
                     </plugin>
-                    <!-- GPG mvn clean deploy -P release -Dgpg.passphrase=YourPassphase-->
+                    <!-- GPG mvn clean deploy -P release -Darguments="-Dgpg.passphrase=YourPassphase"-->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
@@ -137,6 +137,15 @@
                                 </goals>
                             </execution>
                         </executions>
+                        <configuration>
+                            <useAgent>true</useAgent>
+                            <passphrase>${env.GPG_PASSPHRASE}</passphrase>
+                            <gpgArguments>
+                                <arg>--batch</arg>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
