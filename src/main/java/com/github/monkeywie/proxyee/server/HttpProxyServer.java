@@ -3,6 +3,7 @@ package com.github.monkeywie.proxyee.server;
 import com.github.monkeywie.proxyee.crt.CertPool;
 import com.github.monkeywie.proxyee.crt.CertUtil;
 import com.github.monkeywie.proxyee.exception.HttpProxyExceptionHandle;
+import com.github.monkeywie.proxyee.handler.HttpProxyFlowHandle;
 import com.github.monkeywie.proxyee.handler.HttpProxyServerHandle;
 import com.github.monkeywie.proxyee.intercept.HttpProxyInterceptInitializer;
 import com.github.monkeywie.proxyee.intercept.HttpTunnelIntercept;
@@ -139,6 +140,8 @@ public class HttpProxyServer {
                             ch.pipeline().addLast("serverHandle",
                                     new HttpProxyServerHandle(serverConfig, proxyInterceptInitializer, tunnelIntercept, proxyConfig,
                                             httpProxyExceptionHandle));
+                            // 流量控制
+                            ch.pipeline().addLast("flow", new HttpProxyFlowHandle());
                         }
                     });
             ChannelFuture f;
