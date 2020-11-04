@@ -1,18 +1,6 @@
 package com.github.monkeywie.proxyee.crt;
 
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.Extension;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-
 import java.io.*;
-import java.math.BigInteger;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -27,23 +15,23 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class CertUtil {
 
     private static KeyFactory keyFactory = null;
 
-    static {
-        //注册BouncyCastleProvider加密库
-        Security.addProvider(new BouncyCastleProvider());
-    }
-
-    private static KeyFactory getKeyFactory() throws NoSuchAlgorithmException {
+    private static KeyFactory getKeyFactory() {
         if (keyFactory == null) {
-            keyFactory = KeyFactory.getInstance("RSA");
+            try {
+                keyFactory = KeyFactory.getInstance("RSA");
+            } catch (NoSuchAlgorithmException e) {
+                // Unexpected anomalies
+                throw new IllegalStateException(e);
+            }
         }
         return keyFactory;
     }
@@ -52,9 +40,9 @@ public class CertUtil {
      * 生成RSA公私密钥对,长度为2048
      */
     public static KeyPair genKeyPair() throws Exception {
-        KeyPairGenerator caKeyPairGen = KeyPairGenerator.getInstance("RSA", "BC");
-        caKeyPairGen.initialize(2048, new SecureRandom());
-        return caKeyPairGen.genKeyPair();
+        KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
+        keyPairGen.initialize(2048, new SecureRandom());
+        return keyPairGen.genKeyPair();
     }
 
     /**
@@ -189,36 +177,7 @@ public class CertUtil {
     public static X509Certificate genCert(String issuer, PrivateKey caPriKey, Date caNotBefore,
                                           Date caNotAfter, PublicKey serverPubKey,
                                           String... hosts) throws Exception {
-        /* String issuer = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=ProxyeeRoot";
-        String subject = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=" + host;*/
-        //根据CA证书subject来动态生成目标服务器证书的issuer和subject
-        String subject = Stream.of(issuer.split(", ")).map(item -> {
-            String[] arr = item.split("=");
-            if ("CN".equals(arr[0])) {
-                return "CN=" + hosts[0];
-            } else {
-                return item;
-            }
-        }).collect(Collectors.joining(", "));
-
-        //doc from https://www.cryptoworkshop.com/guide/
-        JcaX509v3CertificateBuilder jv3Builder = new JcaX509v3CertificateBuilder(new X500Name(issuer),
-                //issue#3 修复ElementaryOS上证书不安全问题(serialNumber为1时证书会提示不安全)，避免serialNumber冲突，采用时间戳+4位随机数生成
-                BigInteger.valueOf(System.currentTimeMillis() + (long) (Math.random() * 10000) + 1000),
-                caNotBefore,
-                caNotAfter,
-                new X500Name(subject),
-                serverPubKey);
-        //SAN扩展证书支持的域名，否则浏览器提示证书不安全
-        GeneralName[] generalNames = new GeneralName[hosts.length];
-        for (int i = 0; i < hosts.length; i++) {
-            generalNames[i] = new GeneralName(GeneralName.dNSName, hosts[i]);
-        }
-        GeneralNames subjectAltName = new GeneralNames(generalNames);
-        jv3Builder.addExtension(Extension.subjectAlternativeName, false, subjectAltName);
-        //SHA256 用SHA1浏览器可能会提示证书不安全
-        ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSAEncryption").build(caPriKey);
-        return new JcaX509CertificateConverter().getCertificate(jv3Builder.build(signer));
+        return CertUtilsInternal.generateServerCert(issuer, caPriKey, caNotBefore, caNotAfter, serverPubKey, hosts);
     }
 
     /**
@@ -226,16 +185,25 @@ public class CertUtil {
      */
     public static X509Certificate genCACert(String subject, Date caNotBefore, Date caNotAfter,
                                             KeyPair keyPair) throws Exception {
-        JcaX509v3CertificateBuilder jv3Builder = new JcaX509v3CertificateBuilder(new X500Name(subject),
-                BigInteger.valueOf(System.currentTimeMillis() + (long) (Math.random() * 10000) + 1000),
-                caNotBefore,
-                caNotAfter,
-                new X500Name(subject),
-                keyPair.getPublic());
-        jv3Builder.addExtension(Extension.basicConstraints, true, new BasicConstraints(0));
-        ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSAEncryption")
-                .build(keyPair.getPrivate());
-        return new JcaX509CertificateConverter().getCertificate(jv3Builder.build(signer));
+        return CertUtilsInternal.generateCaCert(subject, caNotBefore, caNotAfter, keyPair);
+    }
+
+    /**
+     * 设置所使用的生成器名称.
+     * @param generatorName 欲使用的生成器所属名称, 如果为 null 则恢复默认生成器.
+     * @throws NoSuchElementException 如果指定名称不存在所属生成器则抛出该异常.
+     */
+    public static void setCertGenerator(String generatorName) {
+        CertUtilsInternal.setSelectionGenerator(
+                generatorName == null ? CertUtilsInternal.DEFAULT_GENERATOR_NAME : generatorName);
+    }
+
+    /**
+     * 获取当前所选择的生成器名称.
+     * @return 返回指定要使用的生成器名称.
+     */
+    public static String getCertGenerator() {
+        return CertUtilsInternal.getCurrentSelectionGenerator();
     }
 
     public static void main(String[] args) throws Exception {
