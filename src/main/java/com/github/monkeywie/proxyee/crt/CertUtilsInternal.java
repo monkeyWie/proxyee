@@ -1,7 +1,7 @@
 package com.github.monkeywie.proxyee.crt;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.security.*;
 import java.security.cert.X509Certificate;
@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 final class CertUtilsInternal {
 
-    private final static Logger log = LoggerFactory.getLogger(CertUtilsInternal.class);
+    private final static InternalLogger log = InternalLoggerFactory.getInstance(CertUtilsInternal.class);
     public final static String DEFAULT_GENERATOR_NAME = "BouncyCastle";
 
     private final static Map<String, CertGenerator> generatorMap = new Hashtable<>();
