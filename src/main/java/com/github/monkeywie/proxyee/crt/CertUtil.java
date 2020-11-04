@@ -26,7 +26,12 @@ public class CertUtil {
 
     private static KeyFactory getKeyFactory() {
         if (keyFactory == null) {
-            keyFactory = CertUtilsInternal.generateKeyFactory();
+            try {
+                keyFactory = KeyFactory.getInstance("RSA");
+            } catch (NoSuchAlgorithmException e) {
+                // Unexpected anomalies
+                throw new IllegalStateException(e);
+            }
         }
         return keyFactory;
     }
@@ -35,7 +40,9 @@ public class CertUtil {
      * 生成RSA公私密钥对,长度为2048
      */
     public static KeyPair genKeyPair() throws Exception {
-        return CertUtilsInternal.generateKeyPair("RSA", 2048);
+        KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
+        keyPairGen.initialize(2048, new SecureRandom());
+        return keyPairGen.genKeyPair();
     }
 
     /**

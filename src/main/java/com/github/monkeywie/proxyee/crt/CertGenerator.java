@@ -40,20 +40,4 @@ public interface CertGenerator {
      */
     X509Certificate generateCaCert(String subject, Date caNotBefore, Date caNotAfter, KeyPair keyPair) throws Exception;
 
-    /**
-     * 生成新的密钥对.
-     * @param algorithm 算法名
-     * @param keySize 密钥长度.
-     * @return 返回新的密钥对.
-     * @throws NoSuchAlgorithmException 当指定算法不支持或不存在时抛出.
-     * @throws InvalidParameterException 当密钥长度不支持时抛出.
-     */
-    KeyPair generateKeyPair(String algorithm, int keySize) throws NoSuchAlgorithmException, InvalidParameterException;
-
-    /**
-     * 构造一个生成器所属的 {@link KeyFactory}.
-     * @return 返回 KeyFactory 对象.
-     */
-    KeyFactory generateKeyFactory();
-
 }

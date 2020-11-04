@@ -87,30 +87,4 @@ public class BouncyCastleCertGenerator implements CertGenerator {
         return new JcaX509CertificateConverter().getCertificate(jv3Builder.build(signer));
     }
 
-    @Override
-    public KeyPair generateKeyPair(String algorithm, int keySize) throws NoSuchAlgorithmException, InvalidParameterException {
-        KeyPairGenerator keyPairGen;
-        try {
-            keyPairGen = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
-        } catch (NoSuchProviderException e) {
-            // Unexpected anomalies
-            throw new IllegalStateException(e);
-        }
-        keyPairGen.initialize(2048, new SecureRandom());
-        return keyPairGen.genKeyPair();
-    }
-
-    @Override
-    public KeyFactory generateKeyFactory() {
-        if (keyFactory == null) {
-            try {
-                keyFactory = KeyFactory.getInstance("RSA");
-            } catch (NoSuchAlgorithmException e) {
-                // Unexpected anomalies
-                throw new IllegalStateException(e);
-            }
-        }
-        return keyFactory;
-    }
-
 }
