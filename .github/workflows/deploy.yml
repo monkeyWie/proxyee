@@ -28,8 +28,8 @@ jobs:
 
       - name: Debug gpg
         run: |
-        cat /home/runner/.m2/settings.xml
-        gpg --list-secret-keys --keyid-format LONG
+          cat /home/runner/.m2/settings.xml
+          gpg --list-secret-keys --keyid-format LONG
 
       - name: Publish to Apache Maven Central
         run: mvn clean deploy -P release
