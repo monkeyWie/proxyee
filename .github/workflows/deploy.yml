@@ -27,7 +27,9 @@ jobs:
           gpg-passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }} # env variable for GPG private key passphrase
 
       - name: Debug gpg
-        run: gpg --list-secret-keys --keyid-format LONG
+        run: |
+        cat /home/runner/.m2/settings.xml
+        gpg --list-secret-keys --keyid-format LONG
 
       - name: Publish to Apache Maven Central
         run: mvn clean deploy -P release
