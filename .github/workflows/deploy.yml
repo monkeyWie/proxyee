@@ -3,7 +3,7 @@ name: deploy
 on:
   workflow_dispatch:
   push:
-    tag:
+    tags:
       - "v*"
 jobs:
   deploy:
