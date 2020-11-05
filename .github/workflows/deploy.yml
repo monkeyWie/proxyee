@@ -29,15 +29,15 @@ jobs:
       - name: Debug gpg
         run: gpg --list-secret-keys --keyid-format LONG
 
-#      - name: Publish to Apache Maven Central
-#        run: mvn clean deploy -P release
-#        env:
-#          MAVEN_USERNAME: monkeyWie
-#          MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
-#          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-#
-#      - name: Release on nexus
-#        uses: monkeyWie/create-release@master
-#        with:
-#          maven-repo-server-username: monkeyWie
-#          maven-repo-server-password: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
+      - name: Publish to Apache Maven Central
+        run: mvn clean deploy -P release
+        env:
+          MAVEN_USERNAME: monkeyWie
+          MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+
+      - name: Release on nexus
+        uses: monkeyWie/create-release@master
+        with:
+          maven-repo-server-username: monkeyWie
+          maven-repo-server-password: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
