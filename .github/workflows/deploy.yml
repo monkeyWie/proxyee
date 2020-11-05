@@ -27,10 +27,7 @@ jobs:
           gpg-passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }} # env variable for GPG private key passphrase
 
       - name: Debug gpg
-        run: |
-        echo ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-        echo ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-        gpg --list-secret-keys --keyid-format LONG
+        run: gpg --list-secret-keys --keyid-format LONG
 
 #      - name: Publish to Apache Maven Central
 #        run: mvn clean deploy -P release
