@@ -34,7 +34,7 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
 
       - name: Release on nexus
-        uses: monkeyWie/create-release@master
+        uses: monkeyWie/maven-nexus-release@master
         with:
           maven-repo-server-username: monkeyWie
           maven-repo-server-password: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
