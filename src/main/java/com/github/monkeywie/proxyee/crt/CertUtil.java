@@ -177,7 +177,7 @@ public class CertUtil {
     public static X509Certificate genCert(String issuer, PrivateKey caPriKey, Date caNotBefore,
                                           Date caNotAfter, PublicKey serverPubKey,
                                           String... hosts) throws Exception {
-        return CertUtilsInternal.generateServerCert(issuer, caPriKey, caNotBefore, caNotAfter, serverPubKey, hosts);
+        return CertUtilsLoader.generateServerCert(issuer, caPriKey, caNotBefore, caNotAfter, serverPubKey, hosts);
     }
 
     /**
@@ -185,7 +185,7 @@ public class CertUtil {
      */
     public static X509Certificate genCACert(String subject, Date caNotBefore, Date caNotAfter,
                                             KeyPair keyPair) throws Exception {
-        return CertUtilsInternal.generateCaCert(subject, caNotBefore, caNotAfter, keyPair);
+        return CertUtilsLoader.generateCaCert(subject, caNotBefore, caNotAfter, keyPair);
     }
 
     /**
@@ -194,8 +194,8 @@ public class CertUtil {
      * @throws NoSuchElementException 如果指定名称不存在所属生成器则抛出该异常.
      */
     public static void setCertGenerator(String generatorName) {
-        CertUtilsInternal.setSelectionGenerator(
-                generatorName == null ? CertUtilsInternal.DEFAULT_GENERATOR_NAME : generatorName);
+        CertUtilsLoader.setSelectionGenerator(
+                generatorName == null ? CertUtilsLoader.DEFAULT_GENERATOR_NAME : generatorName);
     }
 
     /**
@@ -203,7 +203,7 @@ public class CertUtil {
      * @return 返回指定要使用的生成器名称.
      */
     public static String getCertGenerator() {
-        return CertUtilsInternal.getCurrentSelectionGenerator();
+        return CertUtilsLoader.getCurrentSelectionGenerator();
     }
 
     public static void main(String[] args) throws Exception {

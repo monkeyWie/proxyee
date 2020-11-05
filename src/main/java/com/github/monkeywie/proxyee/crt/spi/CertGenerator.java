@@ -1,4 +1,4 @@
-package com.github.monkeywie.proxyee.crt;
+package com.github.monkeywie.proxyee.crt.spi;
 
 import java.security.*;
 import java.security.cert.X509Certificate;

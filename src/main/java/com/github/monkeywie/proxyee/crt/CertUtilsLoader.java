@@ -1,5 +1,8 @@
 package com.github.monkeywie.proxyee.crt;
 
+import com.github.monkeywie.proxyee.crt.service.bc.BouncyCastleCertGenerator;
+import com.github.monkeywie.proxyee.crt.spi.CertGenerator;
+import com.github.monkeywie.proxyee.crt.spi.CertGeneratorInfo;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
@@ -14,9 +17,9 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @author LamGC
  */
-final class CertUtilsInternal {
+public final class CertUtilsLoader {
 
-    private final static InternalLogger log = InternalLoggerFactory.getInstance(CertUtilsInternal.class);
+    private final static InternalLogger log = InternalLoggerFactory.getInstance(CertUtilsLoader.class);
     public final static String DEFAULT_GENERATOR_NAME = "BouncyCastle";
 
     private final static Map<String, CertGenerator> generatorMap = new Hashtable<>();
@@ -36,7 +39,7 @@ final class CertUtilsInternal {
     /**
      * 阻止实例化本类.
      */
-    private CertUtilsInternal() {}
+    private CertUtilsLoader() {}
 
     /**
      * 通过 SPI 机制加载并验证证书生成器实现.

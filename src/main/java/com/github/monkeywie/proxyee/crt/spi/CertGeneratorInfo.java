@@ -1,4 +1,4 @@
-package com.github.monkeywie.proxyee.crt;
+package com.github.monkeywie.proxyee.crt.spi;
 
 import java.lang.annotation.*;
 
