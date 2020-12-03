@@ -17,7 +17,7 @@
 
 ## Introduction
 
-Proxyee is a JAVA written HTTP proxy server library that supports HTTP, HTTPS, Websocket protocols, and supports MIMT (Man-in-the-middle), which can capture and tamper with HTTP, HTTPS packet.
+Proxyee is a JAVA written HTTP proxy server library that supports HTTP, HTTPS, Websocket protocols, and supports MITM (Man-in-the-middle), which can capture and tamper with HTTP, HTTPS packet.
 
 ## Usage
 
@@ -37,9 +37,9 @@ Proxyee is a JAVA written HTTP proxy server library that supports HTTP, HTTPS, W
 new HttpProxyServer().start(9999);
 ```
 
-- MIMT HTTP proxy
+- MITM HTTP proxy
 
-The following is a demonstration of a MIMT attack that modifies the response header and response body when visiting the Baidu homepage, as shown in the figure below：
+The following is a demonstration of a MITM attack that modifies the response header and response body when visiting the Baidu homepage, as shown in the figure below：
 
 ![20200724152245](https://raw.githubusercontent.com/monkeyWie/pic-bed/master/proxyee/20200724152245.png)
 
