@@ -35,12 +35,12 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
     private int port;
     private boolean isSsl = false;
     private int status = 0;
-    private HttpProxyServerConfig serverConfig;
-    private ProxyConfig proxyConfig;
-    private HttpProxyInterceptInitializer interceptInitializer;
+    private final HttpProxyServerConfig serverConfig;
+    private final ProxyConfig proxyConfig;
+    private final HttpProxyInterceptInitializer interceptInitializer;
     private HttpProxyInterceptPipeline interceptPipeline;
-    private HttpTunnelIntercept tunnelIntercept;
-    private HttpProxyExceptionHandle exceptionHandle;
+    private final HttpTunnelIntercept tunnelIntercept;
+    private final HttpProxyExceptionHandle exceptionHandle;
     private List requestList;
     private boolean isConnect;
 
@@ -181,6 +181,8 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
             if (proxyConfig != null) {
                 // 代理服务器解析DNS和连接
                 bootstrap.resolver(NoopAddressResolverGroup.INSTANCE);
+            } else {
+                bootstrap.resolver(serverConfig.resolver());
             }
             requestList = new LinkedList();
             cf = bootstrap.connect(requestProto.getHost(), requestProto.getPort());
