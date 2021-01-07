@@ -1,5 +1,6 @@
 package com.github.monkeywie.proxyee.intercept;
 
+import com.github.monkeywie.proxyee.proxy.ProxyConfig;
 import com.github.monkeywie.proxyee.util.ProtoUtil.RequestProto;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.HttpContent;
@@ -23,6 +24,7 @@ public class HttpProxyInterceptPipeline implements Iterable<HttpProxyIntercept> 
     private RequestProto requestProto;
     private HttpRequest httpRequest;
     private HttpResponse httpResponse;
+    private ProxyConfig proxyConfig;
 
     public HttpRequest getHttpRequest() {
         return httpRequest;
@@ -36,9 +38,13 @@ public class HttpProxyInterceptPipeline implements Iterable<HttpProxyIntercept> 
         return requestProto;
     }
 
+    public ProxyConfig getProxyConfig(){ return proxyConfig; }
+
     public void setRequestProto(RequestProto requestProto) {
         this.requestProto = requestProto;
     }
+
+    public void setProxyConfig(ProxyConfig proxyConfig) { this.proxyConfig = proxyConfig; }
 
     public HttpProxyInterceptPipeline(HttpProxyIntercept defaultIntercept) {
         this.intercepts = new LinkedList<>();

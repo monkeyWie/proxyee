@@ -145,7 +145,9 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
             if (isHttp && !(msg instanceof HttpRequest)) {
                 return;
             }
-            ProxyHandler proxyHandler = ProxyHandleFactory.build(proxyConfig);
+            // by default we use the proxy config set in the pipeline
+            ProxyHandler proxyHandler = ProxyHandleFactory.build(
+                    interceptPipeline.getProxyConfig()==null?proxyConfig:interceptPipeline.getProxyConfig());
             /*
              * 添加SSL client hello的Server Name Indication extension(SNI扩展) 有些服务器对于client
              * hello不带SNI扩展时会直接返回Received fatal alert: handshake_failure(握手错误)
@@ -178,7 +180,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
             bootstrap.group(serverConfig.getProxyLoopGroup()) // 注册线程池
                     .channel(NioSocketChannel.class) // 使用NioSocketChannel来作为连接用的channel类
                     .handler(channelInitializer);
-            if (proxyConfig != null) {
+            if (interceptPipeline.getProxyConfig()!=null || proxyConfig != null) {
                 // 代理服务器解析DNS和连接
                 bootstrap.resolver(NoopAddressResolverGroup.INSTANCE);
             }
