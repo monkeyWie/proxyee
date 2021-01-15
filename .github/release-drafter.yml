@@ -1,8 +1,9 @@
 name-template: 'v$NEXT_PATCH_VERSION 🌈'
 tag-template: 'v$NEXT_PATCH_VERSION'
 categories:
-  - title: '🚀 Features'
+  - title: '🆕 Features'
     labels:
+      - 'feat'
       - 'feature'
       - 'enhancement'
   - title: '🐛 Bug Fixes'
@@ -14,6 +15,8 @@ categories:
     label: 'chore'
   - title: '📖 Document'
     label: 'doc'
+  - title: '🚀 CI/CD'
+      label: 'ci'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 version-resolver:
   major:
