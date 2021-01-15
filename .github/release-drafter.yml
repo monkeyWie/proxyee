@@ -16,7 +16,7 @@ categories:
   - title: '📖 Document'
     label: 'doc'
   - title: '🚀 CI/CD'
-      label: 'ci'
+    label: 'ci'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 version-resolver:
   major:
