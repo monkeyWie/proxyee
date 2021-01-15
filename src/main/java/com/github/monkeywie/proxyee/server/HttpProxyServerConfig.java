@@ -23,6 +23,7 @@ public class HttpProxyServerConfig {
     private int workerGroupThreads;
     private int proxyGroupThreads;
     private boolean handleSsl;
+    private HttpProxyAuthenticationProvider authenticationProvider;
     private final AddressResolverGroup<? extends SocketAddress> resolver;
 
     public HttpProxyServerConfig() {
@@ -127,6 +128,14 @@ public class HttpProxyServerConfig {
 
     public void setProxyGroupThreads(int proxyGroupThreads) {
         this.proxyGroupThreads = proxyGroupThreads;
+    }
+
+    public HttpProxyAuthenticationProvider getAuthenticationProvider() {
+        return authenticationProvider;
+    }
+
+    public void setAuthenticationProvider(final HttpProxyAuthenticationProvider authenticationProvider) {
+        this.authenticationProvider = authenticationProvider;
     }
 
     public AddressResolverGroup<?> resolver() {

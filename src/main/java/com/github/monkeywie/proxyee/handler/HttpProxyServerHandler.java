@@ -28,7 +28,7 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
-public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
+public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
 
     private ChannelFuture cf;
     private String host;
@@ -56,7 +56,7 @@ public class HttpProxyServerHandle extends ChannelInboundHandlerAdapter {
         return exceptionHandle;
     }
 
-    public HttpProxyServerHandle(HttpProxyServerConfig serverConfig, HttpProxyInterceptInitializer interceptInitializer, HttpTunnelIntercept tunnelIntercept, ProxyConfig proxyConfig, HttpProxyExceptionHandle exceptionHandle) {
+    public HttpProxyServerHandler(HttpProxyServerConfig serverConfig, HttpProxyInterceptInitializer interceptInitializer, HttpTunnelIntercept tunnelIntercept, ProxyConfig proxyConfig, HttpProxyExceptionHandle exceptionHandle) {
         this.serverConfig = serverConfig;
         this.proxyConfig = proxyConfig;
         this.interceptInitializer = interceptInitializer;
