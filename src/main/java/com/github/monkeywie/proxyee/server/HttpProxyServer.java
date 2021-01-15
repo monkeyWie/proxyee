@@ -149,7 +149,7 @@ public class HttpProxyServer {
             }
             f.channel().closeFuture().sync();
         } catch (Exception e) {
-            e.printStackTrace();
+            httpProxyExceptionHandle.startCatch(e);
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
