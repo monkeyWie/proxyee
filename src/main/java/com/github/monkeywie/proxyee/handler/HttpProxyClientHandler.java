@@ -9,11 +9,11 @@ import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.util.ReferenceCountUtil;
 
-public class HttpProxyClientHandle extends ChannelInboundHandlerAdapter {
+public class HttpProxyClientHandler extends ChannelInboundHandlerAdapter {
 
     private Channel clientChannel;
 
-    public HttpProxyClientHandle(Channel clientChannel) {
+    public HttpProxyClientHandler(Channel clientChannel) {
         this.clientChannel = clientChannel;
     }
 
@@ -24,7 +24,7 @@ public class HttpProxyClientHandle extends ChannelInboundHandlerAdapter {
             ReferenceCountUtil.release(msg);
             return;
         }
-        HttpProxyInterceptPipeline interceptPipeline = ((HttpProxyServerHandle) clientChannel.pipeline()
+        HttpProxyInterceptPipeline interceptPipeline = ((HttpProxyServerHandler) clientChannel.pipeline()
                 .get("serverHandle")).getInterceptPipeline();
         if (msg instanceof HttpResponse) {
             interceptPipeline.afterResponse(clientChannel, ctx.channel(), (HttpResponse) msg);
@@ -45,7 +45,7 @@ public class HttpProxyClientHandle extends ChannelInboundHandlerAdapter {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         ctx.channel().close();
         clientChannel.close();
-        HttpProxyExceptionHandle exceptionHandle = ((HttpProxyServerHandle) clientChannel.pipeline()
+        HttpProxyExceptionHandle exceptionHandle = ((HttpProxyServerHandler) clientChannel.pipeline()
                 .get("serverHandle")).getExceptionHandle();
         exceptionHandle.afterCatch(clientChannel, ctx.channel(), cause);
     }
