@@ -76,17 +76,10 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                     ctx.channel().close();
                     return;
                 }
-                if (serverConfig.getAuthenticationProvider() != null) {
-                    HttpProxyAuthenticationProvider authProvider = serverConfig.getAuthenticationProvider();
-                    if (!authProvider.authenticate(request.headers().get(HttpHeaderNames.PROXY_AUTHORIZATION))) {
-                        status = 2;
-                        HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpProxyServer.UNAUTHORIZED);
-                        response.headers().set(HttpHeaderNames.PROXY_AUTHENTICATE, authProvider.authType() + " realm=\"" + authProvider.authRealm() + "\"");
-                        DefaultLastHttpContent content = new DefaultLastHttpContent();
-                        ctx.writeAndFlush(response);
-                        ctx.writeAndFlush(content);
-                        return;
-                    }
+                if (!authenticate(ctx, request)) {
+                    status = 2;
+                    ctx.channel().close();
+                    return;
                 }
                 status = 1;
                 this.host = requestProto.getHost();
@@ -150,6 +143,19 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
         }
         ctx.channel().close();
         exceptionHandle.beforeCatch(ctx.channel(), cause);
+    }
+
+    private boolean authenticate(ChannelHandlerContext ctx, HttpRequest request) {
+        if (serverConfig.getAuthenticationProvider() != null) {
+            HttpProxyAuthenticationProvider authProvider = serverConfig.getAuthenticationProvider();
+            if (!authProvider.authenticate(request.headers().get(HttpHeaderNames.PROXY_AUTHORIZATION))) {
+                HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpProxyServer.UNAUTHORIZED);
+                response.headers().set(HttpHeaderNames.PROXY_AUTHENTICATE, authProvider.authType() + " realm=\"" + authProvider.authRealm() + "\"");
+                ctx.writeAndFlush(response);
+                return false;
+            }
+        }
+        return true;
     }
 
     private void handleProxyData(Channel channel, Object msg, boolean isHttp) throws Exception {

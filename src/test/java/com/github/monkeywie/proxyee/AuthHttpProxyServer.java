@@ -6,6 +6,7 @@ import com.github.monkeywie.proxyee.server.auth.BasicHttpProxyAuthenticationProv
 
 public class AuthHttpProxyServer {
 
+    // curl -i -x 127.0.0.1:9999 -U admin:123456 https://www.baidu.com
     public static void main(String[] args) throws Exception {
         HttpProxyServerConfig config = new HttpProxyServerConfig();
         config.setAuthenticationProvider(new BasicHttpProxyAuthenticationProvider() {
