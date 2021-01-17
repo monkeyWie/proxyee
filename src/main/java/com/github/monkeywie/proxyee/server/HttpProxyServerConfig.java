@@ -1,5 +1,6 @@
 package com.github.monkeywie.proxyee.server;
 
+import com.github.monkeywie.proxyee.server.auth.HttpProxyAuthenticationProvider;
 import io.netty.channel.EventLoopGroup;
 import io.netty.handler.ssl.SslContext;
 import io.netty.resolver.AddressResolverGroup;

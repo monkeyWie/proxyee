@@ -30,6 +30,8 @@ public class HttpProxyServer {
     //http代理隧道握手成功
     public final static HttpResponseStatus SUCCESS = new HttpResponseStatus(200,
             "Connection established");
+    public final static HttpResponseStatus UNAUTHORIZED = new HttpResponseStatus(407,
+            "Unauthorized");
 
     private HttpProxyCACertFactory caCertFactory;
     private HttpProxyServerConfig serverConfig;
