@@ -65,7 +65,7 @@ new HttpProxyServer()
           }
 
           @Override
-          public void handelResponse(HttpRequest httpRequest, FullHttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) {
+          public void handleResponse(HttpRequest httpRequest, FullHttpResponse httpResponse, HttpProxyInterceptPipeline pipeline) {
             //Print raw packet
             System.out.println(httpResponse.toString());
             System.out.println(httpResponse.content().toString(Charset.defaultCharset()));
