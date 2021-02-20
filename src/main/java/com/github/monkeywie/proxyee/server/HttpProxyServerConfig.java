@@ -1,5 +1,6 @@
 package com.github.monkeywie.proxyee.server;
 
+import com.github.monkeywie.proxyee.server.accept.HttpProxyAcceptHandler;
 import com.github.monkeywie.proxyee.server.auth.HttpProxyAuthenticationProvider;
 import io.netty.channel.EventLoopGroup;
 import io.netty.handler.ssl.SslContext;
@@ -24,6 +25,7 @@ public class HttpProxyServerConfig {
     private int workerGroupThreads;
     private int proxyGroupThreads;
     private boolean handleSsl;
+    private HttpProxyAcceptHandler httpProxyAcceptHandler;
     private HttpProxyAuthenticationProvider authenticationProvider;
     private final AddressResolverGroup<? extends SocketAddress> resolver;
 
@@ -129,6 +131,14 @@ public class HttpProxyServerConfig {
 
     public void setProxyGroupThreads(int proxyGroupThreads) {
         this.proxyGroupThreads = proxyGroupThreads;
+    }
+
+    public HttpProxyAcceptHandler getHttpProxyAcceptHandler() {
+        return httpProxyAcceptHandler;
+    }
+
+    public void setHttpProxyAcceptHandler(final HttpProxyAcceptHandler httpProxyAcceptHandler) {
+        this.httpProxyAcceptHandler = httpProxyAcceptHandler;
     }
 
     public HttpProxyAuthenticationProvider getAuthenticationProvider() {

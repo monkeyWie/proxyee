@@ -76,6 +76,14 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                     ctx.channel().close();
                     return;
                 }
+                // 首次连接处理
+                if (serverConfig.getHttpProxyAcceptHandler() != null
+                        && !serverConfig.getHttpProxyAcceptHandler().onAccept(request, ctx.channel())) {
+                    status = 2;
+                    ctx.channel().close();
+                    return;
+                }
+                // 代理身份验证
                 if (!authenticate(ctx, request)) {
                     status = 2;
                     ctx.channel().close();
