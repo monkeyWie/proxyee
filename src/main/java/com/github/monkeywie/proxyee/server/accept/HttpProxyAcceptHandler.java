@@ -10,11 +10,18 @@ import io.netty.handler.codec.http.HttpRequest;
  */
 public interface HttpProxyAcceptHandler {
     /**
-     * 当客户端有新的连接进来时会触发此方法
+     * 客户端有新的连接建立时触发
      *
      * @param request
      * @param clientChannel
      * @return 返回true表示放行，返回false则断开连接
      */
     boolean onAccept(HttpRequest request, Channel clientChannel);
+
+    /**
+     * 客户端连接关闭时触发
+     *
+     * @param clientChannel
+     */
+    void onClose(Channel clientChannel);
 }
