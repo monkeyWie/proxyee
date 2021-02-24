@@ -142,6 +142,9 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
             cf.channel().close();
         }
         ctx.channel().close();
+        if (serverConfig.getHttpProxyAcceptHandler() != null) {
+            serverConfig.getHttpProxyAcceptHandler().onClose(ctx.channel());
+        }
     }
 
     @Override
