@@ -129,9 +129,13 @@ public class CertUtil {
     /**
      * 从文件加载证书
      */
-    public static X509Certificate loadCert(InputStream inputStream) throws CertificateException {
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        return (X509Certificate) cf.generateCertificate(inputStream);
+    public static X509Certificate loadCert(InputStream inputStream) throws CertificateException, IOException {
+        try {
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            return (X509Certificate) cf.generateCertificate(inputStream);
+        }finally {
+            inputStream.close();
+        }
     }
 
     /**
