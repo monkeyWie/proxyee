@@ -34,11 +34,17 @@ public abstract class FullResponseIntercept extends HttpProxyIntercept {
             // 判断是第一个处理FullResponse的拦截器是否匹配
             boolean isFirstMatch = isMatch != null && isMatch == true;
             // 判断后续的拦截器是否匹配
-            boolean isAfterMatch = isFirstMatch ? false : matchHandle(pipeline.getHttpRequest(), pipeline.getHttpResponse(), pipeline);
+            boolean isAfterMatch = isFirstMatch ? false : match(pipeline.getHttpRequest(), pipeline.getHttpResponse(), pipeline);
             if (isFirstMatch || isAfterMatch) {
                 handleResponse(pipeline.getHttpRequest(), fullHttpResponse, pipeline);
                 if (fullHttpResponse.headers().contains(HttpHeaderNames.CONTENT_LENGTH)) {
                     httpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, fullHttpResponse.content().readableBytes());
+                }
+                if (pipeline.getHttpRequest() instanceof FullHttpRequest) {
+                    FullHttpRequest fullHttpRequest = (FullHttpRequest) pipeline.getHttpRequest();
+                    if (fullHttpRequest.content().refCnt() > 0) {
+                        ReferenceCountUtil.release(fullHttpRequest);
+                    }
                 }
             }
             if (isFirstMatch) {
@@ -46,7 +52,7 @@ public abstract class FullResponseIntercept extends HttpProxyIntercept {
                 proxyChannel.pipeline().remove("aggregator");
             }
         } else {
-            this.isMatch = matchHandle(pipeline.getHttpRequest(), pipeline.getHttpResponse(), pipeline);
+            this.isMatch = match(pipeline.getHttpRequest(), pipeline.getHttpResponse(), pipeline);
             if (this.isMatch) {
                 proxyChannel.pipeline().addAfter("httpCodec", "decompress", new HttpContentDecompressor());
                 proxyChannel.pipeline()
@@ -68,18 +74,6 @@ public abstract class FullResponseIntercept extends HttpProxyIntercept {
         return httpResponse.status().code() == 200 && accept != null && accept
                 .matches("^.*text/html.*$") && contentType != null && contentType
                 .matches("^text/html.*$");
-    }
-
-    private boolean matchHandle(HttpRequest httpRequest, HttpResponse httpResponse,
-                                HttpProxyInterceptPipeline pipeline) {
-        boolean isMatch = match(httpRequest, httpResponse, pipeline);
-        if (httpRequest instanceof FullHttpRequest) {
-            FullHttpRequest fullHttpRequest = (FullHttpRequest) httpRequest;
-            if (fullHttpRequest.content().refCnt() > 0) {
-                ReferenceCountUtil.release(fullHttpRequest);
-            }
-        }
-        return isMatch;
     }
 
     /**
