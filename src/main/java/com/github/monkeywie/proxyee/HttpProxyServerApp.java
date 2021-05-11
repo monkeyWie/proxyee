@@ -14,6 +14,10 @@ public class HttpProxyServerApp {
         if (args.length > 0) {
             port = Integer.valueOf(args[0]);
         }
-        new HttpProxyServer().start(port);
+        new HttpProxyServer().start(port).whenComplete((v, e) -> {
+            if (e != null) {
+                e.printStackTrace();
+            }
+        });
     }
 }
