@@ -26,6 +26,7 @@ import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CountDownLatch;
 
 public class HttpProxyServer {
 
@@ -121,11 +122,50 @@ public class HttpProxyServer {
         return this;
     }
 
-    public CompletionStage<Void> start(int port) {
-        return start(null, port);
+    public void start(int port) {
+        start(null, port);
     }
 
-    public CompletionStage<Void> start(String ip, int port) {
+    public void start(String ip, int port) {
+        try {
+            ChannelFuture channelFuture = doBind(ip, port);
+            CountDownLatch latch = new CountDownLatch(1);
+            channelFuture.addListener(future -> {
+                if (future.cause() != null) {
+                    httpProxyExceptionHandle.startCatch(future.cause());
+                }
+                latch.countDown();
+            });
+            latch.await();
+            channelFuture.channel().closeFuture().sync();
+        } catch (Exception e) {
+            httpProxyExceptionHandle.startCatch(e);
+        } finally {
+            close();
+        }
+    }
+
+    public CompletionStage<Void> startAsync(int port) {
+        return startAsync(null, port);
+    }
+
+    public CompletionStage<Void> startAsync(String ip, int port) {
+        ChannelFuture channelFuture = doBind(ip, port);
+
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        channelFuture.addListener(start -> {
+            if (start.isSuccess()) {
+                future.complete(null);
+                shutdownHook();
+            } else {
+                future.completeExceptionally(start.cause());
+                close();
+            }
+        });
+        return future;
+    }
+
+    private ChannelFuture doBind(String ip, int port) {
         init();
         bossGroup = new NioEventLoopGroup(serverConfig.getBossGroupThreads());
         workerGroup = new NioEventLoopGroup(serverConfig.getWorkerGroupThreads());
@@ -144,19 +184,8 @@ public class HttpProxyServer {
                                         httpProxyExceptionHandle));
                     }
                 });
-        ChannelFuture channelFuture = ip == null ? bootstrap.bind(port) : bootstrap.bind(ip, port);
 
-        CompletableFuture<Void> future = new CompletableFuture<>();
-        channelFuture.addListener(start -> {
-            if (start.isSuccess()) {
-                future.complete(null);
-                shutdownHook();
-            } else {
-                future.completeExceptionally(start.cause());
-                close();
-            }
-        });
-        return future;
+        return ip == null ? bootstrap.bind(port) : bootstrap.bind(ip, port);
     }
 
     /**
