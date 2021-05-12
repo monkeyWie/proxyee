@@ -24,6 +24,9 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CountDownLatch;
 
 public class HttpProxyServer {
 
@@ -124,45 +127,90 @@ public class HttpProxyServer {
     }
 
     public void start(String ip, int port) {
-        init();
-        bossGroup = new NioEventLoopGroup(serverConfig.getBossGroupThreads());
-        workerGroup = new NioEventLoopGroup(serverConfig.getWorkerGroupThreads());
         try {
-            ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-//          .option(ChannelOption.SO_BACKLOG, 100)
-                    .handler(new LoggingHandler(LogLevel.DEBUG))
-                    .childHandler(new ChannelInitializer<Channel>() {
-
-                        @Override
-                        protected void initChannel(Channel ch) throws Exception {
-                            ch.pipeline().addLast("httpCodec", new HttpServerCodec());
-                            ch.pipeline().addLast("serverHandle",
-                                    new HttpProxyServerHandler(serverConfig, proxyInterceptInitializer, tunnelIntercept, proxyConfig,
-                                            httpProxyExceptionHandle));
-                        }
-                    });
-            ChannelFuture f;
-            if (ip == null) {
-                f = b.bind(port).sync();
-            } else {
-                f = b.bind(ip, port).sync();
-            }
-            f.channel().closeFuture().sync();
+            ChannelFuture channelFuture = doBind(ip, port);
+            CountDownLatch latch = new CountDownLatch(1);
+            channelFuture.addListener(future -> {
+                if (future.cause() != null) {
+                    httpProxyExceptionHandle.startCatch(future.cause());
+                }
+                latch.countDown();
+            });
+            latch.await();
+            channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
             httpProxyExceptionHandle.startCatch(e);
         } finally {
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
+            close();
         }
     }
 
+    public CompletionStage<Void> startAsync(int port) {
+        return startAsync(null, port);
+    }
+
+    public CompletionStage<Void> startAsync(String ip, int port) {
+        ChannelFuture channelFuture = doBind(ip, port);
+
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        channelFuture.addListener(start -> {
+            if (start.isSuccess()) {
+                future.complete(null);
+                shutdownHook();
+            } else {
+                future.completeExceptionally(start.cause());
+                close();
+            }
+        });
+        return future;
+    }
+
+    private ChannelFuture doBind(String ip, int port) {
+        init();
+        bossGroup = new NioEventLoopGroup(serverConfig.getBossGroupThreads());
+        workerGroup = new NioEventLoopGroup(serverConfig.getWorkerGroupThreads());
+        ServerBootstrap bootstrap = new ServerBootstrap();
+        bootstrap.group(bossGroup, workerGroup)
+                .channel(NioServerSocketChannel.class)
+//                .option(ChannelOption.SO_BACKLOG, 100)
+                .handler(new LoggingHandler(LogLevel.DEBUG))
+                .childHandler(new ChannelInitializer<Channel>() {
+
+                    @Override
+                    protected void initChannel(Channel ch) throws Exception {
+                        ch.pipeline().addLast("httpCodec", new HttpServerCodec());
+                        ch.pipeline().addLast("serverHandle",
+                                new HttpProxyServerHandler(serverConfig, proxyInterceptInitializer, tunnelIntercept, proxyConfig,
+                                        httpProxyExceptionHandle));
+                    }
+                });
+
+        return ip == null ? bootstrap.bind(port) : bootstrap.bind(ip, port);
+    }
+
+    /**
+     * 释放资源
+     */
     public void close() {
-        serverConfig.getProxyLoopGroup().shutdownGracefully();
-        bossGroup.shutdownGracefully();
-        workerGroup.shutdownGracefully();
+        EventLoopGroup eventLoopGroup = serverConfig.getProxyLoopGroup();
+        if (!(eventLoopGroup.isShutdown() || eventLoopGroup.isShuttingDown())) {
+            eventLoopGroup.shutdownGracefully();
+        }
+        if (!(bossGroup.isShutdown() || bossGroup.isShuttingDown())) {
+            bossGroup.shutdownGracefully();
+        }
+        if (!(workerGroup.isShutdown() || workerGroup.isShuttingDown())) {
+            workerGroup.shutdownGracefully();
+        }
+
         CertPool.clear();
+    }
+
+    /**
+     * 注册JVM关闭的钩子以释放资源
+     */
+    public void shutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(this::close, "Server Shutdown Thread"));
     }
 
 }

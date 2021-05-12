@@ -4,7 +4,7 @@ import io.netty.channel.Channel;
 
 public class HttpProxyExceptionHandle {
 
-    public void startCatch(Exception e) {
+    public void startCatch(Throwable e) {
         e.printStackTrace();
     }
 
