@@ -46,8 +46,8 @@ public class CertUtil {
     }
 
     /**
-     * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out
-     * ca_private.der
+     * 从文件加载RSA私钥
+     * openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.der
      */
     public static PrivateKey loadPriKey(byte[] bts)
             throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -56,8 +56,8 @@ public class CertUtil {
     }
 
     /**
-     * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out
-     * ca_private.der
+     * 从文件加载RSA私钥
+     * openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.der
      */
     public static PrivateKey loadPriKey(String path) throws Exception {
         return loadPriKey(Files.readAllBytes(Paths.get(path)));
@@ -72,8 +72,8 @@ public class CertUtil {
     }
 
     /**
-     * 从文件加载RSA私钥 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out
-     * ca_private.der
+     * 从文件加载RSA私钥
+     * openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.der
      */
     public static PrivateKey loadPriKey(InputStream inputStream)
             throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
@@ -89,7 +89,8 @@ public class CertUtil {
     }
 
     /**
-     * 从文件加载RSA公钥 openssl rsa -in ca.key -pubout -outform DER -out ca_pub.der
+     * 从文件加载RSA公钥
+     * openssl rsa -in ca.key -pubout -outform DER -out ca_pub.der
      */
     public static PublicKey loadPubKey(byte[] bts) throws Exception {
         EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(bts);
@@ -97,7 +98,8 @@ public class CertUtil {
     }
 
     /**
-     * 从文件加载RSA公钥 openssl rsa -in ca.key -pubout -outform DER -out ca_pub.der
+     * 从文件加载RSA公钥
+     * openssl rsa -in ca.key -pubout -outform DER -out ca_pub.der
      */
     public static PublicKey loadPubKey(String path) throws Exception {
         EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(Files.readAllBytes(Paths.get(path)));
@@ -105,14 +107,16 @@ public class CertUtil {
     }
 
     /**
-     * 从文件加载RSA公钥 openssl rsa -in ca.key -pubout -outform DER -out ca_pub.der
+     * 从文件加载RSA公钥
+     * openssl rsa -in ca.key -pubout -outform DER -out ca_pub.der
      */
     public static PublicKey loadPubKey(URI uri) throws Exception {
         return loadPubKey(Paths.get(uri).toString());
     }
 
     /**
-     * 从文件加载RSA公钥 openssl rsa -in ca.key -pubout -outform DER -out ca_pub.der
+     * 从文件加载RSA公钥
+     * openssl rsa -in ca.key -pubout -outform DER -out ca_pub.der
      */
     public static PublicKey loadPubKey(InputStream inputStream) throws Exception {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
