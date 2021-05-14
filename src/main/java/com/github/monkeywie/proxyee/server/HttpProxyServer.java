@@ -20,6 +20,8 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -29,6 +31,8 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.CountDownLatch;
 
 public class HttpProxyServer {
+
+    private final static InternalLogger log = InternalLoggerFactory.getInstance(HttpProxyServer.class);
 
     //http代理隧道握手成功
     public final static HttpResponseStatus SUCCESS = new HttpResponseStatus(200,
@@ -80,6 +84,7 @@ public class HttpProxyServer {
                 serverConfig.setServerPubKey(keyPair.getPublic());
             } catch (Exception e) {
                 serverConfig.setHandleSsl(false);
+                log.warn("SSL init fail,cause:" + e.getMessage());
             }
         }
         if (proxyInterceptInitializer == null) {

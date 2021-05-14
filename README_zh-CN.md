@@ -25,7 +25,7 @@ Proxyee 是一个 JAVA 编写的 HTTP 代理服务器类库，支持 HTTP、HTTP
 <dependency>
     <groupId>com.github.monkeywie</groupId>
     <artifactId>proxyee</artifactId>
-    <version>1.4.4</version>
+    <version>1.4.5</version>
 </dependency>
 ```
 
@@ -111,7 +111,7 @@ new HttpProxyServer()
 openssl genrsa -out ca.key 2048
 
 #key的转换，转换成netty支持私钥编码格式
-openssl rsa -in ca.key -out ca_private.der -outform der
+openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.der
 
 #crt的生成，通过-subj选项可以自定义证书的相关信息
 openssl req -sha256 -new -x509 -days 365 -key ca.key -out ca.crt \

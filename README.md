@@ -25,7 +25,7 @@ Proxyee is a JAVA written HTTP proxy server library that supports HTTP, HTTPS, W
 <dependency>
     <groupId>com.github.monkeywie</groupId>
     <artifactId>proxyee</artifactId>
-    <version>1.4.4</version>
+    <version>1.4.5</version>
 </dependency>
 ```
 
@@ -108,7 +108,7 @@ Since the root certificate and private key attached to the project are public, t
 
 ```sh
 openssl genrsa -out ca.key 2048
-openssl rsa -in ca.key -out ca_private.der -outform der
+openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.der
 openssl req -sha256 -new -x509 -days 365 -key ca.key -out ca.crt \
     -subj "/C=CN/ST=GD/L=SZ/O=lee/OU=study/CN=testRoot"
 ```
