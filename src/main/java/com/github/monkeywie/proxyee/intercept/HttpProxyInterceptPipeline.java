@@ -14,8 +14,8 @@ import java.util.List;
 public class HttpProxyInterceptPipeline implements Iterable<HttpProxyIntercept> {
 
     private List<HttpProxyIntercept> intercepts;
-    private HttpProxyIntercept defaultIntercept;
 
+    private int posBeforeConnect = 0;
     private int posBeforeHead = 0;
     private int posBeforeContent = 0;
     private int posAfterHead = 0;
@@ -38,17 +38,20 @@ public class HttpProxyInterceptPipeline implements Iterable<HttpProxyIntercept> 
         return requestProto;
     }
 
-    public ProxyConfig getProxyConfig(){ return proxyConfig; }
+    public ProxyConfig getProxyConfig() {
+        return proxyConfig;
+    }
 
     public void setRequestProto(RequestProto requestProto) {
         this.requestProto = requestProto;
     }
 
-    public void setProxyConfig(ProxyConfig proxyConfig) { this.proxyConfig = proxyConfig; }
+    public void setProxyConfig(ProxyConfig proxyConfig) {
+        this.proxyConfig = proxyConfig;
+    }
 
     public HttpProxyInterceptPipeline(HttpProxyIntercept defaultIntercept) {
         this.intercepts = new LinkedList<>();
-        this.defaultIntercept = defaultIntercept;
         this.intercepts.add(defaultIntercept);
     }
 
@@ -64,8 +67,12 @@ public class HttpProxyInterceptPipeline implements Iterable<HttpProxyIntercept> 
         return this.intercepts.get(index);
     }
 
-    public HttpProxyIntercept getDefault() {
-        return this.defaultIntercept;
+    public void beforeConnect(Channel clientChannel) throws Exception {
+        if (this.posBeforeConnect < intercepts.size()) {
+            HttpProxyIntercept intercept = intercepts.get(this.posBeforeConnect++);
+            intercept.beforeConnect(clientChannel, this);
+        }
+        this.posBeforeConnect = 0;
     }
 
     public void beforeRequest(Channel clientChannel, HttpRequest httpRequest) throws Exception {

@@ -5,7 +5,17 @@ import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 
+/**
+ * http拦截器
+ * beforeForward -> beforeRequest -> afterResponse
+ */
 public class HttpProxyIntercept {
+
+    /**
+     * 在与目标服务器建立连接之前拦截
+     */
+    public void beforeConnect(Channel clientChannel, HttpProxyInterceptPipeline pipeline) throws Exception {
+    }
 
     /**
      * 拦截代理服务器到目标服务器的请求头

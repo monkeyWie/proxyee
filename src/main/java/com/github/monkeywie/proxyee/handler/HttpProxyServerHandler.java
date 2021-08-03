@@ -5,7 +5,6 @@ import com.github.monkeywie.proxyee.exception.HttpProxyExceptionHandle;
 import com.github.monkeywie.proxyee.intercept.HttpProxyIntercept;
 import com.github.monkeywie.proxyee.intercept.HttpProxyInterceptInitializer;
 import com.github.monkeywie.proxyee.intercept.HttpProxyInterceptPipeline;
-import com.github.monkeywie.proxyee.intercept.HttpTunnelIntercept;
 import com.github.monkeywie.proxyee.proxy.ProxyConfig;
 import com.github.monkeywie.proxyee.proxy.ProxyHandleFactory;
 import com.github.monkeywie.proxyee.server.HttpProxyServer;
@@ -42,7 +41,6 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
     private final ProxyConfig proxyConfig;
     private final HttpProxyInterceptInitializer interceptInitializer;
     private HttpProxyInterceptPipeline interceptPipeline;
-    private final HttpTunnelIntercept tunnelIntercept;
     private final HttpProxyExceptionHandle exceptionHandle;
     private List requestList;
     private boolean isConnect;
@@ -59,11 +57,10 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
         return exceptionHandle;
     }
 
-    public HttpProxyServerHandler(HttpProxyServerConfig serverConfig, HttpProxyInterceptInitializer interceptInitializer, HttpTunnelIntercept tunnelIntercept, ProxyConfig proxyConfig, HttpProxyExceptionHandle exceptionHandle) {
+    public HttpProxyServerHandler(HttpProxyServerConfig serverConfig, HttpProxyInterceptInitializer interceptInitializer, ProxyConfig proxyConfig, HttpProxyExceptionHandle exceptionHandle) {
         this.serverConfig = serverConfig;
         this.proxyConfig = proxyConfig;
         this.interceptInitializer = interceptInitializer;
-        this.tunnelIntercept = tunnelIntercept;
         this.exceptionHandle = exceptionHandle;
     }
 
@@ -168,7 +165,7 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                 ctx.writeAndFlush(response);
                 return false;
             }
-            HttpAuthContext.setToken(ctx.channel(),httpToken);
+            HttpAuthContext.setToken(ctx.channel(), httpToken);
         }
         return true;
     }
@@ -179,22 +176,18 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
             if (isHttp && !(msg instanceof HttpRequest)) {
                 return;
             }
+            if (interceptPipeline == null) {
+                interceptPipeline = buildOnlyConnectPipeline();
+                interceptPipeline.setRequestProto(new RequestProto(host, port, isSsl));
+            }
+            interceptPipeline.beforeConnect(channel);
+
             // by default we use the proxy config set in the pipeline
-            ProxyHandler proxyHandler = ProxyHandleFactory.build(
-                    interceptPipeline == null || interceptPipeline.getProxyConfig() == null ? proxyConfig : interceptPipeline.getProxyConfig());
-            /*
-             * 添加SSL client hello的Server Name Indication extension(SNI扩展) 有些服务器对于client
-             * hello不带SNI扩展时会直接返回Received fatal alert: handshake_failure(握手错误)
-             * 例如：https://cdn.mdn.mozilla.net/static/img/favicon32.7f3da72dcea1.png
-             */
-            RequestProto requestProto;
-            if (!isHttp) {
-                requestProto = new RequestProto(host, port, isSsl);
-                if (this.tunnelIntercept != null) {
-                    this.tunnelIntercept.handle(requestProto);
-                }
-            } else {
-                requestProto = interceptPipeline.getRequestProto();
+            ProxyHandler proxyHandler = ProxyHandleFactory.build(interceptPipeline.getProxyConfig() == null ?
+                    proxyConfig : interceptPipeline.getProxyConfig());
+
+            RequestProto requestProto = interceptPipeline.getRequestProto();
+            if (isHttp) {
                 HttpRequest httpRequest = (HttpRequest) msg;
                 // 检查requestProto是否有修改
                 RequestProto newRP = ProtoUtil.getRequestProto(httpRequest);
@@ -208,6 +201,12 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                     }
                 }
             }
+
+            /*
+             * 添加SSL client hello的Server Name Indication extension(SNI扩展) 有些服务器对于client
+             * hello不带SNI扩展时会直接返回Received fatal alert: handshake_failure(握手错误)
+             * 例如：https://cdn.mdn.mozilla.net/static/img/favicon32.7f3da72dcea1.png
+             */
             ChannelInitializer channelInitializer = isHttp ? new HttpProxyInitializer(channel, requestProto, proxyHandler)
                     : new TunnelProxyInitializer(channel, proxyHandler);
             Bootstrap bootstrap = new Bootstrap();
@@ -280,6 +279,13 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                 clientChannel.writeAndFlush(httpContent);
             }
         });
+        interceptInitializer.init(interceptPipeline);
+        return interceptPipeline;
+    }
+
+    // fix issue #186: 不拦截https报文时，暴露一个扩展点用于代理设置，并且保持一致的编程接口
+    private HttpProxyInterceptPipeline buildOnlyConnectPipeline() {
+        HttpProxyInterceptPipeline interceptPipeline = new HttpProxyInterceptPipeline(new HttpProxyIntercept());
         interceptInitializer.init(interceptPipeline);
         return interceptPipeline;
     }

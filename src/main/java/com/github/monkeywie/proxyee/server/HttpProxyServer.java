@@ -5,7 +5,6 @@ import com.github.monkeywie.proxyee.crt.CertUtil;
 import com.github.monkeywie.proxyee.exception.HttpProxyExceptionHandle;
 import com.github.monkeywie.proxyee.handler.HttpProxyServerHandler;
 import com.github.monkeywie.proxyee.intercept.HttpProxyInterceptInitializer;
-import com.github.monkeywie.proxyee.intercept.HttpTunnelIntercept;
 import com.github.monkeywie.proxyee.proxy.ProxyConfig;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -43,7 +42,6 @@ public class HttpProxyServer {
     private HttpProxyCACertFactory caCertFactory;
     private HttpProxyServerConfig serverConfig;
     private HttpProxyInterceptInitializer proxyInterceptInitializer;
-    private HttpTunnelIntercept tunnelIntercept;
     private HttpProxyExceptionHandle httpProxyExceptionHandle;
     private ProxyConfig proxyConfig;
 
@@ -122,11 +120,6 @@ public class HttpProxyServer {
         return this;
     }
 
-    public HttpProxyServer tunnelIntercept(HttpTunnelIntercept tunnelIntercept) {
-        this.tunnelIntercept = tunnelIntercept;
-        return this;
-    }
-
     public void start(int port) {
         start(null, port);
     }
@@ -185,7 +178,7 @@ public class HttpProxyServer {
                     protected void initChannel(Channel ch) throws Exception {
                         ch.pipeline().addLast("httpCodec", new HttpServerCodec());
                         ch.pipeline().addLast("serverHandle",
-                                new HttpProxyServerHandler(serverConfig, proxyInterceptInitializer, tunnelIntercept, proxyConfig,
+                                new HttpProxyServerHandler(serverConfig, proxyInterceptInitializer, proxyConfig,
                                         httpProxyExceptionHandle));
                     }
                 });
