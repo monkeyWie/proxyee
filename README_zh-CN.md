@@ -25,7 +25,7 @@ Proxyee 是一个 JAVA 编写的 HTTP 代理服务器类库，支持 HTTP、HTTP
 <dependency>
     <groupId>com.github.monkeywie</groupId>
     <artifactId>proxyee</artifactId>
-    <version>1.4.5</version>
+    <version>1.5.0</version>
 </dependency>
 ```
 
@@ -127,12 +127,15 @@ openssl req -sha256 -new -x509 -days 365 -key ca.key -out ca.crt \
 - 基本验证
 
 ```java
-// curl -i -x 127.0.0.1:9999 -U admin:123456 https://www.baidu.com
+// curl -i -x 127.0.0.1:9999 -U admin:123456 http://www.baidu.com
 HttpProxyServerConfig config = new HttpProxyServerConfig();
         config.setAuthenticationProvider(new BasicHttpProxyAuthenticationProvider() {
             @Override
             protected boolean authenticate(String usr, String pwd) {
-                return "admin".equals(usr) && "123456".equals(pwd);
+                if ("admin".equals(usr) && "123456".equals(pwd)) {
+                    return new BasicHttpToken(usr, pwd);
+                }
+                return null;
             }
         });
 new HttpProxyServer()
@@ -143,6 +146,14 @@ new HttpProxyServer()
 - 自定义验证
 
 通过实现`HttpProxyAuthenticationProvider`接口来自定义验证。
+
+### 获取身份验证上下文
+
+在授权通过之后，可以在后续的链路中获取到验证通过返回的token信息。
+
+```java
+HttpToken token = HttpAuthContext.getToken(clientChannel);
+```
 
 ## 前置代理支持
 

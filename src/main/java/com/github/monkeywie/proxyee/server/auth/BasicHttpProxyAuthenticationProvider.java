@@ -1,5 +1,7 @@
 package com.github.monkeywie.proxyee.server.auth;
 
+import com.github.monkeywie.proxyee.server.auth.model.BasicHttpToken;
+
 import java.util.Base64;
 
 /**
@@ -7,7 +9,7 @@ import java.util.Base64;
  * @Description
  * @Date 2021/1/15 14:12
  */
-public abstract class BasicHttpProxyAuthenticationProvider implements HttpProxyAuthenticationProvider {
+public abstract class BasicHttpProxyAuthenticationProvider implements HttpProxyAuthenticationProvider<BasicHttpToken> {
 
     public static final String AUTH_TYPE_BASIC = "Basic";
     public static final String AUTH_REALM_BASIC = "Access to the staging site";
@@ -20,9 +22,9 @@ public abstract class BasicHttpProxyAuthenticationProvider implements HttpProxyA
         return AUTH_REALM_BASIC;
     }
 
-    protected abstract boolean authenticate(String usr, String pwd);
+    protected abstract BasicHttpToken authenticate(String usr, String pwd);
 
-    public boolean authenticate(String authorization) {
+    public BasicHttpToken authenticate(String authorization) {
         String usr = "";
         String pwd = "";
         if (authorization != null && authorization.length() > 0) {
