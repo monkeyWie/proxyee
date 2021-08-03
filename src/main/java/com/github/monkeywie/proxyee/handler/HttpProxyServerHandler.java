@@ -10,7 +10,9 @@ import com.github.monkeywie.proxyee.proxy.ProxyConfig;
 import com.github.monkeywie.proxyee.proxy.ProxyHandleFactory;
 import com.github.monkeywie.proxyee.server.HttpProxyServer;
 import com.github.monkeywie.proxyee.server.HttpProxyServerConfig;
+import com.github.monkeywie.proxyee.server.auth.HttpAuthContext;
 import com.github.monkeywie.proxyee.server.auth.HttpProxyAuthenticationProvider;
+import com.github.monkeywie.proxyee.server.auth.model.HttpToken;
 import com.github.monkeywie.proxyee.util.ProtoUtil;
 import com.github.monkeywie.proxyee.util.ProtoUtil.RequestProto;
 import io.netty.bootstrap.Bootstrap;
@@ -159,12 +161,14 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
     private boolean authenticate(ChannelHandlerContext ctx, HttpRequest request) {
         if (serverConfig.getAuthenticationProvider() != null) {
             HttpProxyAuthenticationProvider authProvider = serverConfig.getAuthenticationProvider();
-            if (!authProvider.authenticate(request.headers().get(HttpHeaderNames.PROXY_AUTHORIZATION))) {
+            HttpToken httpToken = authProvider.authenticate(request.headers().get(HttpHeaderNames.PROXY_AUTHORIZATION));
+            if (httpToken == null) {
                 HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpProxyServer.UNAUTHORIZED);
                 response.headers().set(HttpHeaderNames.PROXY_AUTHENTICATE, authProvider.authType() + " realm=\"" + authProvider.authRealm() + "\"");
                 ctx.writeAndFlush(response);
                 return false;
             }
+            HttpAuthContext.setToken(ctx.channel(),httpToken);
         }
         return true;
     }

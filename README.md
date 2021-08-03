@@ -25,7 +25,7 @@ Proxyee is a JAVA written HTTP proxy server library that supports HTTP, HTTPS, W
 <dependency>
     <groupId>com.github.monkeywie</groupId>
     <artifactId>proxyee</artifactId>
-    <version>1.4.5</version>
+    <version>1.5.0</version>
 </dependency>
 ```
 
@@ -122,12 +122,15 @@ Currently only basic authentication are supported.
 - Basic
 
 ```java
-// curl -i -x 127.0.0.1:9999 -U admin:123456 https://www.baidu.com
+// curl -i -x 127.0.0.1:9999 -U admin:123456 http://www.baidu.com
 HttpProxyServerConfig config = new HttpProxyServerConfig();
         config.setAuthenticationProvider(new BasicHttpProxyAuthenticationProvider() {
             @Override
             protected boolean authenticate(String usr, String pwd) {
-                return "admin".equals(usr) && "123456".equals(pwd);
+                if ("admin".equals(usr) && "123456".equals(pwd)) {
+                    return new BasicHttpToken(usr, pwd);
+                }
+                return null;
             }
         });
 new HttpProxyServer()
@@ -138,6 +141,14 @@ new HttpProxyServer()
 - Custom
 
 Customize authentication by implementing the `HttpProxyAuthenticationProvider` interface.
+
+### Authentication context
+
+After the authorization, the token returned from the verification pass can be obtained in the pipeline.
+
+```java
+HttpToken token = HttpAuthContext.getToken(clientChannel);
+```
 
 ## Pre-proxy support
 
