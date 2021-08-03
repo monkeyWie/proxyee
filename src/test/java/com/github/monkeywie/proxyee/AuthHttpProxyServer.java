@@ -9,11 +9,10 @@ import com.github.monkeywie.proxyee.server.auth.BasicHttpProxyAuthenticationProv
 import com.github.monkeywie.proxyee.server.auth.HttpAuthContext;
 import com.github.monkeywie.proxyee.server.auth.model.BasicHttpToken;
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.HttpRequest;
 
 public class AuthHttpProxyServer {
 
-    // curl -i -x 127.0.0.1:9999 -U admin:123456 http://www.baidu.com
+    // curl -i -x 127.0.0.1:9999 -U admin:123456 https://www.baidu.com
     public static void main(String[] args) throws Exception {
         HttpProxyServerConfig config = new HttpProxyServerConfig();
         config.setAuthenticationProvider(new BasicHttpProxyAuthenticationProvider() {
@@ -32,9 +31,8 @@ public class AuthHttpProxyServer {
                     public void init(HttpProxyInterceptPipeline pipeline) {
                         pipeline.addLast(new HttpProxyIntercept() {
                             @Override
-                            public void beforeRequest(Channel clientChannel, HttpRequest httpRequest, HttpProxyInterceptPipeline pipeline) throws Exception {
+                            public void beforeConnect(Channel clientChannel, HttpProxyInterceptPipeline pipeline) throws Exception {
                                 System.out.println(HttpAuthContext.getToken(clientChannel));
-                                super.beforeRequest(clientChannel, httpRequest, pipeline);
                             }
                         });
                     }
