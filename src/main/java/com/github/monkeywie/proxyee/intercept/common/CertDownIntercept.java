@@ -9,7 +9,6 @@ import com.github.monkeywie.proxyee.util.ProtoUtil.RequestProto;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.*;
 
-import java.net.InetSocketAddress;
 import java.security.cert.X509Certificate;
 
 /**
@@ -17,18 +16,20 @@ import java.security.cert.X509Certificate;
  */
 public class CertDownIntercept extends HttpProxyIntercept {
 
-    private boolean crtFlag = false;
+    private boolean isDirect = false;
 
     private X509Certificate cert = null;
 
     /**
      * Using proxyee's own CA certificate to construct CertDownIntercept
      */
-    public CertDownIntercept() {}
+    public CertDownIntercept() {
+    }
 
     /**
      * Using CA public key in {@linkplain HttpProxyCACertFactory CaCertFactory} to construct CertDownIntercept
      * <p> Visitors will receive a CA certificate from CaCertFactory instead of proxyee's built-in certificate.
+     *
      * @param certFactory The same factory as {@link com.github.monkeywie.proxyee.server.HttpProxyServer}
      *                    ({@link com.github.monkeywie.proxyee.server.HttpProxyServer#caCertFactory(HttpProxyCACertFactory)})
      *                    is required, otherwise HTTP processing will fail
@@ -40,7 +41,8 @@ public class CertDownIntercept extends HttpProxyIntercept {
 
     /**
      * Provide certificate structure CertDownIntercept directly.
-     * @param caCert The public key of CA certificate consistent with 
+     *
+     * @param caCert The public key of CA certificate consistent with
      *               {@link com.github.monkeywie.proxyee.server.HttpProxyServer}.
      */
     public CertDownIntercept(X509Certificate caCert) {
@@ -55,18 +57,16 @@ public class CertDownIntercept extends HttpProxyIntercept {
             clientChannel.close();
             return;
         }
-        InetSocketAddress inetSocketAddress = (InetSocketAddress) clientChannel.localAddress();
-        if (requestProto.getHost().equals(inetSocketAddress.getHostString()) &&
-                requestProto.getPort() == inetSocketAddress.getPort()) {
-            crtFlag = true;
+        if (!httpRequest.headers().contains(HttpHeaderNames.PROXY_CONNECTION)) {
+            isDirect = true;
             if (httpRequest.uri().matches("^.*/ca.crt.*$")) {  //下载证书
                 HttpResponse httpResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1,
                         HttpResponseStatus.OK);
 
                 byte[] bts = this.cert == null ? CertUtil
-                .loadCert(Thread.currentThread().getContextClassLoader().getResourceAsStream("ca.crt"))
-                .getEncoded() :
-                cert.getEncoded();
+                        .loadCert(Thread.currentThread().getContextClassLoader().getResourceAsStream("ca.crt"))
+                        .getEncoded() :
+                        cert.getEncoded();
 
                 httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/x-x509-ca-cert");
                 httpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, bts.length);
@@ -98,7 +98,7 @@ public class CertDownIntercept extends HttpProxyIntercept {
     @Override
     public void beforeRequest(Channel clientChannel, HttpContent httpContent,
                               HttpProxyInterceptPipeline pipeline) throws Exception {
-        if (!crtFlag) {
+        if (!isDirect) {
             pipeline.beforeRequest(clientChannel, httpContent);
         }
     }
