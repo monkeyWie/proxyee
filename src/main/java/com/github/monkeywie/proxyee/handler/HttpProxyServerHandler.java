@@ -118,6 +118,7 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
             }
         } else { // ssl和websocket的握手处理
             if (serverConfig.isHandleSsl()) {
+
                 ByteBuf byteBuf = (ByteBuf) msg;
                 if (byteBuf.getByte(0) == 22) {// ssl握手
                     isSsl = true;

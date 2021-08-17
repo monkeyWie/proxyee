@@ -1,56 +1,40 @@
 package com.github.monkeywie.proxyee.util;
 
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpRequest;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ProtoUtil {
 
+    /*
+    代理服务器需要处理两种握手类型，一种是非CONNECT的http报文代理，另外一种是CONNECT的TCP报文原始转发
+    示例：
+        GET http://www.google.com/ HTTP/1.1
+        CONNECT www.google.com:443 HTTP/1.1
+        CONNECT echo.websocket.org:443 HTTP/1.1
+        CONNECT echo.websocket.org:80 HTTP/1.1
+    当客户端请求协议为TLS(https、wss)、WebSocket(ws)的时候，都会发起CONNECT请求进行原始转发，
+    所以在握手的时候是无法区分客户端原始请求是否为TLS。
+     */
     public static RequestProto getRequestProto(HttpRequest httpRequest) {
         RequestProto requestProto = new RequestProto();
-        int port = -1;
-        String hostStr = httpRequest.headers().get(HttpHeaderNames.HOST);
-        if (hostStr == null) {
-            Pattern pattern = Pattern.compile("^(?:https?://)?(?<host>[^/]*)/?.*$");
-            Matcher matcher = pattern.matcher(httpRequest.uri());
-            if (matcher.find()) {
-                hostStr = matcher.group("host");
-            } else {
-                return null;
-            }
+        String uri = httpRequest.uri().toLowerCase();
+
+        if (!uri.startsWith("http://")) {
+            uri = "http://" + uri;
         }
-        String uriStr = httpRequest.uri();
-        Pattern pattern = Pattern.compile("^(?:https?://)?(?<host>[^:]*)(?::(?<port>\\d+))?(/.*)?$");
-        Matcher matcher = pattern.matcher(hostStr);
-        //先从host上取端口号没取到再从uri上取端口号 issues#4
-        String portTemp = null;
-        if (matcher.find()) {
-            requestProto.setHost(matcher.group("host"));
-            portTemp = matcher.group("port");
-            if (portTemp == null) {
-                matcher = pattern.matcher(uriStr);
-                if (matcher.find()) {
-                    portTemp = matcher.group("port");
-                }
-            }
+        URL url;
+        try {
+            url = new URL(uri);
+        } catch (MalformedURLException e) {
+            return null;
         }
-        if (portTemp != null) {
-            port = Integer.parseInt(portTemp);
-        }
-        boolean isSsl = uriStr.indexOf("https") == 0 || hostStr.indexOf("https") == 0;
-        if (port == -1) {
-            if (isSsl) {
-                port = 443;
-            } else {
-                port = 80;
-            }
-        }
-        requestProto.setPort(port);
-        requestProto.setSsl(isSsl);
+
+        requestProto.setHost(url.getHost());
+        requestProto.setPort(url.getPort() != -1 ? url.getPort() : url.getDefaultPort());
         return requestProto;
     }
 
