@@ -1,5 +1,6 @@
 package com.github.monkeywie.proxyee.util;
 
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpRequest;
 
 import java.io.Serializable;
@@ -35,12 +36,17 @@ public class ProtoUtil {
 
         requestProto.setHost(url.getHost());
         requestProto.setPort(url.getPort() != -1 ? url.getPort() : url.getDefaultPort());
+        requestProto.setProxy(httpRequest.headers().contains(HttpHeaderNames.PROXY_CONNECTION));
         return requestProto;
     }
 
     public static class RequestProto implements Serializable {
 
         private static final long serialVersionUID = -6471051659605127698L;
+        /**
+         * 请求是否来源于http代理，用于区分是通过代理服务访问的还是直接通过http访问的代理服务器
+         */
+        private boolean proxy;
         private String host;
         private int port;
         private boolean ssl;
@@ -78,6 +84,14 @@ public class ProtoUtil {
             this.ssl = ssl;
         }
 
+        public boolean getProxy() {
+            return proxy;
+        }
+
+        public void setProxy(boolean proxy) {
+            this.proxy = proxy;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -91,6 +105,15 @@ public class ProtoUtil {
         @Override
         public int hashCode() {
             return Objects.hash(host, port, ssl);
+        }
+
+        public RequestProto copy() {
+            RequestProto requestProto = new RequestProto();
+            requestProto.setProxy(proxy);
+            requestProto.setHost(host);
+            requestProto.setPort(port);
+            requestProto.setSsl(ssl);
+            return requestProto;
         }
     }
 }

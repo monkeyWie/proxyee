@@ -33,9 +33,7 @@ import java.util.List;
 public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
 
     private ChannelFuture cf;
-    private String host;
-    private int port;
-    private boolean isSsl = false;
+    private RequestProto requestProto;
     private int status = 0;
     private final HttpProxyServerConfig serverConfig;
     private final ProxyConfig proxyConfig;
@@ -70,7 +68,7 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
             HttpRequest request = (HttpRequest) msg;
             // 第一次建立连接取host和端口号和处理代理握手
             if (status == 0) {
-                RequestProto requestProto = ProtoUtil.getRequestProto(request);
+                requestProto = ProtoUtil.getRequestProto(request);
                 if (requestProto == null) { // bad request
                     ctx.channel().close();
                     return;
@@ -89,8 +87,6 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                     return;
                 }
                 status = 1;
-                this.host = requestProto.getHost();
-                this.port = requestProto.getPort();
                 if ("CONNECT".equalsIgnoreCase(request.method().name())) {// 建立代理握手
                     status = 2;
                     HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpProxyServer.SUCCESS);
@@ -102,7 +98,7 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                 }
             }
             interceptPipeline = buildPipeline();
-            interceptPipeline.setRequestProto(new RequestProto(host, port, isSsl));
+            interceptPipeline.setRequestProto(requestProto.copy());
             // fix issue #27
             if (request.uri().indexOf("/") != 0) {
                 URL url = new URL(request.uri());
@@ -118,13 +114,12 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
             }
         } else { // ssl和websocket的握手处理
             if (serverConfig.isHandleSsl()) {
-
                 ByteBuf byteBuf = (ByteBuf) msg;
                 if (byteBuf.getByte(0) == 22) {// ssl握手
-                    isSsl = true;
+                    requestProto.setSsl(true);
                     int port = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
                     SslContext sslCtx = SslContextBuilder
-                            .forServer(serverConfig.getServerPriKey(), CertPool.getCert(port, this.host, serverConfig)).build();
+                            .forServer(serverConfig.getServerPriKey(), CertPool.getCert(port, requestProto.getHost(), serverConfig)).build();
                     ctx.pipeline().addFirst("httpCodec", new HttpServerCodec());
                     ctx.pipeline().addFirst("sslHandle", sslCtx.newHandler(ctx.alloc()));
                     // 重新过一遍pipeline，拿到解密后的的http报文
@@ -179,7 +174,7 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
             }
             if (interceptPipeline == null) {
                 interceptPipeline = buildOnlyConnectPipeline();
-                interceptPipeline.setRequestProto(new RequestProto(host, port, isSsl));
+                interceptPipeline.setRequestProto(requestProto.copy());
             }
             interceptPipeline.beforeConnect(channel);
 

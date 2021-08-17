@@ -4,7 +4,6 @@ import com.github.monkeywie.proxyee.crt.CertUtil;
 import com.github.monkeywie.proxyee.intercept.HttpProxyIntercept;
 import com.github.monkeywie.proxyee.intercept.HttpProxyInterceptPipeline;
 import com.github.monkeywie.proxyee.server.HttpProxyCACertFactory;
-import com.github.monkeywie.proxyee.util.ProtoUtil;
 import com.github.monkeywie.proxyee.util.ProtoUtil.RequestProto;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.*;
@@ -52,12 +51,8 @@ public class CertDownIntercept extends HttpProxyIntercept {
     @Override
     public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
                               HttpProxyInterceptPipeline pipeline) throws Exception {
-        RequestProto requestProto = ProtoUtil.getRequestProto(httpRequest);
-        if (requestProto == null) { //bad request
-            clientChannel.close();
-            return;
-        }
-        if (!httpRequest.headers().contains(HttpHeaderNames.PROXY_CONNECTION)) {
+        RequestProto requestProto = pipeline.getRequestProto();
+        if (!requestProto.getProxy()) {
             isDirect = true;
             if (httpRequest.uri().matches("^.*/ca.crt.*$")) {  //下载证书
                 HttpResponse httpResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1,
