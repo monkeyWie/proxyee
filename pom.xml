@@ -5,7 +5,7 @@
 
     <groupId>com.github.monkeywie</groupId>
     <artifactId>proxyee</artifactId>
-    <version>1.5.4</version>
+    <version>1.5.5</version>
     <build>
         <plugins>
             <plugin>
@@ -81,7 +81,7 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk15on</artifactId>
-            <version>1.58</version>
+            <version>1.60</version>
         </dependency>
     </dependencies>
 
