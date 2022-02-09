@@ -37,6 +37,23 @@ public class HttpProxyServerConfig {
         this.resolver = resolver;
     }
 
+    private HttpProxyServerConfig(Builder builder) {
+        this.clientSslCtx = builder.clientSslCtx;
+        this.issuer = builder.issuer;
+        this.caNotBefore = builder.caNotBefore;
+        this.caNotAfter = builder.caNotAfter;
+        this.caPriKey = builder.caPriKey;
+        this.serverPriKey = builder.serverPriKey;
+        this.serverPubKey = builder.serverPubKey;
+        this.proxyLoopGroup = builder.proxyLoopGroup;
+        this.bossGroupThreads = builder.bossGroupThreads;
+        this.workerGroupThreads = builder.workerGroupThreads;
+        this.proxyGroupThreads = builder.proxyGroupThreads;
+        this.handleSsl = builder.handleSsl;
+        this.httpProxyAcceptHandler = builder.httpProxyAcceptHandler;
+        this.resolver = builder.resolver;
+    }
+
     public SslContext getClientSslCtx() {
         return clientSslCtx;
     }
@@ -153,4 +170,104 @@ public class HttpProxyServerConfig {
         return resolver;
     }
 
+    public static class Builder {
+        private SslContext clientSslCtx;
+        private String issuer;
+        private Date caNotBefore;
+        private Date caNotAfter;
+        private PrivateKey caPriKey;
+        private PrivateKey serverPriKey;
+        private PublicKey serverPubKey;
+        private EventLoopGroup proxyLoopGroup;
+        private int bossGroupThreads;
+        private int workerGroupThreads;
+        private int proxyGroupThreads;
+        private boolean handleSsl;
+        private HttpProxyAcceptHandler httpProxyAcceptHandler;
+        private HttpProxyAuthenticationProvider authenticationProvider;
+        private final AddressResolverGroup<? extends SocketAddress> resolver;
+
+        public Builder() {
+            this(DefaultAddressResolverGroup.INSTANCE);
+        }
+
+        public Builder(final AddressResolverGroup<? extends SocketAddress> resolver) {
+            this.resolver = resolver;
+        }
+
+        public Builder setClientSslCtx(SslContext clientSslCtx) {
+            this.clientSslCtx = clientSslCtx;
+            return this;
+        }
+
+        public Builder setIssuer(String issuer) {
+            this.issuer = issuer;
+            return this;
+        }
+
+        public Builder setCaNotBefore(Date caNotBefore) {
+            this.caNotBefore = caNotBefore;
+            return this;
+        }
+
+        public Builder setCaNotAfter(Date caNotAfter) {
+            this.caNotAfter = caNotAfter;
+            return this;
+        }
+
+        public Builder setCaPriKey(PrivateKey caPriKey) {
+            this.caPriKey = caPriKey;
+            return this;
+        }
+
+        public Builder setServerPriKey(PrivateKey serverPriKey) {
+            this.serverPriKey = serverPriKey;
+            return this;
+        }
+
+        public Builder setServerPubKey(PublicKey serverPubKey) {
+            this.serverPubKey = serverPubKey;
+            return this;
+        }
+
+        public Builder setProxyLoopGroup(EventLoopGroup proxyLoopGroup) {
+            this.proxyLoopGroup = proxyLoopGroup;
+            return this;
+        }
+
+        public Builder setHandleSsl(boolean handleSsl) {
+            this.handleSsl = handleSsl;
+            return this;
+        }
+
+        public Builder setBossGroupThreads(int bossGroupThreads) {
+            this.bossGroupThreads = bossGroupThreads;
+            return this;
+        }
+
+        public Builder setWorkerGroupThreads(int workerGroupThreads) {
+            this.workerGroupThreads = workerGroupThreads;
+            return this;
+        }
+
+        public Builder setProxyGroupThreads(int proxyGroupThreads) {
+            this.proxyGroupThreads = proxyGroupThreads;
+            return this;
+        }
+
+        public Builder setHttpProxyAcceptHandler(final HttpProxyAcceptHandler httpProxyAcceptHandler) {
+            this.httpProxyAcceptHandler = httpProxyAcceptHandler;
+            return this;
+        }
+
+        public Builder setAuthenticationProvider(final HttpProxyAuthenticationProvider authenticationProvider) {
+            this.authenticationProvider = authenticationProvider;
+            return this;
+        }
+
+        public HttpProxyServerConfig build() {
+            HttpProxyServerConfig config = new HttpProxyServerConfig(this);
+            return config;
+        }
+    }
 }
