@@ -154,7 +154,13 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
     private boolean authenticate(ChannelHandlerContext ctx, HttpRequest request) {
         if (serverConfig.getAuthenticationProvider() != null) {
             HttpProxyAuthenticationProvider authProvider = serverConfig.getAuthenticationProvider();
-            HttpToken httpToken = authProvider.authenticate(request.headers().get(HttpHeaderNames.PROXY_AUTHORIZATION));
+
+            // Disable auth for request?
+            if (!authProvider.matches(request)) {
+                return true;
+            }
+
+            HttpToken httpToken = authProvider.authenticate(request);
             if (httpToken == null) {
                 HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpProxyServer.UNAUTHORIZED);
                 response.headers().set(HttpHeaderNames.PROXY_AUTHENTICATE, authProvider.authType() + " realm=\"" + authProvider.authRealm() + "\"");
