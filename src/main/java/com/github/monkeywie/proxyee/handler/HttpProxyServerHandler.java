@@ -43,16 +43,69 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
     private List requestList;
     private boolean isConnect;
 
+    protected ChannelFuture getChannelFuture() {
+        return cf;
+    }
+
+    protected void setChannelFuture(ChannelFuture cf) {
+        this.cf = cf;
+    }
+
+    public HttpProxyExceptionHandle getExceptionHandle() {
+        return exceptionHandle;
+    }
+
+    public HttpProxyInterceptInitializer getInterceptInitializer() {
+        return interceptInitializer;
+    }
+
+    protected boolean getIsConnect() {
+        return isConnect;
+    }
+
+    protected void setIsConnect(boolean isConnect) {
+        this.isConnect = isConnect;
+    }
+
+    protected List getRequestList() {
+        return requestList;
+    }
+
+    protected void setRequestList(List requestList) {
+        this.requestList = requestList;
+    }
+
+
+    public ProxyConfig getProxyConfig() {
+        return proxyConfig;
+    }
+
+    protected RequestProto getRequestProto() {
+        return requestProto;
+    }
+
+    protected void setRequestProto(RequestProto requestProto) {
+        this.requestProto = requestProto;
+    }
+
     public HttpProxyServerConfig getServerConfig() {
         return serverConfig;
+    }
+
+    protected int getStatus() {
+        return status;
+    }
+
+    protected void setStatus(int status) {
+        this.status = status;
     }
 
     public HttpProxyInterceptPipeline getInterceptPipeline() {
         return interceptPipeline;
     }
 
-    public HttpProxyExceptionHandle getExceptionHandle() {
-        return exceptionHandle;
+    protected void setInterceptPipeline(HttpProxyInterceptPipeline interceptPipeline) {
+        this.interceptPipeline = interceptPipeline;
     }
 
     public HttpProxyServerHandler(HttpProxyServerConfig serverConfig, HttpProxyInterceptInitializer interceptInitializer, ProxyConfig proxyConfig, HttpProxyExceptionHandle exceptionHandle) {
@@ -67,28 +120,28 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof HttpRequest) {
             HttpRequest request = (HttpRequest) msg;
             // 第一次建立连接取host和端口号和处理代理握手
-            if (status == 0) {
-                requestProto = ProtoUtil.getRequestProto(request);
-                if (requestProto == null) { // bad request
+            if (getStatus() == 0) {
+                setRequestProto(ProtoUtil.getRequestProto(request));
+                if (getRequestProto() == null) { // bad request
                     ctx.channel().close();
                     return;
                 }
                 // 首次连接处理
-                if (serverConfig.getHttpProxyAcceptHandler() != null
-                        && !serverConfig.getHttpProxyAcceptHandler().onAccept(request, ctx.channel())) {
-                    status = 2;
+                if (getServerConfig().getHttpProxyAcceptHandler() != null
+                        && !getServerConfig().getHttpProxyAcceptHandler().onAccept(request, ctx.channel())) {
+                    setStatus(2);
                     ctx.channel().close();
                     return;
                 }
                 // 代理身份验证
                 if (!authenticate(ctx, request)) {
-                    status = 2;
+                    setStatus(2);
                     ctx.channel().close();
                     return;
                 }
-                status = 1;
+                setStatus(1);
                 if ("CONNECT".equalsIgnoreCase(request.method().name())) {// 建立代理握手
-                    status = 2;
+                    setStatus(2);
                     HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpProxyServer.SUCCESS);
                     ctx.writeAndFlush(response);
                     ctx.channel().pipeline().remove("httpCodec");
@@ -97,29 +150,29 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                     return;
                 }
             }
-            interceptPipeline = buildPipeline();
-            interceptPipeline.setRequestProto(requestProto.copy());
+            setInterceptPipeline(buildPipeline());
+            getInterceptPipeline().setRequestProto(getRequestProto().copy());
             // fix issue #27
             if (request.uri().indexOf("/") != 0) {
                 URL url = new URL(request.uri());
                 request.setUri(url.getFile());
             }
-            interceptPipeline.beforeRequest(ctx.channel(), request);
+            getInterceptPipeline().beforeRequest(ctx.channel(), request);
         } else if (msg instanceof HttpContent) {
-            if (status != 2) {
-                interceptPipeline.beforeRequest(ctx.channel(), (HttpContent) msg);
+            if (getStatus() != 2) {
+                getInterceptPipeline().beforeRequest(ctx.channel(), (HttpContent) msg);
             } else {
                 ReferenceCountUtil.release(msg);
-                status = 1;
+                setStatus(1);
             }
         } else { // ssl和websocket的握手处理
-            if (serverConfig.isHandleSsl()) {
+            if (getServerConfig().isHandleSsl()) {
                 ByteBuf byteBuf = (ByteBuf) msg;
                 if (byteBuf.getByte(0) == 22) {// ssl握手
-                    requestProto.setSsl(true);
+                    getRequestProto().setSsl(true);
                     int port = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
                     SslContext sslCtx = SslContextBuilder
-                            .forServer(serverConfig.getServerPriKey(), CertPool.getCert(port, requestProto.getHost(), serverConfig)).build();
+                            .forServer(getServerConfig().getServerPriKey(), CertPool.getCert(port, getRequestProto().getHost(), getServerConfig())).build();
                     ctx.pipeline().addFirst("httpCodec", new HttpServerCodec());
                     ctx.pipeline().addFirst("sslHandle", sslCtx.newHandler(ctx.alloc()));
                     // 重新过一遍pipeline，拿到解密后的的http报文
@@ -133,19 +186,19 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        if (cf != null) {
-            cf.channel().close();
+        if (getChannelFuture() != null) {
+            getChannelFuture().channel().close();
         }
         ctx.channel().close();
-        if (serverConfig.getHttpProxyAcceptHandler() != null) {
-            serverConfig.getHttpProxyAcceptHandler().onClose(ctx.channel());
+        if (getServerConfig().getHttpProxyAcceptHandler() != null) {
+            getServerConfig().getHttpProxyAcceptHandler().onClose(ctx.channel());
         }
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        if (cf != null) {
-            cf.channel().close();
+        if (getChannelFuture() != null) {
+            getChannelFuture().channel().close();
         }
         ctx.channel().close();
         exceptionHandle.beforeCatch(ctx.channel(), cause);
@@ -173,33 +226,33 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void handleProxyData(Channel channel, Object msg, boolean isHttp) throws Exception {
-        if (cf == null) {
+        if (getChannelFuture() == null) {
             // connection异常 还有HttpContent进来，不转发
             if (isHttp && !(msg instanceof HttpRequest)) {
                 return;
             }
-            if (interceptPipeline == null) {
-                interceptPipeline = buildOnlyConnectPipeline();
-                interceptPipeline.setRequestProto(requestProto.copy());
+            if (getInterceptPipeline() == null) {
+                setInterceptPipeline(buildOnlyConnectPipeline());
+                getInterceptPipeline().setRequestProto(getRequestProto().copy());
             }
-            interceptPipeline.beforeConnect(channel);
+            getInterceptPipeline().beforeConnect(channel);
 
             // by default we use the proxy config set in the pipeline
-            ProxyHandler proxyHandler = ProxyHandleFactory.build(interceptPipeline.getProxyConfig() == null ?
-                    proxyConfig : interceptPipeline.getProxyConfig());
+            ProxyHandler proxyHandler = ProxyHandleFactory.build(getInterceptPipeline().getProxyConfig() == null ?
+                    proxyConfig : getInterceptPipeline().getProxyConfig());
 
-            RequestProto requestProto = interceptPipeline.getRequestProto();
+            RequestProto requestProto = getInterceptPipeline().getRequestProto();
             if (isHttp) {
                 HttpRequest httpRequest = (HttpRequest) msg;
                 // 检查requestProto是否有修改
                 RequestProto newRP = ProtoUtil.getRequestProto(httpRequest);
                 if (!newRP.equals(requestProto)) {
                     // 更新Host请求头
-                    if ((requestProto.getSsl() && requestProto.getPort() == 443)
-                            || (!requestProto.getSsl() && requestProto.getPort() == 80)) {
-                        httpRequest.headers().set(HttpHeaderNames.HOST, requestProto.getHost());
+                    if ((getRequestProto().getSsl() && getRequestProto().getPort() == 443)
+                            || (!getRequestProto().getSsl() && getRequestProto().getPort() == 80)) {
+                        httpRequest.headers().set(HttpHeaderNames.HOST, getRequestProto().getHost());
                     } else {
-                        httpRequest.headers().set(HttpHeaderNames.HOST, requestProto.getHost() + ":" + requestProto.getPort());
+                        httpRequest.headers().set(HttpHeaderNames.HOST, getRequestProto().getHost() + ":" + getRequestProto().getPort());
                     }
                 }
             }
@@ -212,39 +265,39 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
             ChannelInitializer channelInitializer = isHttp ? new HttpProxyInitializer(channel, requestProto, proxyHandler)
                     : new TunnelProxyInitializer(channel, proxyHandler);
             Bootstrap bootstrap = new Bootstrap();
-            bootstrap.group(serverConfig.getProxyLoopGroup()) // 注册线程池
+            bootstrap.group(getServerConfig().getProxyLoopGroup()) // 注册线程池
                     .channel(NioSocketChannel.class) // 使用NioSocketChannel来作为连接用的channel类
                     .handler(channelInitializer);
             if (proxyHandler != null) {
                 // 代理服务器解析DNS和连接
                 bootstrap.resolver(NoopAddressResolverGroup.INSTANCE);
             } else {
-                bootstrap.resolver(serverConfig.resolver());
+                bootstrap.resolver(getServerConfig().resolver());
             }
-            requestList = new LinkedList();
-            cf = bootstrap.connect(requestProto.getHost(), requestProto.getPort());
-            cf.addListener((ChannelFutureListener) future -> {
+            setRequestList(new LinkedList());
+            setChannelFuture(bootstrap.connect(getRequestProto().getHost(), getRequestProto().getPort()));
+            getChannelFuture().addListener((ChannelFutureListener) future -> {
                 if (future.isSuccess()) {
                     future.channel().writeAndFlush(msg);
                     synchronized (requestList) {
-                        requestList.forEach(obj -> future.channel().writeAndFlush(obj));
-                        requestList.clear();
-                        isConnect = true;
+                        getRequestList().forEach(obj -> future.channel().writeAndFlush(obj));
+                        getRequestList().clear();
+                        setIsConnect(true);
                     }
                 } else {
-                    requestList.forEach(obj -> ReferenceCountUtil.release(obj));
-                    requestList.clear();
+                    getRequestList().forEach(obj -> ReferenceCountUtil.release(obj));
+                    getRequestList().clear();
                     getExceptionHandle().beforeCatch(channel, future.cause());
                     future.channel().close();
                     channel.close();
                 }
             });
         } else {
-            synchronized (requestList) {
-                if (isConnect) {
-                    cf.channel().writeAndFlush(msg);
+            synchronized (getRequestList()) {
+                if (getIsConnect()) {
+                    getChannelFuture().channel().writeAndFlush(msg);
                 } else {
-                    requestList.add(msg);
+                    getRequestList().add(msg);
                 }
             }
         }
@@ -281,14 +334,14 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                 clientChannel.writeAndFlush(httpContent);
             }
         });
-        interceptInitializer.init(interceptPipeline);
+        getInterceptInitializer().init(interceptPipeline);
         return interceptPipeline;
     }
 
     // fix issue #186: 不拦截https报文时，暴露一个扩展点用于代理设置，并且保持一致的编程接口
     private HttpProxyInterceptPipeline buildOnlyConnectPipeline() {
         HttpProxyInterceptPipeline interceptPipeline = new HttpProxyInterceptPipeline(new HttpProxyIntercept());
-        interceptInitializer.init(interceptPipeline);
+        getInterceptInitializer().init(interceptPipeline);
         return interceptPipeline;
     }
 }
