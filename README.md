@@ -25,7 +25,7 @@ Proxyee is a JAVA written HTTP proxy server library that supports HTTP, HTTPS, W
 <dependency>
     <groupId>com.github.monkeywie</groupId>
     <artifactId>proxyee</artifactId>
-    <version>1.5.5</version>
+    <version>1.6.0</version>
 </dependency>
 ```
 
