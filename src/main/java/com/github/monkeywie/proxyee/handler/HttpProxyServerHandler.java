@@ -140,7 +140,7 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                     return;
                 }
                 setStatus(1);
-                if ("CONNECT".equalsIgnoreCase(request.method().name())) {// 建立代理握手
+                if (HttpMethod.CONNECT.name().equalsIgnoreCase(request.method().name())) {// 建立代理握手
                     setStatus(2);
                     HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpProxyServer.SUCCESS);
                     ctx.writeAndFlush(response);
@@ -166,22 +166,38 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                 setStatus(1);
             }
         } else { // ssl和websocket的握手处理
-            if (getServerConfig().isHandleSsl()) {
-                ByteBuf byteBuf = (ByteBuf) msg;
-                if (byteBuf.getByte(0) == 22) {// ssl握手
-                    getRequestProto().setSsl(true);
-                    int port = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
-                    SslContext sslCtx = SslContextBuilder
-                            .forServer(getServerConfig().getServerPriKey(), CertPool.getCert(port, getRequestProto().getHost(), getServerConfig())).build();
-                    ctx.pipeline().addFirst("httpCodec", new HttpServerCodec());
-                    ctx.pipeline().addFirst("sslHandle", sslCtx.newHandler(ctx.alloc()));
-                    // 重新过一遍pipeline，拿到解密后的的http报文
-                    ctx.pipeline().fireChannelRead(msg);
-                    return;
-                }
+            ByteBuf byteBuf = (ByteBuf) msg;
+            if (getServerConfig().isHandleSsl() && byteBuf.getByte(0) == 22) {// ssl握手
+                getRequestProto().setSsl(true);
+                int port = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
+                SslContext sslCtx = SslContextBuilder
+                        .forServer(getServerConfig().getServerPriKey(), CertPool.getCert(port, getRequestProto().getHost(), getServerConfig())).build();
+                ctx.pipeline().addFirst("httpCodec", new HttpServerCodec());
+                ctx.pipeline().addFirst("sslHandle", sslCtx.newHandler(ctx.alloc()));
+                // 重新过一遍pipeline，拿到解密后的的http报文
+                ctx.pipeline().fireChannelRead(msg);
+                return;
+            }
+            if (byteBuf.readableBytes() < 8) {
+                return;
+            }
+            // 如果connect后面跑的是HTTP报文，也可以抓包处理
+            if (isHttp(byteBuf)) {
+                ctx.pipeline().addFirst("httpCodec", new HttpServerCodec());
+                ctx.pipeline().fireChannelRead(msg);
+                return;
             }
             handleProxyData(ctx.channel(), msg, false);
         }
+    }
+
+    private boolean isHttp(ByteBuf byteBuf) {
+        byte[] bytes = new byte[8];
+        byteBuf.getBytes(0, bytes);
+        String methodToken = new String(bytes);
+        return methodToken.startsWith("GET ") || methodToken.startsWith("POST ") || methodToken.startsWith("HEAD ")
+                || methodToken.startsWith("PUT ") || methodToken.startsWith("DELETE ") || methodToken.startsWith("OPTIONS ")
+                || methodToken.startsWith("CONNECT ") || methodToken.startsWith("TRACE ");
     }
 
     @Override
