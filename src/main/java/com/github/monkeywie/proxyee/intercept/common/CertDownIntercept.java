@@ -11,7 +11,9 @@ import io.netty.handler.codec.http.*;
 import java.security.cert.X509Certificate;
 
 /**
- * 处理证书下载页面 http://proxyServerIp:proxyServerPort
+ * <div class="zh">处理证书下载页面</div>
+ * <div class="en">Process the certificate download page</div>
+ * http://proxyServerIp:proxyServerPort
  */
 public class CertDownIntercept extends HttpProxyIntercept {
 
@@ -73,7 +75,7 @@ public class CertDownIntercept extends HttpProxyIntercept {
                 clientChannel.close();
             } else if (httpRequest.uri().matches("^.*/favicon.ico$")) {
                 clientChannel.close();
-            } else {  //跳转下载页面
+            } else {  // 跳转下载页面 | Jump to download page
                 HttpResponse httpResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1,
                         HttpResponseStatus.OK);
                 String html = "<html><body><div style=\"margin-top:100px;text-align:center;\"><a href=\"ca.crt\">ProxyeeRoot ca.crt</a></div></body></html>";

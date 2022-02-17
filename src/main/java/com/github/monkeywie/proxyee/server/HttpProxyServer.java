@@ -33,7 +33,8 @@ public class HttpProxyServer {
 
     private final static InternalLogger log = InternalLoggerFactory.getInstance(HttpProxyServer.class);
 
-    //http代理隧道握手成功
+    // http代理隧道握手成功
+    // http proxy tunnel handshake successful
     public final static HttpResponseStatus SUCCESS = new HttpResponseStatus(200,
             "Connection established");
     public final static HttpResponseStatus UNAUTHORIZED = new HttpResponseStatus(407,
@@ -69,14 +70,19 @@ public class HttpProxyServer {
                     caCert = caCertFactory.getCACert();
                     caPriKey = caCertFactory.getCAPriKey();
                 }
-                //读取CA证书使用者信息
+                // 读取CA证书使用者信息
+                // Read CA certificate user information
                 serverConfig.setIssuer(CertUtil.getSubject(caCert));
-                //读取CA证书有效时段(server证书有效期超出CA证书的，在手机上会提示证书不安全)
+                // 读取CA证书有效时段(server证书有效期超出CA证书的，在手机上会提示证书不安全)
+                // Read the validity period of the CA certificate (if the validity period of the server certificate
+                //   exceeds the CA certificate, the mobile phone will prompt that the certificate is not safe)
                 serverConfig.setCaNotBefore(caCert.getNotBefore());
                 serverConfig.setCaNotAfter(caCert.getNotAfter());
-                //CA私钥用于给动态生成的网站SSL证书签证
+                // CA私钥用于给动态生成的网站SSL证书签证
+                // The CA private key is used to sign the dynamically generated website SSL certificate
                 serverConfig.setCaPriKey(caPriKey);
-                //生产一对随机公私钥用于网站SSL证书动态创建
+                // 生产一对随机公私钥用于网站SSL证书动态创建
+                // Generate a pair of random public and private keys for dynamic creation of website SSL certificates
                 KeyPair keyPair = CertUtil.genKeyPair();
                 serverConfig.setServerPriKey(keyPair.getPrivate());
                 serverConfig.setServerPubKey(keyPair.getPublic());
@@ -187,7 +193,8 @@ public class HttpProxyServer {
     }
 
     /**
-     * 释放资源
+     * <div class="zh">释放资源</div>
+     * <div class="en">release resources</div>
      */
     public void close() {
         EventLoopGroup eventLoopGroup = serverConfig.getProxyLoopGroup();
@@ -205,7 +212,8 @@ public class HttpProxyServer {
     }
 
     /**
-     * 注册JVM关闭的钩子以释放资源
+     * <div class="zh">注册JVM关闭的钩子以释放资源</div>
+     * <div class="en">Register hooks for JVM shutdown to release resources</div>
      */
     public void shutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(this::close, "Server Shutdown Thread"));

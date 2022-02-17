@@ -32,8 +32,10 @@ public abstract class FullResponseIntercept extends HttpProxyIntercept {
         if (httpResponse instanceof FullHttpResponse) {
             FullHttpResponse fullHttpResponse = (FullHttpResponse) httpResponse;
             // 判断是第一个处理FullResponse的拦截器是否匹配
+            // Determine whether the first interceptor that handles FullResponse matches
             boolean isFirstMatch = isMatch != null && isMatch == true;
             // 判断后续的拦截器是否匹配
+            // Determine whether subsequent interceptors match
             boolean isAfterMatch = isFirstMatch ? false : match(pipeline.getHttpRequest(), pipeline.getHttpResponse(), pipeline);
             if (isFirstMatch || isAfterMatch) {
                 handleResponse(pipeline.getHttpRequest(), fullHttpResponse, pipeline);
@@ -66,7 +68,8 @@ public abstract class FullResponseIntercept extends HttpProxyIntercept {
 
     @Deprecated
     /**
-     * 剥离到工具类中了：{@link com.github.monkeywie.proxyee.util#isHtml(HttpRequest, HttpResponse)}
+     * <div class="zh">剥离到工具类中了：{@link com.github.monkeywie.proxyee.util#isHtml(HttpRequest, HttpResponse)}</div>
+     * <div class="en">Stripped into the tool class: {@link com.github.monkeywie.proxyee.util#isHtml(HttpRequest, HttpResponse)}</div>
      */
     protected boolean isHtml(HttpRequest httpRequest, HttpResponse httpResponse) {
         String accept = httpRequest.headers().get(HttpHeaderNames.ACCEPT);
@@ -77,13 +80,15 @@ public abstract class FullResponseIntercept extends HttpProxyIntercept {
     }
 
     /**
-     * 匹配到的响应会解码成FullResponse
+     * <div class="zh">匹配到的响应会解码成FullResponse</div>
+     * <div class="en">The matched response will be decoded into FullResponse</div>
      */
     public abstract boolean match(HttpRequest httpRequest, HttpResponse httpResponse,
                                   HttpProxyInterceptPipeline pipeline);
 
     /**
-     * 拦截并处理响应
+     * <div class="zh">拦截并处理响应</div>
+     * <div class="en">Intercept and process the response</div>
      */
     public void handleResponse(HttpRequest httpRequest, FullHttpResponse httpResponse,
                                HttpProxyInterceptPipeline pipeline) {

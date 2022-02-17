@@ -7,7 +7,8 @@ import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.proxy.ProxyHandler;
 
 /**
- * HTTP代理，转发解码后的HTTP报文
+ * <div class="en">HTTP proxy, forwarding decoded HTTP packets</div>
+ * <div class="zh">HTTP代理，转发解码后的HTTP报文</div>
  */
 public class HttpProxyInitializer extends ChannelInitializer {
 

@@ -8,7 +8,8 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.handler.proxy.ProxyHandler;
 
 /**
- * http代理隧道，转发原始报文
+ * <div class="zh">http代理隧道，转发原始报文</div>
+ * <div class="en">http proxy tunnel, forwarding original packets</div>
  */
 public class TunnelProxyInitializer extends ChannelInitializer {
 
