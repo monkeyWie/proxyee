@@ -4,6 +4,7 @@
   
   [![maven](https://img.shields.io/maven-central/v/com.github.monkeywie/proxyee.svg)](https://search.maven.org/search?q=com.github.monkeywie)
   [![license](https://img.shields.io/github/license/monkeywie/proxyee.svg)](https://opensource.org/licenses/MIT)
+  [![javadoc](https://javadoc.io/badge2/com.github.monkeywie/proxyee/javadoc.svg)](https://javadoc.io/doc/com.github.monkeywie/proxyee)
 
   </p>
   <p>
