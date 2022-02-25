@@ -28,6 +28,7 @@ public class HttpProxyServerConfig {
     private HttpProxyAcceptHandler httpProxyAcceptHandler;
     private HttpProxyAuthenticationProvider authenticationProvider;
     private final AddressResolverGroup<? extends SocketAddress> resolver;
+    private Iterable<String> ciphers;
 
     public HttpProxyServerConfig() {
         this(DefaultAddressResolverGroup.INSTANCE);
@@ -168,6 +169,14 @@ public class HttpProxyServerConfig {
 
     public AddressResolverGroup<?> resolver() {
         return resolver;
+    }
+    
+    public Iterable<String> getCiphers() {
+        return ciphers;
+    }
+
+    public void setCiphers(Iterable<String> ciphers) {
+        this.ciphers = ciphers;
     }
 
     public static class Builder {

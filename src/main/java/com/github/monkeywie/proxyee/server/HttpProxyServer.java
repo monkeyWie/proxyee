@@ -56,9 +56,12 @@ public class HttpProxyServer {
 
         if (serverConfig.isHandleSsl()) {
             try {
-                serverConfig.setClientSslCtx(
-                        SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE)
-                                .build());
+                SslContextBuilder contextBuilder = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE);
+                // 设置ciphers用于改变 client hello 握手协议指纹
+                if(serverConfig.getCiphers()!=null){
+                    contextBuilder.ciphers(serverConfig.getCiphers());
+                }
+                serverConfig.setClientSslCtx(contextBuilder.build());
                 ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
                 X509Certificate caCert;
                 PrivateKey caPriKey;
