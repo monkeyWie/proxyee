@@ -120,6 +120,7 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof HttpRequest) {
             HttpRequest request = (HttpRequest) msg;
             // 第一次建立连接取host和端口号和处理代理握手
+            // The first connection is established to take the host and port number and handle the proxy handshake
             if (getStatus() == 0) {
                 setRequestProto(ProtoUtil.getRequestProto(request));
                 if (getRequestProto() == null) { // bad request
@@ -127,6 +128,7 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                     return;
                 }
                 // 首次连接处理
+                // first connection handling
                 if (getServerConfig().getHttpProxyAcceptHandler() != null
                         && !getServerConfig().getHttpProxyAcceptHandler().onAccept(request, ctx.channel())) {
                     setStatus(2);
@@ -134,6 +136,7 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                     return;
                 }
                 // 代理身份验证
+                // proxy authentication
                 if (!authenticate(ctx, request)) {
                     setStatus(2);
                     ctx.channel().close();
@@ -165,9 +168,9 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                 ReferenceCountUtil.release(msg);
                 setStatus(1);
             }
-        } else { // ssl和websocket的握手处理
+        } else { // ssl和websocket的握手处理 | Handshake processing of ssl and websocket
             ByteBuf byteBuf = (ByteBuf) msg;
-            if (getServerConfig().isHandleSsl() && byteBuf.getByte(0) == 22) {// ssl握手
+            if (getServerConfig().isHandleSsl() && byteBuf.getByte(0) == 22) {// ssl握手 | ssl handshake
                 getRequestProto().setSsl(true);
                 int port = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
                 SslContext sslCtx = SslContextBuilder
@@ -182,6 +185,7 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                 return;
             }
             // 如果connect后面跑的是HTTP报文，也可以抓包处理
+            // If the HTTP packet is running behind the connect, you can also capture the packet and process it.
             if (isHttp(byteBuf)) {
                 ctx.pipeline().addFirst("httpCodec", new HttpServerCodec());
                 ctx.pipeline().fireChannelRead(msg);
@@ -244,6 +248,7 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
     private void handleProxyData(Channel channel, Object msg, boolean isHttp) throws Exception {
         if (getChannelFuture() == null) {
             // connection异常 还有HttpContent进来，不转发
+            // connection exception and HttpContent comes in, not forwarded
             if (isHttp && !(msg instanceof HttpRequest)) {
                 return;
             }
@@ -261,9 +266,11 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
             if (isHttp) {
                 HttpRequest httpRequest = (HttpRequest) msg;
                 // 检查requestProto是否有修改
+                // Check if requestProto is modified
                 RequestProto newRP = ProtoUtil.getRequestProto(httpRequest);
                 if (!newRP.equals(requestProto)) {
                     // 更新Host请求头
+                    // Update the Host request header
                     if ((getRequestProto().getSsl() && getRequestProto().getPort() == 443)
                             || (!getRequestProto().getSsl() && getRequestProto().getPort() == 80)) {
                         httpRequest.headers().set(HttpHeaderNames.HOST, getRequestProto().getHost());
@@ -277,15 +284,19 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
              * 添加SSL client hello的Server Name Indication extension(SNI扩展) 有些服务器对于client
              * hello不带SNI扩展时会直接返回Received fatal alert: handshake_failure(握手错误)
              * 例如：https://cdn.mdn.mozilla.net/static/img/favicon32.7f3da72dcea1.png
+             *
+             * Add the Server Name Indication extension (SNI extension) of the SSL client hello to some servers for the client
+             * Received fatal alert: handshake_failure (handshake error) will be returned directly without the SNI extension.
+             * For example: https://cdn.mdn.mozilla.net/static/img/favicon32.7f3da72dcea1.png
              */
             ChannelInitializer channelInitializer = isHttp ? new HttpProxyInitializer(channel, requestProto, proxyHandler)
                     : new TunnelProxyInitializer(channel, proxyHandler);
             Bootstrap bootstrap = new Bootstrap();
-            bootstrap.group(getServerConfig().getProxyLoopGroup()) // 注册线程池
-                    .channel(NioSocketChannel.class) // 使用NioSocketChannel来作为连接用的channel类
+            bootstrap.group(getServerConfig().getProxyLoopGroup()) // 注册线程池 | register thread pool
+                    .channel(NioSocketChannel.class) // 使用NioSocketChannel来作为连接用的channel类 | Use NioSocketChannel as the connection channel class
                     .handler(channelInitializer);
             if (proxyHandler != null) {
-                // 代理服务器解析DNS和连接
+                // 代理服务器解析DNS和连接 | Proxy server resolves DNS and connects
                 bootstrap.resolver(NoopAddressResolverGroup.INSTANCE);
             } else {
                 bootstrap.resolver(getServerConfig().resolver());
@@ -338,7 +349,7 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                                       HttpProxyInterceptPipeline pipeline) throws Exception {
                 clientChannel.writeAndFlush(httpResponse);
                 if (HttpHeaderValues.WEBSOCKET.toString().equals(httpResponse.headers().get(HttpHeaderNames.UPGRADE))) {
-                    // websocket转发原始报文
+                    // websocket转发原始报文 | Websocket forwards original packets
                     proxyChannel.pipeline().remove("httpCodec");
                     clientChannel.pipeline().remove("httpCodec");
                 }
@@ -355,6 +366,7 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     // fix issue #186: 不拦截https报文时，暴露一个扩展点用于代理设置，并且保持一致的编程接口
+    // When not intercepting https messages, expose an extension point for proxy settings and maintain a consistent programming interface
     private HttpProxyInterceptPipeline buildOnlyConnectPipeline() {
         HttpProxyInterceptPipeline interceptPipeline = new HttpProxyInterceptPipeline(new HttpProxyIntercept());
         getInterceptInitializer().init(interceptPipeline);

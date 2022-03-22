@@ -24,7 +24,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * 使用了 BC 套件的证书生成器.
+ * <div class="zh">使用了 BC 套件的证书生成器.</div>
+ * <div class="en">Use the BouncyCastle suite's certificate generator.</div>
  *
  * @author LamGC
  */
@@ -32,7 +33,8 @@ import java.util.stream.Stream;
 public class BouncyCastleCertGenerator implements CertGenerator {
 
     static {
-        //注册BouncyCastleProvider加密库
+        // 注册BouncyCastleProvider加密库
+        // Register the BouncyCastleProvider cryptographic library
         Security.addProvider(new BouncyCastleProvider());
     }
 
@@ -44,7 +46,8 @@ public class BouncyCastleCertGenerator implements CertGenerator {
                                           String... hosts) throws Exception {
         /* String issuer = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=ProxyeeRoot";
         String subject = "C=CN, ST=GD, L=SZ, O=lee, OU=study, CN=" + host;*/
-        //根据CA证书subject来动态生成目标服务器证书的issuer和subject
+        // 根据CA证书subject来动态生成目标服务器证书的issuer和subject
+        // Dynamically generate the issuer and subject of the target server certificate based on the CA certificate subject
         String subject = Stream.of(issuer.split(", ")).map(item -> {
             String[] arr = item.split("=");
             if ("CN".equals(arr[0])) {
@@ -54,22 +57,27 @@ public class BouncyCastleCertGenerator implements CertGenerator {
             }
         }).collect(Collectors.joining(", "));
 
-        //doc from https://www.cryptoworkshop.com/guide/
+        // doc from https://www.cryptoworkshop.com/guide/
         JcaX509v3CertificateBuilder jv3Builder = new JcaX509v3CertificateBuilder(new X500Name(issuer),
                 //issue#3 修复ElementaryOS上证书不安全问题(serialNumber为1时证书会提示不安全)，避免serialNumber冲突，采用时间戳+4位随机数生成
+                // Fix the insecure certificate issue on ElementaryOS (when serialNumber is 1, the certificate will be
+                // prompted to be insecure), avoid serialNumber conflict, and use timestamp + 4-digit random number to
+                // generate
                 BigInteger.valueOf(System.currentTimeMillis() + (long) (Math.random() * 10000) + 1000),
                 caNotBefore,
                 caNotAfter,
                 new X500Name(subject),
                 serverPubKey);
-        //SAN扩展证书支持的域名，否则浏览器提示证书不安全
+        // SAN扩展证书支持的域名，否则浏览器提示证书不安全
+        // The domain name supported by the SAN extended certificate, otherwise the browser prompts that the certificate is not secure
         GeneralName[] generalNames = new GeneralName[hosts.length];
         for (int i = 0; i < hosts.length; i++) {
             generalNames[i] = new GeneralName(GeneralName.dNSName, hosts[i]);
         }
         GeneralNames subjectAltName = new GeneralNames(generalNames);
         jv3Builder.addExtension(Extension.subjectAlternativeName, false, subjectAltName);
-        //SHA256 用SHA1浏览器可能会提示证书不安全
+        // SHA256 用SHA1浏览器可能会提示证书不安全
+        // SHA256 and SHA1 browsers may prompt that the certificate is not secure
         ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSAEncryption").build(caPriKey);
         return new JcaX509CertificateConverter().getCertificate(jv3Builder.build(signer));
     }
