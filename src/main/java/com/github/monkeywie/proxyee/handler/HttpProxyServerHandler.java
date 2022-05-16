@@ -253,22 +253,22 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
             }
             getInterceptPipeline().beforeConnect(channel);
 
-            // by default we use the proxy config set in the pipeline
+            // by default, we use the proxy config set in the pipeline
             ProxyHandler proxyHandler = ProxyHandleFactory.build(getInterceptPipeline().getProxyConfig() == null ?
                     proxyConfig : getInterceptPipeline().getProxyConfig());
 
-            RequestProto requestProto = getInterceptPipeline().getRequestProto();
+            RequestProto pipeRp = getInterceptPipeline().getRequestProto();
             if (isHttp) {
                 HttpRequest httpRequest = (HttpRequest) msg;
                 // 检查requestProto是否有修改
                 RequestProto newRP = ProtoUtil.getRequestProto(httpRequest);
-                if (!newRP.equals(requestProto)) {
+                if (!newRP.equals(pipeRp)) {
                     // 更新Host请求头
-                    if ((getRequestProto().getSsl() && getRequestProto().getPort() == 443)
-                            || (!getRequestProto().getSsl() && getRequestProto().getPort() == 80)) {
-                        httpRequest.headers().set(HttpHeaderNames.HOST, getRequestProto().getHost());
+                    if ((pipeRp.getSsl() && pipeRp.getPort() == 443)
+                            || (!pipeRp.getSsl() && pipeRp.getPort() == 80)) {
+                        httpRequest.headers().set(HttpHeaderNames.HOST, pipeRp.getHost());
                     } else {
-                        httpRequest.headers().set(HttpHeaderNames.HOST, getRequestProto().getHost() + ":" + getRequestProto().getPort());
+                        httpRequest.headers().set(HttpHeaderNames.HOST, pipeRp.getHost() + ":" + pipeRp.getPort());
                     }
                 }
             }
@@ -278,7 +278,7 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
              * hello不带SNI扩展时会直接返回Received fatal alert: handshake_failure(握手错误)
              * 例如：https://cdn.mdn.mozilla.net/static/img/favicon32.7f3da72dcea1.png
              */
-            ChannelInitializer channelInitializer = isHttp ? new HttpProxyInitializer(channel, requestProto, proxyHandler)
+            ChannelInitializer channelInitializer = isHttp ? new HttpProxyInitializer(channel, pipeRp, proxyHandler)
                     : new TunnelProxyInitializer(channel, proxyHandler);
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.group(getServerConfig().getProxyLoopGroup()) // 注册线程池
@@ -291,7 +291,7 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                 bootstrap.resolver(getServerConfig().resolver());
             }
             setRequestList(new LinkedList());
-            setChannelFuture(bootstrap.connect(getRequestProto().getHost(), getRequestProto().getPort()));
+            setChannelFuture(bootstrap.connect(pipeRp.getHost(), pipeRp.getPort()));
             getChannelFuture().addListener((ChannelFutureListener) future -> {
                 if (future.isSuccess()) {
                     future.channel().writeAndFlush(msg);
