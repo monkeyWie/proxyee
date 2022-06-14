@@ -7,7 +7,7 @@ import io.netty.handler.codec.http.HttpResponse;
 
 /**
  * http拦截器
- * beforeForward -> beforeRequest -> afterResponse
+ * beforeConnect -> beforeRequest -> afterResponse
  */
 public class HttpProxyIntercept {
 
@@ -15,6 +15,7 @@ public class HttpProxyIntercept {
      * 在与目标服务器建立连接之前拦截
      */
     public void beforeConnect(Channel clientChannel, HttpProxyInterceptPipeline pipeline) throws Exception {
+        pipeline.beforeConnect(clientChannel);
     }
 
     /**
