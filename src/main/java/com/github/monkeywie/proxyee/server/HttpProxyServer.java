@@ -179,7 +179,10 @@ public class HttpProxyServer {
 
                     @Override
                     protected void initChannel(Channel ch) throws Exception {
-                        ch.pipeline().addLast("httpCodec", new HttpServerCodec());
+                        ch.pipeline().addLast("httpCodec", new HttpServerCodec(
+                                serverConfig.getMaxInitialLineLength(),
+                                serverConfig.getMaxHeaderSize(),
+                                serverConfig.getMaxChunkSize()));
                         ch.pipeline().addLast("serverHandle",
                                 new HttpProxyServerHandler(serverConfig, proxyInterceptInitializer, proxyConfig,
                                         httpProxyExceptionHandle));

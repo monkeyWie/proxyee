@@ -3,6 +3,7 @@ package com.github.monkeywie.proxyee.server;
 import com.github.monkeywie.proxyee.server.accept.HttpProxyAcceptHandler;
 import com.github.monkeywie.proxyee.server.auth.HttpProxyAuthenticationProvider;
 import io.netty.channel.EventLoopGroup;
+import io.netty.handler.codec.http.HttpObjectDecoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.resolver.AddressResolverGroup;
 import io.netty.resolver.DefaultAddressResolverGroup;
@@ -29,6 +30,9 @@ public class HttpProxyServerConfig {
     private HttpProxyAuthenticationProvider authenticationProvider;
     private final AddressResolverGroup<? extends SocketAddress> resolver;
     private Iterable<String> ciphers;
+    private int maxInitialLineLength = HttpObjectDecoder.DEFAULT_MAX_INITIAL_LINE_LENGTH;
+    private int maxHeaderSize = HttpObjectDecoder.DEFAULT_MAX_HEADER_SIZE;
+    private int maxChunkSize = HttpObjectDecoder.DEFAULT_MAX_CHUNK_SIZE;
 
     public HttpProxyServerConfig() {
         this(DefaultAddressResolverGroup.INSTANCE);
@@ -53,6 +57,9 @@ public class HttpProxyServerConfig {
         this.handleSsl = builder.handleSsl;
         this.httpProxyAcceptHandler = builder.httpProxyAcceptHandler;
         this.resolver = builder.resolver;
+        this.maxInitialLineLength = builder.maxInitialLineLength;
+        this.maxHeaderSize = builder.maxHeaderSize;
+        this.maxChunkSize = builder.maxChunkSize;
     }
 
     public SslContext getClientSslCtx() {
@@ -170,13 +177,37 @@ public class HttpProxyServerConfig {
     public AddressResolverGroup<?> resolver() {
         return resolver;
     }
-    
+
     public Iterable<String> getCiphers() {
         return ciphers;
     }
 
     public void setCiphers(Iterable<String> ciphers) {
         this.ciphers = ciphers;
+    }
+
+    public int getMaxInitialLineLength() {
+        return maxInitialLineLength;
+    }
+
+    public void setMaxInitialLineLength(int maxInitialLineLength) {
+        this.maxInitialLineLength = maxInitialLineLength;
+    }
+
+    public int getMaxHeaderSize() {
+        return maxHeaderSize;
+    }
+
+    public void setMaxHeaderSize(int maxHeaderSize) {
+        this.maxHeaderSize = maxHeaderSize;
+    }
+
+    public int getMaxChunkSize() {
+        return maxChunkSize;
+    }
+
+    public void setMaxChunkSize(int maxChunkSize) {
+        this.maxChunkSize = maxChunkSize;
     }
 
     public static class Builder {
@@ -195,6 +226,9 @@ public class HttpProxyServerConfig {
         private HttpProxyAcceptHandler httpProxyAcceptHandler;
         private HttpProxyAuthenticationProvider authenticationProvider;
         private final AddressResolverGroup<? extends SocketAddress> resolver;
+        private int maxInitialLineLength = HttpObjectDecoder.DEFAULT_MAX_INITIAL_LINE_LENGTH;
+        private int maxHeaderSize = HttpObjectDecoder.DEFAULT_MAX_HEADER_SIZE;
+        private int maxChunkSize = HttpObjectDecoder.DEFAULT_MAX_CHUNK_SIZE;
 
         public Builder() {
             this(DefaultAddressResolverGroup.INSTANCE);
@@ -271,6 +305,21 @@ public class HttpProxyServerConfig {
 
         public Builder setAuthenticationProvider(final HttpProxyAuthenticationProvider authenticationProvider) {
             this.authenticationProvider = authenticationProvider;
+            return this;
+        }
+
+        public Builder setMaxInitialLineLength(int maxInitialLineLength) {
+            this.maxInitialLineLength = maxInitialLineLength;
+            return this;
+        }
+
+        public Builder setMaxHeaderSize(int maxHeaderSize) {
+            this.maxHeaderSize = maxHeaderSize;
+            return this;
+        }
+
+        public Builder setMaxChunkSize(int maxChunkSize) {
+            this.maxChunkSize = maxChunkSize;
             return this;
         }
 
