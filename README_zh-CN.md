@@ -25,7 +25,7 @@ Proxyee 是一个 JAVA 编写的 HTTP 代理服务器类库，支持 HTTP、HTTP
 <dependency>
     <groupId>com.github.monkeywie</groupId>
     <artifactId>proxyee</artifactId>
-    <version>1.6.5</version>
+    <version>1.6.6</version>
 </dependency>
 ```
 
