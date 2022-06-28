@@ -199,7 +199,10 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                 int port = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
                 SslContext sslCtx = SslContextBuilder
                         .forServer(getServerConfig().getServerPriKey(), CertPool.getCert(port, getRequestProto().getHost(), getServerConfig())).build();
-                ctx.pipeline().addFirst("httpCodec", new HttpServerCodec());
+                ctx.pipeline().addFirst("httpCodec", new HttpServerCodec(
+                        getServerConfig().getMaxInitialLineLength(),
+                        getServerConfig().getMaxHeaderSize(),
+                        getServerConfig().getMaxChunkSize()));
                 ctx.pipeline().addFirst("sslHandle", sslCtx.newHandler(ctx.alloc()));
                 // 重新过一遍pipeline，拿到解密后的的http报文
                 ctx.pipeline().fireChannelRead(msg);
@@ -210,7 +213,10 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
             }
             // 如果connect后面跑的是HTTP报文，也可以抓包处理
             if (isHttp(byteBuf)) {
-                ctx.pipeline().addFirst("httpCodec", new HttpServerCodec());
+                ctx.pipeline().addFirst("httpCodec", new HttpServerCodec(
+                        getServerConfig().getMaxInitialLineLength(),
+                        getServerConfig().getMaxHeaderSize(),
+                        getServerConfig().getMaxChunkSize()));
                 ctx.pipeline().fireChannelRead(msg);
                 return;
             }
