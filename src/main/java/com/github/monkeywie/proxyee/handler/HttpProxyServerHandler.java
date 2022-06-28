@@ -18,6 +18,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.*;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.proxy.ProxyHandler;
 import io.netty.handler.ssl.SslContext;
@@ -75,7 +76,6 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
         this.requestList = requestList;
     }
 
-
     public ProxyConfig getProxyConfig() {
         return proxyConfig;
     }
@@ -115,11 +115,38 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
         this.exceptionHandle = exceptionHandle;
     }
 
+
     @Override
     public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
         if (msg instanceof HttpRequest) {
             HttpRequest request = (HttpRequest) msg;
-            // 第一次建立连接取host和端口号和处理代理握手
+            DecoderResult result = request.decoderResult();
+            Throwable cause = result.cause();
+
+            if (cause instanceof DecoderException) {
+                setStatus(2);
+                HttpResponseStatus status = null;
+
+                if (cause instanceof TooLongHttpLineException) {
+                    status = HttpResponseStatus.REQUEST_URI_TOO_LONG;
+                } else if (cause instanceof TooLongHttpHeaderException) {
+                    status = HttpResponseStatus.REQUEST_HEADER_FIELDS_TOO_LARGE;
+                } else if (cause instanceof TooLongHttpContentException) {
+                    status = HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE;
+                }
+
+                if (status == null) {
+                    status = HttpResponseStatus.BAD_REQUEST;
+                }
+
+                HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status);
+                ctx.writeAndFlush(response);
+                //ctx.channel().pipeline().remove("httpCodec");
+                ReferenceCountUtil.release(msg);
+                return;
+            }
+
+            // The first time a connection is established, the host and port number are taken and the proxy handshake is processed.
             if (getStatus() == 0) {
                 setRequestProto(ProtoUtil.getRequestProto(request));
                 if (getRequestProto() == null) { // bad request
