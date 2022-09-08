@@ -5,8 +5,8 @@ import com.github.monkeywie.proxyee.intercept.HttpProxyInterceptPipeline;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.HttpContent;
-import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.DecoderResult;
+import io.netty.handler.codec.http.*;
 import io.netty.util.ReferenceCountUtil;
 
 public class HttpProxyClientHandler extends ChannelInboundHandlerAdapter {
@@ -27,6 +27,13 @@ public class HttpProxyClientHandler extends ChannelInboundHandlerAdapter {
         HttpProxyInterceptPipeline interceptPipeline = ((HttpProxyServerHandler) clientChannel.pipeline()
                 .get("serverHandle")).getInterceptPipeline();
         if (msg instanceof HttpResponse) {
+            DecoderResult decoderResult = ((HttpResponse) msg).decoderResult();
+            Throwable cause = decoderResult.cause();
+            if(cause != null){
+                ReferenceCountUtil.release(msg);
+                this.exceptionCaught(ctx, cause);
+                return;
+            }
             interceptPipeline.afterResponse(clientChannel, ctx.channel(), (HttpResponse) msg);
         } else if (msg instanceof HttpContent) {
             interceptPipeline.afterResponse(clientChannel, ctx.channel(), (HttpContent) msg);
