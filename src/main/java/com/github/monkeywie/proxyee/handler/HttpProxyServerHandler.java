@@ -275,7 +275,25 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void handleProxyData(Channel channel, Object msg, boolean isHttp) throws Exception {
-        if (getChannelFuture() == null) {
+        RequestProto pipeRp = getInterceptPipeline().getRequestProto();
+        boolean isChangeRp = false;
+        if (isHttp && msg instanceof HttpRequest) {
+            HttpRequest httpRequest = (HttpRequest) msg;
+            // 检查requestProto是否有修改
+            RequestProto newRP = ProtoUtil.getRequestProto(httpRequest);
+            if (!newRP.equals(pipeRp)) {
+                isChangeRp = true;
+                // 更新Host请求头
+                if ((pipeRp.getSsl() && pipeRp.getPort() == 443)
+                        || (!pipeRp.getSsl() && pipeRp.getPort() == 80)) {
+                    httpRequest.headers().set(HttpHeaderNames.HOST, pipeRp.getHost());
+                } else {
+                    httpRequest.headers().set(HttpHeaderNames.HOST, pipeRp.getHost() + ":" + pipeRp.getPort());
+                }
+            }
+        }
+
+        if (isChangeRp || getChannelFuture() == null) {
             // connection异常 还有HttpContent进来，不转发
             if (isHttp && !(msg instanceof HttpRequest)) {
                 return;
@@ -289,22 +307,6 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
             // by default, we use the proxy config set in the pipeline
             ProxyHandler proxyHandler = ProxyHandleFactory.build(getInterceptPipeline().getProxyConfig() == null ?
                     proxyConfig : getInterceptPipeline().getProxyConfig());
-
-            RequestProto pipeRp = getInterceptPipeline().getRequestProto();
-            if (isHttp) {
-                HttpRequest httpRequest = (HttpRequest) msg;
-                // 检查requestProto是否有修改
-                RequestProto newRP = ProtoUtil.getRequestProto(httpRequest);
-                if (!newRP.equals(pipeRp)) {
-                    // 更新Host请求头
-                    if ((pipeRp.getSsl() && pipeRp.getPort() == 443)
-                            || (!pipeRp.getSsl() && pipeRp.getPort() == 80)) {
-                        httpRequest.headers().set(HttpHeaderNames.HOST, pipeRp.getHost());
-                    } else {
-                        httpRequest.headers().set(HttpHeaderNames.HOST, pipeRp.getHost() + ":" + pipeRp.getPort());
-                    }
-                }
-            }
 
             /*
              * 添加SSL client hello的Server Name Indication extension(SNI扩展) 有些服务器对于client
