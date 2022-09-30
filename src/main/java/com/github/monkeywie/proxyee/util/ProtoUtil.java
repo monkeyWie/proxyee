@@ -34,7 +34,7 @@ public class ProtoUtil {
             return null;
         }
 
-        requestProto.setHost(url.getHost());
+        requestProto.setHost(url.getHost().isEmpty() ? httpRequest.headers().get(HttpHeaderNames.HOST) : url.getHost());
         requestProto.setPort(url.getPort() != -1 ? url.getPort() : url.getDefaultPort());
         requestProto.setProxy(httpRequest.headers().contains(HttpHeaderNames.PROXY_CONNECTION));
         return requestProto;
