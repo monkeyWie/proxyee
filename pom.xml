@@ -5,7 +5,7 @@
 
     <groupId>com.github.monkeywie</groupId>
     <artifactId>proxyee</artifactId>
-    <version>1.6.9</version>
+    <version>1.6.10</version>
 
     <packaging>jar</packaging>
 
@@ -151,7 +151,7 @@
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.9</version>
+                        <version>1.6.10</version>
                         <extensions>true</extensions>
                         <configuration>
                             <serverId>releases</serverId>

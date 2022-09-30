@@ -54,14 +54,15 @@ public class HttpProxyServer {
         }
         serverConfig.setProxyLoopGroup(new NioEventLoopGroup(serverConfig.getProxyGroupThreads()));
 
-        if (serverConfig.isHandleSsl()) {
-            try {
-                SslContextBuilder contextBuilder = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE);
-                // 设置ciphers用于改变 client hello 握手协议指纹
-                if(serverConfig.getCiphers()!=null){
-                    contextBuilder.ciphers(serverConfig.getCiphers());
-                }
-                serverConfig.setClientSslCtx(contextBuilder.build());
+        SslContextBuilder contextBuilder = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE);
+        // 设置ciphers用于改变 client hello 握手协议指纹
+        if (serverConfig.getCiphers() != null) {
+            contextBuilder.ciphers(serverConfig.getCiphers());
+        }
+        try {
+            serverConfig.setClientSslCtx(contextBuilder.build());
+            if (serverConfig.isHandleSsl()) {
+
                 ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
                 X509Certificate caCert;
                 PrivateKey caPriKey;
@@ -83,10 +84,10 @@ public class HttpProxyServer {
                 KeyPair keyPair = CertUtil.genKeyPair();
                 serverConfig.setServerPriKey(keyPair.getPrivate());
                 serverConfig.setServerPubKey(keyPair.getPublic());
-            } catch (Exception e) {
-                serverConfig.setHandleSsl(false);
-                log.warn("SSL init fail,cause:" + e.getMessage());
             }
+        } catch (Exception e) {
+            serverConfig.setHandleSsl(false);
+            log.warn("SSL init fail,cause:" + e.getMessage());
         }
         if (proxyInterceptInitializer == null) {
             proxyInterceptInitializer = new HttpProxyInterceptInitializer();

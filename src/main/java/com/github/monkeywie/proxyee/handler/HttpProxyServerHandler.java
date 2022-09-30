@@ -275,6 +275,10 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void handleProxyData(Channel channel, Object msg, boolean isHttp) throws Exception {
+        if (getInterceptPipeline() == null) {
+            setInterceptPipeline(buildOnlyConnectPipeline());
+            getInterceptPipeline().setRequestProto(getRequestProto().copy());
+        }
         RequestProto pipeRp = getInterceptPipeline().getRequestProto();
         boolean isChangeRp = false;
         if (isHttp && msg instanceof HttpRequest) {
@@ -297,10 +301,6 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
             // connection异常 还有HttpContent进来，不转发
             if (isHttp && !(msg instanceof HttpRequest)) {
                 return;
-            }
-            if (getInterceptPipeline() == null) {
-                setInterceptPipeline(buildOnlyConnectPipeline());
-                getInterceptPipeline().setRequestProto(getRequestProto().copy());
             }
             getInterceptPipeline().beforeConnect(channel);
 
