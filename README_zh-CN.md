@@ -8,7 +8,7 @@
   </p>
   <p>
 
-  [English](/README.md) | [中文](/README_zh-CN.md)
+[English](/README.md) | [中文](/README_zh-CN.md)
 
   </p>
 </div>
@@ -28,6 +28,18 @@ Proxyee 是一个 JAVA 编写的 HTTP 代理服务器类库，支持 HTTP、HTTP
     <version>1.6.9</version>
 </dependency>
 ```
+
+## 代理推荐
+
+[https://www.ipidea.net](https://www.ipidea.net/?utm-source=levi&utm-keyword=?levi)
+
+> IPIDEA 致力于为全球用户提供优质的大数据代理服务，促进信息创造价值。
+> 优势：
+> 1、覆盖 220+的国家和地区，9000 万真实住宅 IP 资源，汇聚成大规模代理服务池。
+> 2、提供动态住宅代理、静态住宅代理、数据中心、移动代理等多种解决方案，满足电子商务、市场调查、抓取索引、网站测试、广告验证、seo 监控优化等多个业务场景。
+> 3、支持 HTTP/HTTPS/Socks5 协议
+> 4、真实住宅 IP，支持从制定国家城市访问目标网站，隐藏真实网络环境，保护隐私，24 小时持续过滤并更新，IP 纯净度高，快速响应，无限并发，99.9%的成功率，确保高效稳定连接
+> 5、支持海量 IP 免费试用
 
 ## 示例
 
@@ -85,18 +97,18 @@ new HttpProxyServer()
 
 ## HTTPS 支持
 
-需要导入项目中的CA证书(src/resources/ca.crt)至受信任的根证书颁发机构。
-可以使用CertDownIntercept拦截器，开启网页下载证书功能，访问http://serverIP:serverPort即可进入。
+需要导入项目中的 CA 证书(src/resources/ca.crt)至受信任的根证书颁发机构。
+可以使用 CertDownIntercept 拦截器，开启网页下载证书功能，访问 http://serverIP:serverPort 即可进入。
 
-> 注1：安卓手机上安装证书若弹出键入凭据存储的密码，输入锁屏密码即可。
-> 
-> 注2：Android 7以及以上，系统不再信任用户安装的证书，你需要root后，使用
-> cat ca.crt > $(openssl x509 -inform PEM -subject_hash_old -in ca.crt  | head -1).0
+> 注 1：安卓手机上安装证书若弹出键入凭据存储的密码，输入锁屏密码即可。
+>
+> 注 2：Android 7 以及以上，系统不再信任用户安装的证书，你需要 root 后，使用
+> cat ca.crt > $(openssl x509 -inform PEM -subject_hash_old -in ca.crt | head -1).0
 > 命令生成 d1488b25.0 文件，然后把文件移动到
 > /system/etc/security/cacerts/
-> 并给与644权限
-> 
-> 注3：在Android 7以及以上，即使你把证书添加进系统证书里，这个证书在chrome里也是不工作的。原因是chrome从2018年开始只信任有效期少于27个月的证书(https://www.entrustdatacard.com/blog/2018/february/chrome-requires-ct-after-april-2018)。所以你需要自行生成证书文件。
+> 并给与 644 权限
+>
+> 注 3：在 Android 7 以及以上，即使你把证书添加进系统证书里，这个证书在 chrome 里也是不工作的。原因是 chrome 从 2018 年开始只信任有效期少于 27 个月的证书(https://www.entrustdatacard.com/blog/2018/february/chrome-requires-ct-after-april-2018)。所以你需要自行生成证书文件。
 
 ### 使用自定义根证书
 
@@ -149,7 +161,7 @@ new HttpProxyServer()
 
 ### 获取身份验证上下文
 
-在授权通过之后，可以在后续的链路中获取到验证通过返回的token信息。
+在授权通过之后，可以在后续的链路中获取到验证通过返回的 token 信息。
 
 ```java
 HttpToken token = HttpAuthContext.getToken(clientChannel);
@@ -164,17 +176,6 @@ new HttpProxyServer()
     .proxyConfig(new ProxyConfig(ProxyType.SOCKS5, "127.0.0.1", 1085))  //使用socks5二级代理
     .start(9999);
 ```
-
-## 代理推荐
-
-[https://www.ipidea.net](https://www.ipidea.net/?utm-source=levi&utm-keyword=?levi)
-> IPIDEA致力于为全球用户提供优质的大数据代理服务，促进信息创造价值。
-优势：
-1、覆盖220+的国家和地区，9000万真实住宅IP资源，汇聚成大规模代理服务池。
-2、提供动态住宅代理、静态住宅代理、数据中心、移动代理等多种解决方案，满足电子商务、市场调查、抓取索引、网站测试、广告验证、seo监控优化等多个业务场景。
-3、支持HTTP/HTTPS/Socks5协议
-4、真实住宅IP，支持从制定国家城市访问目标网站，隐藏真实网络环境，保护隐私，24小时持续过滤并更新，IP纯净度高，快速响应，无限并发，99.9%的成功率，确保高效稳定连接
-5、支持海量IP免费试用
 
 ## 通讯流程
 
