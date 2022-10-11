@@ -31,7 +31,7 @@ Proxyee 是一个 JAVA 编写的 HTTP 代理服务器类库，支持 HTTP、HTTP
 
 ## 代理推荐
 
-[https://www.ipidea.net](https://www.ipidea.net/?utm-source=levi&utm-keyword=?levi)
+[https://www.ipidea.net](http://www.ipidea.net/?utm-source=monkeyWie&utm-keyword=?monkeyWie)
 
 > IPIDEA 致力于为全球用户提供优质的大数据代理服务，促进信息创造价值。
 > 

@@ -31,7 +31,7 @@ Proxyee is a JAVA written HTTP proxy server library that supports HTTP, HTTPS, W
 
 ## Provider recommendation
 
-[https://www.ipidea.net](https://www.ipidea.net/?utm-source=levi&utm-keyword=?levi)
+[https://www.ipidea.net](http://www.ipidea.net/?utm-source=monkeyWie&utm-keyword=?monkeyWie)
 
 > IPIDEA 致力于为全球用户提供优质的大数据代理服务，促进信息创造价值。
 > 
