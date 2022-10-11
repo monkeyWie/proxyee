@@ -160,6 +160,17 @@ new HttpProxyServer()
     .start(9999);
 ```
 
+## Provider recommendation
+
+[https://www.ipidea.net](https://www.ipidea.net/?utm-source=levi&utm-keyword=?levi)
+> IPIDEA致力于为全球用户提供优质的大数据代理服务，促进信息创造价值。
+优势：
+1、覆盖220+的国家和地区，9000万真实住宅IP资源，汇聚成大规模代理服务池。
+2、提供动态住宅代理、静态住宅代理、数据中心、移动代理等多种解决方案，满足电子商务、市场调查、抓取索引、网站测试、广告验证、seo监控优化等多个业务场景。
+3、支持HTTP/HTTPS/Socks5协议
+4、真实住宅IP，支持从制定国家城市访问目标网站，隐藏真实网络环境，保护隐私，24小时持续过滤并更新，IP纯净度高，快速响应，无限并发，99.9%的成功率，确保高效稳定连接
+5、支持海量IP免费试用
+
 ## Flow
 
 SSL handshake
