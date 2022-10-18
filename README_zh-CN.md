@@ -29,7 +29,7 @@ Proxyee 是一个 JAVA 编写的 HTTP 代理服务器类库，支持 HTTP、HTTP
 </dependency>
 ```
 
-## 代理推荐
+## IP池推荐
 
 [https://www.ipidea.net](http://www.ipidea.net/?utm-source=monkeyWie&utm-keyword=?monkeyWie)
 

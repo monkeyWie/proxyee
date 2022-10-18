@@ -29,7 +29,7 @@ Proxyee is a JAVA written HTTP proxy server library that supports HTTP, HTTPS, W
 </dependency>
 ```
 
-## Provider recommendation
+## IP pools
 
 [https://www.ipidea.net](http://www.ipidea.net/?utm-source=monkeyWie&utm-keyword=?monkeyWie)
 
