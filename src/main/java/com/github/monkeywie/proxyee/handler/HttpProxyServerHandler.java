@@ -287,13 +287,6 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
             RequestProto newRP = ProtoUtil.getRequestProto(httpRequest);
             if (!newRP.equals(pipeRp)) {
                 isChangeRp = true;
-                // 更新Host请求头
-                if ((pipeRp.getSsl() && pipeRp.getPort() == 443)
-                        || (!pipeRp.getSsl() && pipeRp.getPort() == 80)) {
-                    httpRequest.headers().set(HttpHeaderNames.HOST, pipeRp.getHost());
-                } else {
-                    httpRequest.headers().set(HttpHeaderNames.HOST, pipeRp.getHost() + ":" + pipeRp.getPort());
-                }
             }
         }
 
