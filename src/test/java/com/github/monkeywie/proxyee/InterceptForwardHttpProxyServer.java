@@ -8,6 +8,7 @@ import com.github.monkeywie.proxyee.server.HttpProxyServer;
 import com.github.monkeywie.proxyee.server.HttpProxyServerConfig;
 import com.github.monkeywie.proxyee.util.HttpUtil;
 import io.netty.channel.Channel;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpRequest;
 
 /**
@@ -37,6 +38,7 @@ public class InterceptForwardHttpProxyServer {
                                     pipeline.getRequestProto().setHost("www.taobao.com");
                                     pipeline.getRequestProto().setPort(443);
                                     pipeline.getRequestProto().setSsl(true);
+                                    httpRequest.headers().set(HttpHeaderNames.HOST, "www.taobao.com");
                                 }
                                 pipeline.beforeRequest(clientChannel, httpRequest);
                             }
