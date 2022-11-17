@@ -323,14 +323,16 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
             getChannelFuture().addListener((ChannelFutureListener) future -> {
                 if (future.isSuccess()) {
                     future.channel().writeAndFlush(msg);
-                    synchronized (requestList) {
+                    synchronized (getRequestList()) {
                         getRequestList().forEach(obj -> future.channel().writeAndFlush(obj));
                         getRequestList().clear();
                         setIsConnect(true);
                     }
                 } else {
-                    getRequestList().forEach(obj -> ReferenceCountUtil.release(obj));
-                    getRequestList().clear();
+                    synchronized (getRequestList()) {
+                        getRequestList().forEach(obj -> ReferenceCountUtil.release(obj));
+                        getRequestList().clear();
+                    }
                     getExceptionHandle().beforeCatch(channel, future.cause());
                     future.channel().close();
                     channel.close();
