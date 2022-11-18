@@ -185,6 +185,7 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                 request.setUri(url.getFile());
             }
             getInterceptPipeline().beforeRequest(ctx.channel(), request);
+            ReferenceCountUtil.release(msg);
         } else if (msg instanceof HttpContent) {
             if (getStatus() != 2) {
                 getInterceptPipeline().beforeRequest(ctx.channel(), (HttpContent) msg);
