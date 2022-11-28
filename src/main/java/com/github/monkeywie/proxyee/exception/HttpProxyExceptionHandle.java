@@ -9,9 +9,11 @@ public class HttpProxyExceptionHandle {
     }
 
     public void beforeCatch(Channel clientChannel, Throwable cause) throws Exception {
+        cause.printStackTrace();
     }
 
     public void afterCatch(Channel clientChannel, Channel proxyChannel, Throwable cause)
             throws Exception {
+        cause.printStackTrace();
     }
 }
