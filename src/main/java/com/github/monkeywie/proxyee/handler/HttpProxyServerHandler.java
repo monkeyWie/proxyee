@@ -18,7 +18,8 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.*;
+import io.netty.handler.codec.DecoderException;
+import io.netty.handler.codec.DecoderResult;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.proxy.ProxyHandler;
 import io.netty.handler.ssl.SslContext;
@@ -43,6 +44,8 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
     private final HttpProxyExceptionHandle exceptionHandle;
     private List requestList;
     private boolean isConnect;
+
+    private byte[] httpTagBuf;
 
     protected ChannelFuture getChannelFuture() {
         return cf;
@@ -209,9 +212,21 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                 ctx.pipeline().fireChannelRead(msg);
                 return;
             }
+
             if (byteBuf.readableBytes() < 8) {
+                httpTagBuf = new byte[byteBuf.readableBytes()];
+                byteBuf.readBytes(httpTagBuf);
+                ReferenceCountUtil.release(msg);
                 return;
             }
+            if (httpTagBuf != null) {
+                byte[] tmp = new byte[byteBuf.readableBytes()];
+                byteBuf.readBytes(tmp);
+                byteBuf.writeBytes(httpTagBuf);
+                byteBuf.writeBytes(tmp);
+                httpTagBuf = null;
+            }
+
             // 如果connect后面跑的是HTTP报文，也可以抓包处理
             if (isHttp(byteBuf)) {
                 ctx.pipeline().addFirst("httpCodec", new HttpServerCodec(
@@ -283,10 +298,8 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
         RequestProto pipeRp = getInterceptPipeline().getRequestProto();
         boolean isChangeRp = false;
         if (isHttp && msg instanceof HttpRequest) {
-            HttpRequest httpRequest = (HttpRequest) msg;
-            // 检查requestProto是否有修改
-            RequestProto newRP = ProtoUtil.getRequestProto(httpRequest);
-            if (!newRP.equals(pipeRp)) {
+            // check if request modified
+            if (!pipeRp.equals(getRequestProto())) {
                 isChangeRp = true;
             }
         }
