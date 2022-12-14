@@ -31,7 +31,9 @@ public abstract class BasicHttpProxyAuthenticationProvider implements HttpProxyA
             String token = authorization.substring(AUTH_TYPE_BASIC.length() + 1);
             String decode = new String(Base64.getDecoder().decode(token));
             String[] arr = decode.split(":");
-            usr = arr[0];
+            if (arr.length >= 1) {
+                usr = arr[0];
+            }
             if (arr.length >= 2) {
                 pwd = arr[1];
             }
