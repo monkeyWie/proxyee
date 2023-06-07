@@ -198,7 +198,7 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
             }
         } else { // ssl和websocket的握手处理
             ByteBuf byteBuf = (ByteBuf) msg;
-            if (getServerConfig().isHandleSsl() && byteBuf.getByte(0) == 22) {// ssl握手
+            if (getServerConfig().isHandleSsl() && byteBuf.getByte(0) == 22 && doMitm()) {// ssl握手
                 getRequestProto().setSsl(true);
                 int port = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
                 SslContext sslCtx = SslContextBuilder
@@ -238,6 +238,10 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
             }
             handleProxyData(ctx.channel(), msg, false);
         }
+    }
+
+    private boolean doMitm() {
+        return getServerConfig().getMitmMatcher() == null || getServerConfig().getMitmMatcher().doMatch(getRequestProto());
     }
 
     private boolean isHttp(ByteBuf byteBuf) {

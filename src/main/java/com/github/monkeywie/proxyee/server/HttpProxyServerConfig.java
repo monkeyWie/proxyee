@@ -1,6 +1,7 @@
 package com.github.monkeywie.proxyee.server;
 
 import com.github.monkeywie.proxyee.server.accept.HttpProxyAcceptHandler;
+import com.github.monkeywie.proxyee.server.accept.HttpProxyMitmMatcher;
 import com.github.monkeywie.proxyee.server.auth.HttpProxyAuthenticationProvider;
 import io.netty.channel.EventLoopGroup;
 import io.netty.handler.codec.http.HttpObjectDecoder;
@@ -28,6 +29,7 @@ public class HttpProxyServerConfig {
     private boolean handleSsl;
     private HttpProxyAcceptHandler httpProxyAcceptHandler;
     private HttpProxyAuthenticationProvider authenticationProvider;
+    private HttpProxyMitmMatcher mitmMatcher;
     private final AddressResolverGroup<? extends SocketAddress> resolver;
     private Iterable<String> ciphers;
     private int maxInitialLineLength = HttpObjectDecoder.DEFAULT_MAX_INITIAL_LINE_LENGTH;
@@ -172,6 +174,14 @@ public class HttpProxyServerConfig {
 
     public void setAuthenticationProvider(final HttpProxyAuthenticationProvider authenticationProvider) {
         this.authenticationProvider = authenticationProvider;
+    }
+
+    public HttpProxyMitmMatcher getMitmMatcher() {
+        return mitmMatcher;
+    }
+
+    public void setMitmMatcher(HttpProxyMitmMatcher mitmMatcher) {
+        this.mitmMatcher = mitmMatcher;
     }
 
     public AddressResolverGroup<?> resolver() {

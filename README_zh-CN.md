@@ -120,6 +120,19 @@ openssl req -sha256 -new -x509 -days 365 -key ca.key -out ca.crt \
 
 生成完之后把`ca.crt`和`ca_private.der`复制到项目的 src/resources/中，或者实现 HttpProxyCACertFactory 接口来自定义加载根证书和私钥
 
+### 按规则启用中间人攻击
+
+可以指定域名启用HTTPS请求是否走中间人攻击，代码示例：
+
+```java
+HttpProxyServerConfig config = new HttpProxyServerConfig();
+config.setHandleSsl(true);
+// 设置只有访问百度才会走中间人攻击，其它域名正常转发
+config.setMitmMatcher(new DomainHttpProxyMitmMatcher(Arrays.asList("www.baidu.com")));
+```
+
+目前内置的`DomainHttpProxyMitmMatcher`是对域名做精确匹配，如果有其它需求可以实现`HttpProxyMitmMatcher`接口来自定义匹配规则。
+
 ## 身份验证
 
 目前只支持基本身份验证方案。
