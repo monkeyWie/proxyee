@@ -106,6 +106,19 @@ Since the root certificate and private key attached to the project are public, t
 
 - use openssl
 
+### Rules for MITM
+
+If you only want to perform MITM attacks on certain domains, you can use the `HttpProxyServerConfig.setMitmMatcher` method to set the matching rule, for example:
+
+```java
+HttpProxyServerConfig config = new HttpProxyServerConfig();
+config.setHandleSsl(true);
+// only MITM on www.baidu.com
+config.setMitmMatcher(new DomainHttpProxyMitmMatcher(Arrays.asList("www.baidu.com")));
+```
+
+Now the built-in `DomainHttpProxyMitmMatcher` is an exact match for the request domain. If you have other requirements, you can implement the `HttpProxyMitmMatcher` interface to customize the matching rules.
+
 ```sh
 openssl genrsa -out ca.key 2048
 openssl pkcs8 -topk8 -nocrypt -inform PEM -outform DER -in ca.key -out ca_private.der
