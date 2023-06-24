@@ -24,6 +24,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.proxy.ProxyHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.resolver.NoopAddressResolverGroup;
 import io.netty.util.ReferenceCountUtil;
 
@@ -271,6 +272,13 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
         }
         ctx.channel().close();
         exceptionHandle.beforeCatch(ctx.channel(), cause);
+    }
+
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        if (evt instanceof IdleStateEvent) {
+            ctx.channel().close();
+        }
     }
 
     private boolean authenticate(ChannelHandlerContext ctx, HttpRequest request) {

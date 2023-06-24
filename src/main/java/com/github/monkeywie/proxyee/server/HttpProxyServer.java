@@ -1,5 +1,6 @@
 package com.github.monkeywie.proxyee.server;
 
+import com.github.monkeywie.proxyee.config.IdleStateCheck;
 import com.github.monkeywie.proxyee.crt.CertPool;
 import com.github.monkeywie.proxyee.crt.CertUtil;
 import com.github.monkeywie.proxyee.exception.HttpProxyExceptionHandle;
@@ -19,6 +20,7 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
@@ -28,6 +30,7 @@ import java.security.cert.X509Certificate;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class HttpProxyServer {
 
@@ -184,6 +187,13 @@ public class HttpProxyServer {
                                 serverConfig.getMaxInitialLineLength(),
                                 serverConfig.getMaxHeaderSize(),
                                 serverConfig.getMaxChunkSize()));
+                        if (serverConfig.getIdleStateCheck() != null) {
+                            IdleStateCheck idleStateCheck = serverConfig.getIdleStateCheck();
+                            ch.pipeline().addLast("idleStateCheck",
+                                    new IdleStateHandler(idleStateCheck.getReaderIdleTime(), idleStateCheck.getWriterIdleTime(),
+                                            idleStateCheck.getAllIdleTime(), TimeUnit.MILLISECONDS)
+                            );
+                        }
                         ch.pipeline().addLast("serverHandle",
                                 new HttpProxyServerHandler(serverConfig, proxyInterceptInitializer, proxyConfig,
                                         httpProxyExceptionHandle));
