@@ -3,6 +3,7 @@ package com.github.monkeywie.proxyee.server;
 import com.github.monkeywie.proxyee.server.accept.HttpProxyAcceptHandler;
 import com.github.monkeywie.proxyee.server.accept.HttpProxyMitmMatcher;
 import com.github.monkeywie.proxyee.server.auth.HttpProxyAuthenticationProvider;
+import com.github.monkeywie.proxyee.config.IdleStateCheck;
 import io.netty.channel.EventLoopGroup;
 import io.netty.handler.codec.http.HttpObjectDecoder;
 import io.netty.handler.ssl.SslContext;
@@ -35,6 +36,7 @@ public class HttpProxyServerConfig {
     private int maxInitialLineLength = HttpObjectDecoder.DEFAULT_MAX_INITIAL_LINE_LENGTH;
     private int maxHeaderSize = HttpObjectDecoder.DEFAULT_MAX_HEADER_SIZE;
     private int maxChunkSize = HttpObjectDecoder.DEFAULT_MAX_CHUNK_SIZE;
+    private IdleStateCheck idleStateCheck;
 
     public HttpProxyServerConfig() {
         this(DefaultAddressResolverGroup.INSTANCE);
@@ -62,6 +64,7 @@ public class HttpProxyServerConfig {
         this.maxInitialLineLength = builder.maxInitialLineLength;
         this.maxHeaderSize = builder.maxHeaderSize;
         this.maxChunkSize = builder.maxChunkSize;
+        this.idleStateCheck = builder.idleStateCheck;
     }
 
     public SslContext getClientSslCtx() {
@@ -220,6 +223,14 @@ public class HttpProxyServerConfig {
         this.maxChunkSize = maxChunkSize;
     }
 
+    public IdleStateCheck getIdleStateCheck() {
+        return idleStateCheck;
+    }
+
+    public void setIdleStateCheck(IdleStateCheck idleStateCheck) {
+        this.idleStateCheck = idleStateCheck;
+    }
+
     public static class Builder {
         private SslContext clientSslCtx;
         private String issuer;
@@ -239,6 +250,7 @@ public class HttpProxyServerConfig {
         private int maxInitialLineLength = HttpObjectDecoder.DEFAULT_MAX_INITIAL_LINE_LENGTH;
         private int maxHeaderSize = HttpObjectDecoder.DEFAULT_MAX_HEADER_SIZE;
         private int maxChunkSize = HttpObjectDecoder.DEFAULT_MAX_CHUNK_SIZE;
+        private IdleStateCheck idleStateCheck;
 
         public Builder() {
             this(DefaultAddressResolverGroup.INSTANCE);
@@ -330,6 +342,11 @@ public class HttpProxyServerConfig {
 
         public Builder setMaxChunkSize(int maxChunkSize) {
             this.maxChunkSize = maxChunkSize;
+            return this;
+        }
+
+        public Builder setIdleStateCheck(IdleStateCheck idleStateCheck) {
+            this.idleStateCheck = idleStateCheck;
             return this;
         }
 

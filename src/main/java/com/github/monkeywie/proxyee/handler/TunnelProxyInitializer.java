@@ -6,6 +6,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.handler.proxy.ProxyHandler;
+import io.netty.util.ReferenceCountUtil;
 
 /**
  * http代理隧道，转发原始报文
@@ -29,6 +30,10 @@ public class TunnelProxyInitializer extends ChannelInitializer {
         ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
             @Override
             public void channelRead(ChannelHandlerContext ctx0, Object msg0) throws Exception {
+                if (!clientChannel.isOpen()) {
+                    ReferenceCountUtil.release(msg0);
+                    return;
+                }
                 clientChannel.writeAndFlush(msg0);
             }
 
