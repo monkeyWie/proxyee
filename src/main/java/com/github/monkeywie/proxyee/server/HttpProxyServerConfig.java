@@ -4,7 +4,11 @@ import com.github.monkeywie.proxyee.server.accept.HttpProxyAcceptHandler;
 import com.github.monkeywie.proxyee.server.accept.HttpProxyMitmMatcher;
 import com.github.monkeywie.proxyee.server.auth.HttpProxyAuthenticationProvider;
 import com.github.monkeywie.proxyee.config.IdleStateCheck;
+
+import io.netty.channel.ChannelFactory;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpObjectDecoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.resolver.AddressResolverGroup;
@@ -37,6 +41,8 @@ public class HttpProxyServerConfig {
     private int maxHeaderSize = HttpObjectDecoder.DEFAULT_MAX_HEADER_SIZE;
     private int maxChunkSize = HttpObjectDecoder.DEFAULT_MAX_CHUNK_SIZE;
     private IdleStateCheck idleStateCheck;
+    private ChannelFactory<SocketChannel> channelFactory;
+    private boolean forceResolveDNS = false;
 
     public HttpProxyServerConfig() {
         this(DefaultAddressResolverGroup.INSTANCE);
@@ -65,6 +71,30 @@ public class HttpProxyServerConfig {
         this.maxHeaderSize = builder.maxHeaderSize;
         this.maxChunkSize = builder.maxChunkSize;
         this.idleStateCheck = builder.idleStateCheck;
+    }
+
+    public void setForceResolveDNS(boolean forceResolveDNS) {
+        this.forceResolveDNS = forceResolveDNS;
+    }
+
+    public boolean getForceResolveDNS() {
+        return forceResolveDNS;
+    }
+
+    public ChannelFactory<SocketChannel> getChannelFactory() {
+        if (channelFactory == null) {
+            return (new ChannelFactory<SocketChannel>() {
+                @Override
+                public SocketChannel newChannel() {
+                    return new NioSocketChannel(); // 使用NioSocketChannel来作为连接用的channel类
+                }
+            });
+        }
+        return channelFactory;
+    }
+
+    public void setChannelFactory(ChannelFactory<SocketChannel> channelFactory) {
+        this.channelFactory = channelFactory;
     }
 
     public SslContext getClientSslCtx() {
