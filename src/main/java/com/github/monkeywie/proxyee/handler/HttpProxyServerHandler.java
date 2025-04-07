@@ -336,9 +336,9 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
                     : new TunnelProxyInitializer(channel, proxyHandler);
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.group(getServerConfig().getProxyLoopGroup()) // 注册线程池
-                    .channel(NioSocketChannel.class) // 使用NioSocketChannel来作为连接用的channel类
+                    .channelFactory(getServerConfig().getChannelFactory())
                     .handler(channelInitializer);
-            if (proxyHandler != null) {
+            if (proxyHandler != null && !getServerConfig().getForceResolveDNS()) {
                 // 代理服务器解析DNS和连接
                 bootstrap.resolver(NoopAddressResolverGroup.INSTANCE);
             } else {
